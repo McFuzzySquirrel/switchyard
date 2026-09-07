@@ -79,3 +79,38 @@ test("passes the complete approved risk envelope to the adapter", async () => {
 
   assert.deepEqual(receivedContext.probeRisks, ["read-only", "external-access"]);
 });
+
+test("bounds a hanging adapter probe and signals cancellation", async () => {
+  let aborted = false;
+  const adapter = {
+    id: "fixture",
+    supportedOperations: { discover: false, verify: true, execute: false, resume: false, fork: false },
+    async verify(capabilities, context) {
+      context.signal.addEventListener("abort", () => {
+        aborted = true;
+      }, { once: true });
+      await new Promise(() => {});
+      return capabilities.map((capability) => ({
+        schemaVersion: 1,
+        capability,
+        status: "passed",
+        startedAt: new Date().toISOString(),
+        completedAt: new Date().toISOString(),
+      }));
+    },
+  };
+
+  const run = await verifyCapabilities(adapter, ["headless"], {
+    context: { timeoutMs: 20 },
+  });
+  assert.deepEqual(run.results.map(({ capability, status, message }) => ({
+    capability,
+    status,
+    message,
+  })), [{
+    capability: "headless",
+    status: "timed-out",
+    message: "Verification probe timed out after 20ms",
+  }]);
+  assert.equal(aborted, true);
+});

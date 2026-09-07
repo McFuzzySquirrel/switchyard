@@ -12,6 +12,8 @@ import {
 } from "./policy.ts";
 import type { CapabilityName } from "../capabilities/vocabulary.ts";
 
+export const DEFAULT_VERIFICATION_TIMEOUT_MS = 5_000;
+
 export interface VerificationRunOptions {
   readonly policy?: ProbePolicy;
   readonly context?: Omit<ProbeContext, "probePolicy" | "probeRisks">;
@@ -23,6 +25,100 @@ export interface VerificationRunOptions {
 export interface VerificationRunResult {
   readonly results: readonly VerificationResult[];
   readonly decisions: Readonly<Record<string, ProbePolicyDecision>>;
+}
+
+function boundedTimeout(value: number | undefined): number {
+  return value === undefined || !Number.isFinite(value) || value <= 0
+    ? DEFAULT_VERIFICATION_TIMEOUT_MS
+    : Math.floor(value);
+}
+
+function timeoutResults(
+  capabilities: readonly CapabilityName[],
+  now: () => Date,
+  message: string,
+): readonly VerificationResult[] {
+  const completedAt = now().toISOString();
+  return capabilities.map((capability) => ({
+    schemaVersion: 1 as const,
+    capability,
+    status: "timed-out" as const,
+    startedAt: completedAt,
+    completedAt,
+    message,
+  }));
+}
+
+function unavailableResults(
+  capabilities: readonly CapabilityName[],
+  now: () => Date,
+  message: string,
+): readonly VerificationResult[] {
+  const completedAt = now().toISOString();
+  return capabilities.map((capability) => ({
+    schemaVersion: 1 as const,
+    capability,
+    status: "unavailable" as const,
+    startedAt: completedAt,
+    completedAt,
+    message,
+  }));
+}
+
+async function runBoundedVerification(
+  adapter: HarnessVerificationAdapter,
+  capabilities: readonly CapabilityName[],
+  context: ProbeContext,
+  now: () => Date,
+): Promise<readonly VerificationResult[]> {
+  const controller = new AbortController();
+  const parentSignal = context.signal;
+  let resolveAborted: ((results: readonly VerificationResult[]) => void) | undefined;
+  const aborted = new Promise<readonly VerificationResult[]>((resolve) => {
+    resolveAborted = resolve;
+  });
+  const abortFromParent = () => {
+    controller.abort(parentSignal?.reason);
+    resolveAborted?.(
+      unavailableResults(capabilities, now, "Verification probe was aborted"),
+    );
+  };
+  if (parentSignal?.aborted) {
+    abortFromParent();
+  } else {
+    parentSignal?.addEventListener("abort", abortFromParent, { once: true });
+  }
+
+  const timeoutMs = boundedTimeout(context.timeoutMs);
+  let timer: NodeJS.Timeout | undefined;
+  let timedOut = false;
+  try {
+    if (parentSignal?.aborted) {
+      return unavailableResults(capabilities, now, "Verification probe was aborted");
+    }
+    const probe = adapter.verify(capabilities, {
+      ...context,
+      signal: controller.signal,
+    });
+    const timeout = new Promise<readonly VerificationResult[]>((resolve) => {
+      timer = setTimeout(() => {
+        timedOut = true;
+        controller.abort();
+        resolve(
+          timeoutResults(
+            capabilities,
+            now,
+            `Verification probe timed out after ${timeoutMs}ms`,
+          ),
+        );
+      }, timeoutMs);
+    });
+    return await Promise.race([probe, timeout, aborted]);
+  } finally {
+    if (timer) clearTimeout(timer);
+    parentSignal?.removeEventListener("abort", abortFromParent);
+    if (timedOut) controller.abort();
+  }
 }
 
 /**
@@ -71,6 +167,6 @@ export async function verifyCapabilities(
     probeRisks: [...allowedRisks],
     probePolicy: options.policy,
   };
-  const results = await adapter.verify(allowed, context);
+  const results = await runBoundedVerification(adapter, allowed, context, now);
   return { results: [...results, ...rejected], decisions };
 }

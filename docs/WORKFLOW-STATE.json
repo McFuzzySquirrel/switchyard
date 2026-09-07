@@ -1,12 +1,12 @@
 {
   "runId": "faef066b-e967-49ae-ba56-4dbe4255f89d",
   "startedAt": "2026-09-07T19:10:17.558Z",
-  "lastUpdatedAt": "2026-09-07T21:19:11.661Z",
+  "lastUpdatedAt": "2026-09-07T21:20:45.758Z",
   "manifestPath": "/home/mcfuzzysquirrel/Projects/switchyard/docs/EXECUTION-MANIFEST.json",
   "manifestVersion": "1.0",
   "harness": "copilot",
   "status": "running",
-  "currentPhase": "HARNESS-EXECUTION-RUNTIME-1",
+  "currentPhase": "VERIFICATION-AND-RESILIENCE-1",
   "tasks": {
     "DISCOVERY-AND-REGISTRY-1.1": {
       "taskId": "DISCOVERY-AND-REGISTRY-1.1",
@@ -468,10 +468,24 @@
     },
     "VERIFICATION-AND-RESILIENCE-1.3": {
       "taskId": "VERIFICATION-AND-RESILIENCE-1.3",
-      "status": "pending",
+      "status": "complete",
       "ownerAgent": "verification-resilience-engineer",
-      "attempt": 0,
-      "outputFiles": []
+      "attempt": 1,
+      "outputFiles": [
+        "CHANGELOG.md",
+        "README.md",
+        "docs/features/verification-and-resilience.md",
+        "src/harness/adapter.ts",
+        "src/verification/runner.ts",
+        "tests/verification-policy.test.mjs"
+      ],
+      "startedAt": "2026-09-07T21:19:11.685Z",
+      "completedAt": "2026-09-07T21:20:45.758Z",
+      "agentOutput": "● codegraph_explore (MCP: codegraph) · bounded adapter probes verification runner adapter probe tim…\n  └ The project at /home/mcfuzzysquirrel/Projects/switchyard isn't indexed with c...\n\n/ Search (glob)\n  │ \"tests/**/*\"\n  └ 16 files found\n\n/ Search (glob)\n  │ \"src/**/*.ts\"\n  └ 54 files found\n\n/ Search (grep)\n  │ \"probe|verification|timeout|bounded|adapter\" (src, tests)\n  └ 42 files found\n\n● Read policy.ts\n  │ src/verification/policy.ts\n  └ 121 lines read\n\n● Read runner.ts\n  │ src/verification/runner.ts\n  └ 76 lines read\n\n● Read schema.ts\n  │ src/verification/schema.ts\n  └ 141 lines read\n\n● Read adapter.ts\n  │ src/harness/adapter.ts\n  └ 369 lines read\n\n● Read process.ts\n  │ src/harness/process.ts\n  └ 307 lines read\n\n● Read verification-policy.test.mjs\n  │ tests/verification-policy.test.mjs\n  └ 81 lines read\n\n● Read verification-schema.test.mjs\n  │ tests/verification-schema.test.mjs\n  └ 44 lines read\n\n● Read probe.ts\n  │ src/discovery/probe.ts\n  └ 493 lines read\n\n● Read package.json\n  └ 33 lines read\n\n● Read stub.ts\n  │ src/harness/stub.ts\n  └ 165 lines read\n\n● Read copilot.ts\n  │ src/harness/copilot.ts\n  └ 101 lines read\n\n● Read discovery-adapter.ts\n  │ src/harness/discovery-adapter.ts\n  └ 334 lines read\n\n● Read index.ts\n  │ src/index.ts\n  └ 8 lines read\n\n● Read opencode.ts\n  │ src/harness/opencode.ts\n  └ 106 lines read\n\n● Read index.ts\n  │ src/harness/index.ts\n  └ 8 lines read\n\n● Read process-execution.test.mjs\n  │ tests/process-execution.test.mjs\n  └ 110 lines read\n\n● Read CHANGELOG.md\n  └ L1:100 (97 lines read)\n\n● Read README.md\n  └ L1:220 (168 lines read)\n\n● Read registry.ts\n  │ src/harness/registry.ts\n  └ 17 lines read\n\n● Read adapter-conformance.test.mjs\n  │ tests/adapter-conformance.test.mjs\n  └ 395 lines read\n\n● Read index.ts\n  │ src/verification/index.ts\n  └ 3 lines read\n\n● Read index.ts\n  │ src/discovery/index.ts\n  └ 4 lines read\n\n● Read tsconfig.json\n  └ 13 lines read\n\n/ Search (grep)\n  │ \"bounded adapter probes|adapter probes|probe\" (docs/features/verification-and-resilience.md)\n  └ 12 lines found\n\n/ Search (grep)\n  │ \"verification|probe\" (docs/PRD.md)\n  └ 30 lines found\n\n● Read verification-and-resilience.md\n  │ docs/features/verification-and-resilience.md\n  └ L1:130 (96 lines read)\n\nI’m extending the verification boundary so adapter probes inherit an explicit timeout/cancellation budget, abort cooperatively, and return schema-shaped timeout results instead of hanging the caller. I’ll keep policy filtering unchanged and document the new bounded behavior.\n\n● Edit\n  │ Edit src/harness/adapter.ts\n  │ Edit src/verification/runner.ts\n  │ Edit src/verification/index.ts\n  │ Edit tests/verification-policy.test.mjs\n  │ Edit docs/features/verification-and-resilience.md\n  │ Edit CHANGELOG.md\n  └ Edit README.md\n\n● Run documentation tests (shell)\n  │ npm run test:docs\n  └ 26 lines…\n\n● Run TypeScript typecheck (shell)\n  │ npm run typecheck\n  └ 3 lines…\n\n● Run project tests (shell)\n  │ npm test\n  └ 566 lines…\n\n● Edit\n  └ Edit src/verification/runner.ts\n\n● Review changed files (shell)\n  │ git --no-pager diff --stat && git --no-pager status --short\n  └ 18 lines…\n\n● Run verification tests (shell)\n  │ node --experimental-strip-types --test tests/verification-policy.test.mjs\n  │ tests/verification-schema.test.mjs\n  └ 53 lines…\n\n● Run TypeScript typecheck (shell)\n  │ npm run typecheck\n  └ 3 lines…\n\n● Inspect implementation diff (shell)\n  │ git --no-pager diff -- src/verification/runner.ts src/harness/adapter.ts\n  │ tests/verification-policy.test.mjs README.md CHANGELOG.md\n  │ docs/features/verification-and-resilience.md\n  └ 232 lines…\n\n● Inspect unrelated workflow changes (shell)\n  │ git --no-pager diff -- docs/EXECUTION-AUDIT.jsonl docs/WORKFLOW-STATE.json\n  └ 46 lines…\n\n● Edit\n  └ Edit src/verification/runner.ts\n\n● List worktree changes (shell)\n  │ git --no-pager status --short\n  └ 9 lines…\n\n● Validate bounded verification changes (shell)\n  │ npm run typecheck && node --experimental-strip-types --test tests/verification-policy.test.mjs\n  └ 44 lines…\n\nImplemented bounded adapter probes with cooperative cancellation and explicit timeout results.\n\n**Changes:**\n- Added `ProbeContext.signal` for cancellation.\n- Added a default 5-second verification timeout via `DEFAULT_VERIFICATION_TIMEOUT_MS`.\n- Aborted probes now return `unavailable` results; timed-out probes return `timed-out` results with timestamps and diagnostics.\n- Added coverage for hanging probes and cancellation signaling.\n- Updated README, changelog, and verification feature documentation.\n\n**Files changed:**\n- `src/harness/adapter.ts`\n- `src/verification/runner.ts`\n- `tests/verification-policy.test.mjs`\n- `README.md`\n- `CHANGELOG.md`\n- `docs/features/verification-and-resilience.md`\n\nTypecheck and focused verification tests pass.\n\n",
+      "artifactId": "work-verification-and-resilience-1-3-001",
+      "inputArtifactIds": [
+        "work-verification-and-resilience-1-2-001"
+      ]
     },
     "VERIFICATION-AND-RESILIENCE-2.1": {
       "taskId": "VERIFICATION-AND-RESILIENCE-2.1",

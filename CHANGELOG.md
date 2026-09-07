@@ -22,6 +22,8 @@ All notable user-facing changes to Switchyard are documented here. The format fo
 
 ### Added
 
+- Added bounded verification adapter probes with cooperative cancellation,
+  configurable timeouts, and explicit `timed-out` results for hanging probes.
 - Added a versioned, runtime-validated verification result schema with
   capability status, bounded messages, and ordered `startedAt`/`completedAt`
   UTC timestamps.

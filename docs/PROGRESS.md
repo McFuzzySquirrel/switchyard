@@ -1,9 +1,9 @@
 # Project Progress
 
 ## Current State
-**Phase**: HARNESS-EXECUTION-RUNTIME-1
+**Phase**: VERIFICATION-AND-RESILIENCE-1
 **Status**: In Progress
-**Last Updated**: 2026-09-07T21:19:11.663Z
+**Last Updated**: 2026-09-07T21:20:45.760Z
 **Run ID**: faef066b-e967-49ae-ba56-4dbe4255f89d
 **Harness**: copilot
 **Execution Mode**: auto
@@ -49,6 +49,8 @@
   - Files: CHANGELOG.md, docs/features/verification-and-resilience.md, package.json, src/config/resolve.ts, src/config/schema.ts, src/harness/adapter.ts, src/index.ts, src/verification/index.ts, src/verification/policy.ts, src/verification/runner.ts, tests/verification-policy.test.mjs
 - [x] Phase VERIFICATION-AND-RESILIENCE-1, Task VERIFICATION-AND-RESILIENCE-1.2: [ ] Add verification result schema and timestamps (@verification-resilience-engineer)
   - Files: CHANGELOG.md, README.md, docs/features/verification-and-resilience.md, src/harness/adapter.ts, src/harness/stub.ts, src/verification/index.ts, src/verification/runner.ts, tests/adapter-conformance.test.mjs, tests/verification-policy.test.mjs, src/verification/schema.ts, tests/verification-schema.test.mjs
+- [x] Phase VERIFICATION-AND-RESILIENCE-1, Task VERIFICATION-AND-RESILIENCE-1.3: [ ] Implement bounded adapter probes (@verification-resilience-engineer)
+  - Files: CHANGELOG.md, README.md, docs/features/verification-and-resilience.md, src/harness/adapter.ts, src/verification/runner.ts, tests/verification-policy.test.mjs
 - [x] Phase ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1, Task ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1.1: [ ] Define discovery, verification, execution, resume, and fork adapter interfaces (@adapter-platform-engineer)
   - Files: CHANGELOG.md, README.md, src/config/index.ts, src/harness/adapter.ts, src/harness/copilot.ts, src/harness/discovery-adapter.ts, src/harness/index.ts, src/harness/opencode.ts, docs/adapter-development.md, docs/adr/0002-adapter-contract-and-typed-configuration.md, src/config/loader.ts, src/config/resolve.ts, src/config/schema.ts, src/harness/adapter-registry.ts, src/harness/stub.ts, tests/adapter-conformance.test.mjs, tests/harness-config.test.mjs
 - [x] Phase ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1, Task ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1.2: [ ] Define capability observation and operation support schemas (@adapter-platform-engineer)
@@ -68,7 +70,6 @@
 ## Remaining
 - [ ] Phase HARNESS-EXECUTION-RUNTIME-1: Phase 1: Process Runner
 - [ ] Phase HARNESS-EXECUTION-RUNTIME-2: Phase 2: CLI Integration
-- [ ] Phase VERIFICATION-AND-RESILIENCE-1: Phase 1: Probes
 - [ ] Phase VERIFICATION-AND-RESILIENCE-2: Phase 2: Routing Integration
 - [ ] Phase MULTI-HARNESS-COMPOSITION-1: Phase 1: Workflow Model
 - [ ] Phase MULTI-HARNESS-COMPOSITION-2: Phase 2: Execution and Demonstration

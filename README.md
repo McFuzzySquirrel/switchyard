@@ -116,7 +116,10 @@ diagnostics, and distinguish ordinary failures from timeout and cancellation.
 Verification adapters return the versioned `VerificationResult` schema,
 validated with `validateVerificationResult` (or
 `assertVerificationResult`), including ordered UTC `startedAt` and
-`completedAt` timestamps.
+`completedAt` timestamps. Verification probes default to a five-second
+timeout; set `ProbeContext.timeoutMs` for a different positive bound. The
+runner passes `ProbeContext.signal` for cooperative cancellation and returns
+explicit `timed-out` results if an adapter does not finish within its bound.
 
 Executable location, probe timeout, maximum probe output length, the
 mutating-probe policy flag, and the registry path all resolve through the same

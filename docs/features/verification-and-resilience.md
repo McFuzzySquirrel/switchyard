@@ -43,7 +43,7 @@
 ### Phase 1: Probes
 - [x] Define read-only and mutating probe policies.
 - [x] Add verification result schema and timestamps.
-- [ ] Implement bounded adapter probes.
+- [x] Implement bounded adapter probes.
 
 ### Phase 2: Routing Integration
 - [ ] Include verification state in candidate ranking.
@@ -78,8 +78,11 @@ Policy can be configured globally or per harness using
 `allowMutatingProbes`, `allowExternalAccess`, `allowPaidProbes`, and
 `allowModelInvocation` (all default to `false`). Warnings contain only fixed
 risk descriptions: command arguments, environment values, prompts, and
-secrets are never included. Probe runners bound output and time through the
-adapter context and do not alter routing or fallback decisions.
+secrets are never included. Verification runners apply a default five-second
+timeout (or the adapter context's positive `timeoutMs`), pass an abort signal
+to the adapter, and return a `timed-out` result for every in-flight capability
+if the adapter does not finish. Probe runners bound output and time through
+the adapter context and do not alter routing or fallback decisions.
 
 ## 7. Acceptance Criteria
 

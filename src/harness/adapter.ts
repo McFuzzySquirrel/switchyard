@@ -123,6 +123,8 @@ export const assertSupportedOperations = assertOperationSupport;
 export interface ProbeContext {
   readonly cwd?: string;
   readonly timeoutMs?: number;
+  /** Cancellation signal for a bounded verification probe. */
+  readonly signal?: AbortSignal;
   readonly nonInteractive?: boolean;
   /** Risk classes must be declared before verification is launched. */
   readonly probeRisks?: readonly (

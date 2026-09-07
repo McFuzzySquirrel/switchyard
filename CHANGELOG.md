@@ -12,6 +12,8 @@ All notable user-facing changes to Switchyard are documented here. The format fo
   artifact metadata are forwarded, receiving stages re-check artifact
   containment/kind (including symlink resolution), and persisted results retain
   sanitized handoff manifests plus earlier successes when a later stage fails.
+- Composition dependency validation now produces a deterministic topological
+  stage order and rejects cyclic or unknown dependencies before execution.
 - Added `switchyard verify` with selective harness/capability probes,
   atomic verification-state persistence, and fixed redacted warnings for
   probes that may access external services, invoke models, mutate state, or

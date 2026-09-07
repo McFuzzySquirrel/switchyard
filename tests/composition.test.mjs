@@ -39,6 +39,54 @@ test("rejects cycles and unsatisfied declared artifact handoff before execution"
   assert.match(missing.issues.map((x) => x.message).join(" "), /not declared/);
 });
 
+test("returns a stable topological order and rejects invalid dependency declarations", async () => {
+  const workspace = await mkdtemp(join(tmpdir(), "switchyard-compose-"));
+  const validation = validateWorkflow({
+    id: "ordered", workspace,
+    stages: [
+      { id: "review", dependsOn: ["package"], requirements: [], task: "review" },
+      { id: "package", dependsOn: ["implementation"], requirements: [], task: "package" },
+      { id: "implementation", requirements: [], task: "implement" },
+    ],
+  });
+  assert.equal(validation.success, true);
+  assert.deepEqual(validation.value.order, ["implementation", "package", "review"]);
+
+  const invalid = validateWorkflow({
+    id: "invalid-dependencies", workspace,
+    stages: [
+      { id: "implementation", dependsOn: ["implementation", "missing"], requirements: [], task: "implement" },
+    ],
+  });
+  assert.equal(invalid.success, false);
+  const messages = invalid.issues.map((x) => x.message).join(" ");
+  assert.match(messages, /unknown stage 'missing'/);
+  assert.match(messages, /cycle/);
+});
+
+test("executes stages in dependency order even when declarations are reversed", async () => {
+  const workspace = await mkdtemp(join(tmpdir(), "switchyard-compose-"));
+  const tasks = [];
+  const makeAdapter = (id) => ({
+    id, supportedOperations: operations,
+    async execute(request) { tasks.push(request.task); return result(true); },
+  });
+  const workflow = {
+    id: "reverse-order", workspace,
+    stages: [
+      { id: "review", dependsOn: ["implementation"], requirements: [], task: "review" },
+      { id: "implementation", requirements: [], task: "implement" },
+    ],
+  };
+  const outcome = await executeWorkflow({
+    workflow,
+    adapters: { implementation: makeAdapter("implementation"), review: makeAdapter("review") },
+  });
+  assert.equal(outcome.status, "succeeded");
+  assert.deepEqual(tasks, ["implement", "review"]);
+  assert.deepEqual(outcome.stages.map((stage) => stage.stageId), ["implementation", "review"]);
+});
+
 test("executes sequential stages with only declared handoff and preserves prior result on failure", async () => {
   const workspace = await mkdtemp(join(tmpdir(), "switchyard-compose-"));
   const tasks = [];

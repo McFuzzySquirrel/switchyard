@@ -184,15 +184,28 @@ export function validateWorkflow(input: unknown): ValidationResult<ValidatedWork
     }
   }
   const order: string[] = [];
-  const visiting = new Set<string>(), visited = new Set<string>();
-  function visit(id: string): void {
-    if (visiting.has(id)) { issues.push(issue("$.stages", "dependency graph contains a cycle")); return; }
-    if (visited.has(id)) return;
-    visiting.add(id);
-    for (const dep of byId.get(id)?.dependsOn ?? []) if (byId.has(dep)) visit(dep);
-    visiting.delete(id); visited.add(id); order.push(id);
+  const dependencies = new Map<string, number>();
+  const dependents = new Map<string, string[]>();
+  for (const id of byId.keys()) {
+    dependencies.set(id, 0);
+    dependents.set(id, []);
   }
-  for (const id of byId.keys()) visit(id);
+  for (const stage of byId.values()) {
+    const knownDependencies = (stage.dependsOn ?? []).filter((dependency) => byId.has(dependency));
+    dependencies.set(stage.id, knownDependencies.length);
+    for (const dependency of knownDependencies) dependents.get(dependency)?.push(stage.id);
+  }
+  const ready = [...byId.keys()].filter((id) => dependencies.get(id) === 0);
+  while (ready.length) {
+    const id = ready.shift()!;
+    order.push(id);
+    for (const dependent of dependents.get(id) ?? []) {
+      const remaining = dependencies.get(dependent)! - 1;
+      dependencies.set(dependent, remaining);
+      if (remaining === 0) ready.push(dependent);
+    }
+  }
+  if (order.length !== byId.size) issues.push(issue("$.stages", "dependency graph contains a cycle"));
   if (issues.length) return { success: false, issues };
   return { success: true, value: { ...(value as unknown as WorkflowDefinition), schemaVersion: COMPOSITION_SCHEMA_VERSION, stages: [...byId.values()], order }, issues: [] };
 }

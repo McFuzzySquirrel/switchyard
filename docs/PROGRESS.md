@@ -1,9 +1,9 @@
 # Project Progress
 
 ## Current State
-**Phase**: ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-2
+**Phase**: DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-2
 **Status**: In Progress
-**Last Updated**: 2026-09-07T21:05:01.844Z
+**Last Updated**: 2026-09-07T21:06:29.791Z
 **Run ID**: faef066b-e967-49ae-ba56-4dbe4255f89d
 **Harness**: copilot
 **Execution Mode**: auto
@@ -37,6 +37,8 @@
   - Files: CHANGELOG.md, README.md, docs/features/deterministic-routing-and-explainability.md, src/capabilities/matcher.ts, src/cli.ts, src/commands/index.ts, tests/capability-matcher.test.mjs, tests/commands.test.mjs, src/commands/explain.ts
 - [x] Phase DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-2, Task DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-2.2: [ ] Implement stable JSON decision schema (@switchyard-architect)
   - Files: CHANGELOG.md, README.md, docs/features/deterministic-routing-and-explainability.md, package.json, src/cli.ts, src/commands/capabilities.ts, src/commands/discover.ts, src/commands/explain.ts, src/index.ts, tests/commands.test.mjs, docs/adr/0003-versioned-command-json-contracts.md, src/output/decision.ts, src/output/index.ts, src/output/json.ts
+- [x] Phase DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-2, Task DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-2.3: [ ] Define no-match and invalid-input exit codes (@routing-policy-engineer)
+  - Files: CHANGELOG.md, README.md, docs/features/deterministic-routing-and-explainability.md, docs/features/discovery-and-registry.md, src/cli.ts, tests/commands.test.mjs
 - [x] Phase ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1, Task ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1.1: [ ] Define discovery, verification, execution, resume, and fork adapter interfaces (@adapter-platform-engineer)
   - Files: CHANGELOG.md, README.md, src/config/index.ts, src/harness/adapter.ts, src/harness/copilot.ts, src/harness/discovery-adapter.ts, src/harness/index.ts, src/harness/opencode.ts, docs/adapter-development.md, docs/adr/0002-adapter-contract-and-typed-configuration.md, src/config/loader.ts, src/config/resolve.ts, src/config/schema.ts, src/harness/adapter-registry.ts, src/harness/stub.ts, tests/adapter-conformance.test.mjs, tests/harness-config.test.mjs
 - [x] Phase ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1, Task ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1.2: [ ] Define capability observation and operation support schemas (@adapter-platform-engineer)
@@ -52,7 +54,6 @@
 - None currently running
 
 ## Remaining
-- [ ] Phase DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-2: Phase 2: Explainability
 - [ ] Phase HARNESS-EXECUTION-RUNTIME-1: Phase 1: Process Runner
 - [ ] Phase HARNESS-EXECUTION-RUNTIME-2: Phase 2: CLI Integration
 - [ ] Phase VERIFICATION-AND-RESILIENCE-1: Phase 1: Probes

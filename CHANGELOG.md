@@ -17,7 +17,8 @@ All notable user-facing changes to Switchyard are documented here. The format fo
 - Added `switchyard explain --requires=<capability,...> [--json]` with
   deterministic all-required matching, verified-before-discovered ranking,
   stable candidate explanations, explicit preferred-harness/fallback policy,
-  and distinct invalid-input (`2`) and no-match (`4`) exit categories.
+  and distinct invalid-input (`2`, `CLI_EXIT_CODES.invalidInput`) and
+  no-match (`4`, `CLI_EXIT_CODES.noMatch`) exit categories.
 
 ### Added
 

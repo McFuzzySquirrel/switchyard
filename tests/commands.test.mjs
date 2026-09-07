@@ -20,11 +20,23 @@ import {
   parseDecisionJson,
   serializeCommandJson,
   DECISION_SCHEMA_VERSION,
+  CLI_EXIT_CODES,
   runCli,
 } from "../src/index.ts";
 
 const observedAt = "2026-09-07T19:00:00.000Z";
 const execFileAsync = promisify(execFile);
+
+test("CLI exposes stable exit categories for invalid input and no-match decisions", () => {
+  assert.deepEqual(CLI_EXIT_CODES, {
+    success: 0,
+    partial: 1,
+    invalidInput: 2,
+    usage: 2,
+    failure: 3,
+    noMatch: 4,
+  });
+});
 
 function profile(id = "fixture", verification = "not-requested", capabilityNames = ["headless"]) {
   const observations = capabilityNames.map((capability) => ({

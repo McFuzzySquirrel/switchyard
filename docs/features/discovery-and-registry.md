@@ -90,7 +90,7 @@ Key test scenarios:
 4. Registry writes are atomic and reloadable.
 5. Discovery results remain available when one harness fails.
 6. Human and JSON inspection commands work non-interactively.
-7. Command diagnostics are redacted and JSON output remains parseable with stable exit categories (`0` success, `1` partial discovery, `2` usage, `3` persistence/command failure).
+7. Command diagnostics are redacted and JSON output remains parseable with stable exit categories (`0` success, `1` partial discovery, `2` invalid input, `3` persistence/command failure, `4` no match).
 
 ## 8. Open Questions
 

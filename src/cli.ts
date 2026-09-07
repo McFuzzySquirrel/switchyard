@@ -29,6 +29,8 @@ import { serializeCommandJson } from "./output/json.ts";
 export const CLI_EXIT_CODES = Object.freeze({
   success: 0,
   partial: 1,
+  invalidInput: 2,
+  /** @deprecated Use invalidInput for the public input-validation category. */
   usage: 2,
   failure: 3,
   noMatch: 4,
@@ -281,7 +283,7 @@ export async function runCli(
     } else {
       writeStderr(message);
     }
-    return CLI_EXIT_CODES.usage;
+    return CLI_EXIT_CODES.invalidInput;
   }
 
   if (parsed.command === "help") {
@@ -326,7 +328,7 @@ export async function runCli(
       } else {
         writeStderr(formatExplainHuman(invalid));
       }
-      return CLI_EXIT_CODES.usage;
+      return CLI_EXIT_CODES.invalidInput;
     }
     if (parsed.json) {
       writeStdout(serializeCommandJson({

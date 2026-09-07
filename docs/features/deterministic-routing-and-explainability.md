@@ -50,8 +50,8 @@ uses the shared ranking policy: fully verified matches first, discovered-only
 matches second, then ascending harness ID. `--preferred-harness=<id>` selects
 that harness only when it qualifies; fallback is disabled unless
 `--allow-fallback` is supplied. A successful explanation exits `0`; a
-non-qualifying request exits `4`; malformed requirements use the usage exit
-`2`. Human and JSON output carry the same decision data, and JSON uses the
+non-qualifying request exits `4` (`noMatch`); malformed requirements use the
+invalid-input exit `2` (`invalidInput`). Human and JSON output carry the same decision data, and JSON uses the
 versioned command schema (`schemaVersion: 1`). The shared output contract
 requires the stable `schemaVersion`, `command`, and `status` envelope; the
 explain-specific fields remain command-owned and additive for compatibility.

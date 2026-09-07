@@ -52,8 +52,9 @@ every candidate's matched and missing capabilities,
 verification state, deterministic ranking inputs, and selection reason.
 Requirements are all-required. Use `--preferred-harness=<id>` to request a
 preferred qualifying harness; fallback remains disabled unless
-`--allow-fallback` is explicitly supplied. Invalid requirements exit `2`, and
-valid requirements with no qualifying selection exit `4`.
+`--allow-fallback` is explicitly supplied. Invalid requirements exit `2`
+(`CLI_EXIT_CODES.invalidInput`), and valid requirements with no qualifying
+selection exit `4` (`CLI_EXIT_CODES.noMatch`).
 
 JSON output is versioned with `schemaVersion: 1`. All command JSON payloads use
 the shared `serializeCommandJson` contract exported from `src/output/index.ts`;

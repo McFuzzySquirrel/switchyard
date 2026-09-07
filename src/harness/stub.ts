@@ -111,10 +111,13 @@ export function createStubHarnessAdapter(
     ): Promise<readonly VerificationResult[]> {
       assertOperationSupported(adapter, "verify");
       record("verify");
+      const startedAt = now().toISOString();
       const completedAt = now().toISOString();
       return capabilities.map((capability) => ({
+        schemaVersion: 1 as const,
         capability,
         status: "passed" as const,
+        startedAt,
         completedAt,
       }));
     },

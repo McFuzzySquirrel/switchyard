@@ -1,12 +1,12 @@
 {
   "runId": "faef066b-e967-49ae-ba56-4dbe4255f89d",
   "startedAt": "2026-09-07T19:10:17.558Z",
-  "lastUpdatedAt": "2026-09-07T21:16:09.176Z",
+  "lastUpdatedAt": "2026-09-07T21:17:42.874Z",
   "manifestPath": "/home/mcfuzzysquirrel/Projects/switchyard/docs/EXECUTION-MANIFEST.json",
   "manifestVersion": "1.0",
   "harness": "copilot",
   "status": "running",
-  "currentPhase": "HARNESS-EXECUTION-RUNTIME-1",
+  "currentPhase": "VERIFICATION-AND-RESILIENCE-1",
   "tasks": {
     "DISCOVERY-AND-REGISTRY-1.1": {
       "taskId": "DISCOVERY-AND-REGISTRY-1.1",
@@ -432,10 +432,29 @@
     },
     "VERIFICATION-AND-RESILIENCE-1.2": {
       "taskId": "VERIFICATION-AND-RESILIENCE-1.2",
-      "status": "pending",
+      "status": "complete",
       "ownerAgent": "verification-resilience-engineer",
-      "attempt": 0,
-      "outputFiles": []
+      "attempt": 1,
+      "outputFiles": [
+        "CHANGELOG.md",
+        "README.md",
+        "docs/features/verification-and-resilience.md",
+        "src/harness/adapter.ts",
+        "src/harness/stub.ts",
+        "src/verification/index.ts",
+        "src/verification/runner.ts",
+        "tests/adapter-conformance.test.mjs",
+        "tests/verification-policy.test.mjs",
+        "src/verification/schema.ts",
+        "tests/verification-schema.test.mjs"
+      ],
+      "startedAt": "2026-09-07T21:16:09.200Z",
+      "completedAt": "2026-09-07T21:17:42.874Z",
+      "agentOutput": "● codegraph_explore (MCP: codegraph) · verification result schema timestamps src/verification tests…\n  └ The project at /home/mcfuzzysquirrel/Projects/switchyard isn't indexed with c...\n\nI’m tracing the existing verification types, runner outputs, persistence boundaries, and tests before adding the schema so timestamps remain consistent across public and stored results.\n\n● Read runner.ts\n  │ src/verification/runner.ts\n  └ 73 lines read\n\n● Read index.ts\n  │ src/verification/index.ts\n  └ 2 lines read\n\n● Read policy.ts\n  │ src/verification/policy.ts\n  └ 121 lines read\n\n● Read adapter.ts\n  │ src/harness/adapter.ts\n  └ 374 lines read\n\n● Read verification-policy.test.mjs\n  │ tests/verification-policy.test.mjs\n  └ 79 lines read\n\n● Read package.json\n  └ 33 lines read\n\n/ Search (glob)\n  │ \"src/verification/*\"\n  └ 3 files found\n\n/ Search (glob)\n  │ \"tests/*verification*\"\n  └ 1 file found\n\n● Read verification-and-resilience.md\n  │ docs/features/verification-and-resilience.md\n  └ 96 lines read\n\n● Read index.ts\n  │ src/index.ts\n  └ 8 lines read\n\n● Read CHANGELOG.md\n  └ 94 lines read\n\n/ Search (glob)\n  │ \"src/**/schema.ts\"\n  └ 2 files found\n\n/ Search (grep)\n  │ \"VerificationResult|completedAt|verification result|verification\" in *.{md,ts,mjs} (docs, src,\n  │ tests)\n  └ 190 lines found\n\n/ Search (glob)\n  │ \"docs/templates/*\"\n  └ 3 files found\n\n● Read schema.ts\n  │ src/discovery/schema.ts\n  └ L1:90 (90 lines read)\n\n● Read discovery-schema.test.mjs\n  │ tests/discovery-schema.test.mjs\n  └ L1:130 (130 lines read)\n\n● Read tsconfig.json\n  └ 13 lines read\n\n● Read schema.ts\n  │ src/discovery/schema.ts\n  └ L400:530 (131 lines read)\n\n● Read stub.ts\n  │ src/harness/stub.ts\n  └ L90:130 (41 lines read)\n\n● Read PRD.md\n  │ docs/PRD.md\n  └ L190:225 (36 lines read)\n\n● Read PRD.md\n  │ docs/PRD.md\n  └ L350:410 (61 lines read)\n\n● Read schema.ts\n  │ src/discovery/schema.ts\n  └ L300:400 (101 lines read)\n\n● Read opencode.ts\n  │ src/harness/opencode.ts\n  └ L75:110 (32 lines read)\n\n● Read copilot.ts\n  │ src/harness/copilot.ts\n  └ L75:105 (27 lines read)\n\n● Read adapter-conformance.test.mjs\n  │ tests/adapter-conformance.test.mjs\n  └ L120:155 (36 lines read)\n\nThe current contract has only an unvalidated `completedAt`. I’m promoting verification results to a versioned, runtime-validated record with `startedAt`/`completedAt`, then updating the runner and fixtures so every produced result carries the same durable shape.\n\n● Read stub.ts\n  │ src/harness/stub.ts\n  └ L1:125 (125 lines read)\n\n● Read README.md\n  └ L1:180 (164 lines read)\n\n● Read schema.ts\n  │ src/discovery/schema.ts\n  └ L1:25 (25 lines read)\n\n● Edit\n  │ Create src/verification/schema.ts\n  │ Edit src/harness/adapter.ts\n  │ Edit src/verification/index.ts\n  │ Edit src/verification/runner.ts\n  │ Edit src/harness/stub.ts\n  │ Edit docs/features/verification-and-resilience.md\n  │ Edit CHANGELOG.md\n  │ Edit README.md\n  │ Edit tests/adapter-conformance.test.mjs\n  └ Edit tests/verification-policy.test.mjs\n\n● Edit\n  │ Edit src/verification/runner.ts\n  │ Edit src/verification/schema.ts\n  └ Create tests/verification-schema.test.mjs\n\nThe schema and producer updates are in place, including explicit rejection of malformed, out-of-order, or oversized result records. I’m running the repository’s required test, typecheck, and documentation checks now.\n\n● Run documentation governance tests (shell)\n  │ npm run test:docs\n  └ 26 lines…\n\n● Run the TypeScript typecheck (shell)\n  │ npm run typecheck\n  └ 8 lines…\n\n● Run the full Node test suite (shell)\n  │ npm test\n  └ 554 lines…\n\n● Edit\n  └ Edit src/verification/schema.ts\n\n● Check patch formatting and changed files (shell)\n  │ git --no-pager diff --check && git --no-pager status --short\n  └ 14 lines…\n\n● Re-run the TypeScript typecheck (shell)\n  │ npm run typecheck\n  └ 3 lines…\n\nImplemented the versioned verification result schema and timestamps.\n\n**Changes:**\n- Added `src/verification/schema.ts` with:\n  - `schemaVersion`\n  - normalized capability validation\n  - status validation\n  - ordered UTC `startedAt`/`completedAt` timestamps\n  - bounded optional messages\n  - `validateVerificationResult`, `isVerificationResult`, and `assertVerificationResult`\n- Updated adapter and verification contracts to use the schema.\n- Updated the runner and stub adapter to emit complete timestamped results.\n- Added verification schema tests.\n- Updated `README.md`, `CHANGELOG.md`, and the verification feature checklist.\n- Updated existing verification expectations in adapter and policy tests.\n\nTypechecking, the full test suite, and documentation checks pass. Existing changes to `docs/EXECUTION-AUDIT.jsonl` and `docs/WORKFLOW-STATE.json` were left untouched.\n\n",
+      "artifactId": "work-verification-and-resilience-1-2-001",
+      "inputArtifactIds": [
+        "work-verification-and-resilience-1-1-001"
+      ]
     },
     "VERIFICATION-AND-RESILIENCE-1.3": {
       "taskId": "VERIFICATION-AND-RESILIENCE-1.3",

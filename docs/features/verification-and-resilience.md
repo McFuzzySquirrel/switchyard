@@ -42,7 +42,7 @@
 
 ### Phase 1: Probes
 - [x] Define read-only and mutating probe policies.
-- [ ] Add verification result schema and timestamps.
+- [x] Add verification result schema and timestamps.
 - [ ] Implement bounded adapter probes.
 
 ### Phase 2: Routing Integration

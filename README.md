@@ -113,6 +113,10 @@ execution runtime.
 adapter implementations. They never invoke a shell, apply environment
 inheritance allow/deny rules, cap each output stream independently, redact
 diagnostics, and distinguish ordinary failures from timeout and cancellation.
+Verification adapters return the versioned `VerificationResult` schema,
+validated with `validateVerificationResult` (or
+`assertVerificationResult`), including ordered UTC `startedAt` and
+`completedAt` timestamps.
 
 Executable location, probe timeout, maximum probe output length, the
 mutating-probe policy flag, and the registry path all resolve through the same

@@ -1,5 +1,7 @@
 import type { CapabilityName } from "../capabilities/vocabulary.ts";
 import type { HarnessProfile } from "../discovery/schema.ts";
+import type { VerificationResult } from "../verification/schema.ts";
+export type { VerificationResult } from "../verification/schema.ts";
 
 export type AdapterOperation =
   | "discover"
@@ -137,13 +139,6 @@ export interface ProbeContext {
     readonly allowPaidProbes?: boolean;
     readonly allowModelInvocation?: boolean;
   };
-}
-
-export interface VerificationResult {
-  readonly capability: CapabilityName;
-  readonly status: "passed" | "failed" | "skipped" | "timed-out" | "unavailable";
-  readonly completedAt: string;
-  readonly message?: string;
 }
 
 /**

@@ -63,8 +63,10 @@ test("passes the complete approved risk envelope to the adapter", async () => {
     async verify(capabilities, context) {
       receivedContext = context;
       return capabilities.map((capability) => ({
+        schemaVersion: 1,
         capability,
         status: "passed",
+        startedAt: new Date().toISOString(),
         completedAt: new Date().toISOString(),
       }));
     },

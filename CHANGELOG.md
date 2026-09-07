@@ -22,6 +22,9 @@ All notable user-facing changes to Switchyard are documented here. The format fo
 
 ### Added
 
+- Added a versioned, runtime-validated verification result schema with
+  capability status, bounded messages, and ordered `startedAt`/`completedAt`
+  UTC timestamps.
 - Added the bounded asynchronous process runtime (`executeProcess`/`runProcess`)
   with direct argv spawning, controlled environment inheritance, per-stream
   output limits, redacted diagnostics, timeout/cancellation classification,

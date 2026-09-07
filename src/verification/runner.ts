@@ -50,10 +50,13 @@ export async function verifyCapabilities(
       allowed.push(capability);
       for (const risk of decision.risks) allowedRisks.add(risk);
     } else {
+      const completedAt = now().toISOString();
       rejected.push({
+        schemaVersion: 1,
         capability,
         status: "skipped",
-        completedAt: now().toISOString(),
+        startedAt: completedAt,
+        completedAt,
         message: decision.reason,
       });
     }

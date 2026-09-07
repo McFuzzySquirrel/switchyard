@@ -135,7 +135,13 @@ test("stub adapter exercises discover, verify, execute, and resume with one cons
 
   const verification = await stub.verify(["headless"], {});
   assert.deepEqual(verification, [
-    { capability: "headless", status: "passed", completedAt: observedAt },
+    {
+      schemaVersion: 1,
+      capability: "headless",
+      status: "passed",
+      startedAt: observedAt,
+      completedAt: observedAt,
+    },
   ]);
 
   const execution = await stub.execute({ task: "run tests" });

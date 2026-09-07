@@ -1,0 +1,10 @@
+{"timestamp":"2026-09-07T18:57:50.467Z","action":"manifest.compiled","note":"/home/mcfuzzysquirrel/Projects/switchyard/docs/EXECUTION-MANIFEST.json"}
+{"timestamp":"2026-09-07T19:02:47.734Z","action":"manifest.compiled","note":"/home/mcfuzzysquirrel/Projects/switchyard/docs/EXECUTION-MANIFEST.json"}
+{"timestamp":"2026-09-07T19:03:37.260Z","action":"manifest.compiled","note":"/home/mcfuzzysquirrel/Projects/switchyard/docs/EXECUTION-MANIFEST.json"}
+{"timestamp":"2026-09-07T19:04:12.549Z","action":"manifest.compiled","note":"/home/mcfuzzysquirrel/Projects/switchyard/docs/EXECUTION-MANIFEST.json"}
+{"timestamp":"2026-09-07T19:10:17.559Z","action":"state.reconciled","runId":"faef066b-e967-49ae-ba56-4dbe4255f89d","note":"manifest=2026-09-07T19:04:12.536Z"}
+{"timestamp":"2026-09-07T19:10:17.561Z","action":"run.started","runId":"faef066b-e967-49ae-ba56-4dbe4255f89d","note":"harness=copilot"}
+{"timestamp":"2026-09-07T19:10:17.616Z","action":"phase.started","runId":"faef066b-e967-49ae-ba56-4dbe4255f89d","phaseId":"DISCOVERY-AND-REGISTRY-1"}
+{"timestamp":"2026-09-07T19:10:17.617Z","action":"task.started","runId":"faef066b-e967-49ae-ba56-4dbe4255f89d","taskId":"DISCOVERY-AND-REGISTRY-1.1","phaseId":"DISCOVERY-AND-REGISTRY-1","attempt":1}
+{"timestamp":"2026-09-07T19:22:48.415Z","action":"artifact.created","runId":"faef066b-e967-49ae-ba56-4dbe4255f89d","taskId":"DISCOVERY-AND-REGISTRY-1.1","artifactId":"work-discovery-and-registry-1-1-001","artifactType":"work.discovery-and-registry-1.1","inputArtifacts":[]}
+{"timestamp":"2026-09-07T19:22:48.415Z","action":"task.complete","runId":"faef066b-e967-49ae-ba56-4dbe4255f89d","taskId":"DISCOVERY-AND-REGISTRY-1.1","phaseId":"DISCOVERY-AND-REGISTRY-1","outputFiles":["package.json","src/capabilities/index.ts","src/capabilities/vocabulary.ts","src/discovery/index.ts","src/discovery/registry.ts","src/discovery/schema.ts","src/harness/adapter.ts","src/harness/index.ts","src/index.ts","tests/discovery-schema.test.mjs","tsconfig.json"],"durationMs":750775}

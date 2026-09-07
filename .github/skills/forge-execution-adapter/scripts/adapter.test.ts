@@ -470,6 +470,26 @@ test("compileExecutionManifest falls back to lexical order when the vision has n
   assert.match(manifest.warnings.join("\n"), /No feature dependency table found/);
 });
 
+test("compileExecutionManifest resolves numbered feature dependencies", () => {
+  const root = createFeatureFixture();
+  writeFileSync(join(root, "docs", "product-vision.md"), `# Product Vision
+
+## 14. Features
+
+| # | Feature | File | Dependencies | Priority |
+|---|---------|------|-------------|----------|
+| 1 | Foundation | [docs/features/foundation.md](features/foundation.md) | None | Must |
+| 2 | Expenses | [docs/features/expenses.md](features/expenses.md) | Feature 1 | Must |
+| 3 | Budgets | [docs/features/budgets.md](features/budgets.md) | Features 1 and 2 | Must |
+`, "utf8");
+
+  const manifest = compileExecutionManifest(discoverForgeRepo(root));
+
+  assert.deepEqual(manifest.featureOrder, ["Foundation", "Expenses", "Budgets"]);
+  assert.deepEqual(manifest.phases.map((phase) => phase.dependencies), [[], ["FOUNDATION-1"], ["FOUNDATION-1", "EXPENSES-1"]]);
+  assert.doesNotMatch(manifest.warnings.join("\n"), /depends on 'Feature/);
+});
+
 test("validateTeam flags duplicate file owners and orphan agents", () => {
   const root = createFixture();
   writeFileSync(join(root, ".agents", "agents", "unused-engineer.md"), `---

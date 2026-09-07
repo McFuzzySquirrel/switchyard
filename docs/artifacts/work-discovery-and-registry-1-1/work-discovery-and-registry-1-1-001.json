@@ -1,0 +1,30 @@
+{
+  "type": "work.discovery-and-registry-1.1",
+  "category": "work",
+  "taskId": "DISCOVERY-AND-REGISTRY-1.1",
+  "producedBy": "adapter-platform-engineer",
+  "status": "complete",
+  "summary": "[ ] Define registry and capability observation schemas: [ ] Define registry and capability observation schemas.",
+  "confidence": 0.9,
+  "inputs": [],
+  "filesChanged": [
+    "package.json",
+    "src/capabilities/index.ts",
+    "src/capabilities/vocabulary.ts",
+    "src/discovery/index.ts",
+    "src/discovery/registry.ts",
+    "src/discovery/schema.ts",
+    "src/harness/adapter.ts",
+    "src/harness/index.ts",
+    "src/index.ts",
+    "tests/discovery-schema.test.mjs",
+    "tsconfig.json"
+  ],
+  "payload": {
+    "agentOutputExcerpt": "● skill(adapter-conformance)\n\nI’m defining the shared registry and observation schema at the adapter boundary, then wiring its validation coverage.\n\n● Adapter-platform-engineer (model: gpt-5.6-terra) Define registry schemas                   11m 44s\n  │ Implemented versioned registry and capability observation schemas with public...\n  │ update_todo todos: \"- [x] Inspect architecture, registry/capability docs, conven…\"\n  │   └ TODO list updated\n  └ Check final worktree and new-file whitespace (sh",
+    "taskDescription": "[ ] Define registry and capability observation schemas."
+  },
+  "nextActions": [],
+  "artifactId": "work-discovery-and-registry-1-1-001",
+  "createdAt": "2026-09-07T19:22:48.415Z"
+}

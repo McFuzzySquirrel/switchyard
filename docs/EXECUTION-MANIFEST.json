@@ -1,0 +1,1202 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-09-07T19:04:12.536Z",
+  "granularity": "fine",
+  "sourceLayout": "features",
+  "repoRoot": "/home/mcfuzzysquirrel/Projects/switchyard",
+  "harnessRoot": ".github",
+  "prdPath": "/home/mcfuzzysquirrel/Projects/switchyard/docs/product-vision.md",
+  "visionPath": "/home/mcfuzzysquirrel/Projects/switchyard/docs/product-vision.md",
+  "featureOrder": [
+    "Discovery and Registry",
+    "Deterministic Routing and Explainability",
+    "Harness Execution Runtime",
+    "Verification and Resilience",
+    "Adapter Extensibility and Configuration",
+    "Multi-Harness Composition"
+  ],
+  "progressPath": "/home/mcfuzzysquirrel/Projects/switchyard/docs/PROGRESS.md",
+  "auditPath": "/home/mcfuzzysquirrel/Projects/switchyard/docs/EXECUTION-AUDIT.jsonl",
+  "validationCommands": [],
+  "approvalGates": {
+    "preflight": true,
+    "betweenPhases": true
+  },
+  "phases": [
+    {
+      "id": "DISCOVERY-AND-REGISTRY-1",
+      "title": "Phase 1: Discovery Core",
+      "feature": "Discovery and Registry",
+      "description": "- [ ] Define registry and capability observation schemas. - [ ] Implement cross-platform executable lookup. - [ ] Implement bounded version/help probing.",
+      "ownerAgents": [
+        "adapter-platform-engineer",
+        "discovery-registry-engineer"
+      ],
+      "dependencies": [],
+      "approvalRequired": false,
+      "tasks": [
+        {
+          "id": "DISCOVERY-AND-REGISTRY-1.1",
+          "title": "[ ] Define registry and capability observation schemas",
+          "description": "[ ] Define registry and capability observation schemas.",
+          "ownerAgent": "adapter-platform-engineer",
+          "requiredCapabilities": [
+            "repository-tools"
+          ],
+          "dependencies": [],
+          "expectedOutputs": [],
+          "validationCommands": [],
+          "approvalRequired": false,
+          "sourceLines": [
+            "[ ] Define registry and capability observation schemas."
+          ],
+          "produces": "work.discovery-and-registry-1.1",
+          "inputs": [],
+          "timeoutMs": 900000
+        },
+        {
+          "id": "DISCOVERY-AND-REGISTRY-1.2",
+          "title": "[ ] Implement cross-platform executable lookup",
+          "description": "[ ] Implement cross-platform executable lookup.",
+          "ownerAgent": "discovery-registry-engineer",
+          "requiredCapabilities": [
+            "repository-tools"
+          ],
+          "dependencies": [
+            "DISCOVERY-AND-REGISTRY-1.1"
+          ],
+          "expectedOutputs": [],
+          "validationCommands": [],
+          "approvalRequired": false,
+          "sourceLines": [
+            "[ ] Implement cross-platform executable lookup."
+          ],
+          "produces": "work.discovery-and-registry-1.2",
+          "inputs": [
+            "work.discovery-and-registry-1.1"
+          ],
+          "timeoutMs": 900000
+        },
+        {
+          "id": "DISCOVERY-AND-REGISTRY-1.3",
+          "title": "[ ] Implement bounded version/help probing",
+          "description": "[ ] Implement bounded version/help probing.",
+          "ownerAgent": "discovery-registry-engineer",
+          "requiredCapabilities": [
+            "repository-tools"
+          ],
+          "dependencies": [
+            "DISCOVERY-AND-REGISTRY-1.2"
+          ],
+          "expectedOutputs": [],
+          "validationCommands": [],
+          "approvalRequired": false,
+          "sourceLines": [
+            "[ ] Implement bounded version/help probing."
+          ],
+          "produces": "work.discovery-and-registry-1.3",
+          "inputs": [
+            "work.discovery-and-registry-1.2"
+          ],
+          "timeoutMs": 900000
+        },
+        {
+          "id": "DISCOVERY-AND-REGISTRY-1.4",
+          "title": "[ ] Add OpenCode and Copilot discovery adapters",
+          "description": "[ ] Add OpenCode and Copilot discovery adapters.",
+          "ownerAgent": "adapter-platform-engineer",
+          "requiredCapabilities": [
+            "repository-tools"
+          ],
+          "dependencies": [
+            "DISCOVERY-AND-REGISTRY-1.3"
+          ],
+          "expectedOutputs": [],
+          "validationCommands": [],
+          "approvalRequired": false,
+          "sourceLines": [
+            "[ ] Add OpenCode and Copilot discovery adapters."
+          ],
+          "produces": "work.discovery-and-registry-1.4",
+          "inputs": [
+            "work.discovery-and-registry-1.3"
+          ],
+          "timeoutMs": 900000
+        },
+        {
+          "id": "DISCOVERY-AND-REGISTRY-1.5",
+          "title": "[ ] Implement parser fixtures for supported CLI output",
+          "description": "[ ] Implement parser fixtures for supported CLI output.",
+          "ownerAgent": "discovery-registry-engineer",
+          "requiredCapabilities": [
+            "repository-tools"
+          ],
+          "dependencies": [
+            "DISCOVERY-AND-REGISTRY-1.4"
+          ],
+          "expectedOutputs": [],
+          "validationCommands": [],
+          "approvalRequired": false,
+          "sourceLines": [
+            "[ ] Implement parser fixtures for supported CLI output."
+          ],
+          "produces": "work.discovery-and-registry-1.5",
+          "inputs": [
+            "work.discovery-and-registry-1.4"
+          ],
+          "timeoutMs": 900000
+        }
+      ]
+    },
+    {
+      "id": "DISCOVERY-AND-REGISTRY-2",
+      "title": "Phase 2: Persistence and Commands",
+      "feature": "Discovery and Registry",
+      "description": "- [ ] Implement atomic registry reads/writes. - [ ] Implement refresh and stale-entry handling. - [ ] Implement `discover` and `capabilities`.",
+      "ownerAgents": [
+        "discovery-registry-engineer"
+      ],
+      "dependencies": [
+        "DISCOVERY-AND-REGISTRY-1"
+      ],
+      "approvalRequired": true,
+      "tasks": [
+        {
+          "id": "DISCOVERY-AND-REGISTRY-2.1",
+          "title": "[ ] Implement atomic registry reads/writes",
+          "description": "[ ] Implement atomic registry reads/writes.",
+          "ownerAgent": "discovery-registry-engineer",
+          "requiredCapabilities": [
+            "repository-tools"
+          ],
+          "dependencies": [],
+          "expectedOutputs": [],
+          "validationCommands": [],
+          "approvalRequired": false,
+          "sourceLines": [
+            "[ ] Implement atomic registry reads/writes."
+          ],
+          "produces": "work.discovery-and-registry-2.1",
+          "inputs": [],
+          "timeoutMs": 900000
+        },
+        {
+          "id": "DISCOVERY-AND-REGISTRY-2.2",
+          "title": "[ ] Implement refresh and stale-entry handling",
+          "description": "[ ] Implement refresh and stale-entry handling.",
+          "ownerAgent": "discovery-registry-engineer",
+          "requiredCapabilities": [
+            "repository-tools"
+          ],
+          "dependencies": [
+            "DISCOVERY-AND-REGISTRY-2.1"
+          ],
+          "expectedOutputs": [],
+          "validationCommands": [],
+          "approvalRequired": false,
+          "sourceLines": [
+            "[ ] Implement refresh and stale-entry handling."
+          ],
+          "produces": "work.discovery-and-registry-2.2",
+          "inputs": [
+            "work.discovery-and-registry-2.1"
+          ],
+          "timeoutMs": 900000
+        },
+        {
+          "id": "DISCOVERY-AND-REGISTRY-2.3",
+          "title": "[ ] Implement `discover` and `capabilities`",
+          "description": "[ ] Implement `discover` and `capabilities`.",
+          "ownerAgent": "discovery-registry-engineer",
+          "requiredCapabilities": [
+            "repository-tools"
+          ],
+          "dependencies": [
+            "DISCOVERY-AND-REGISTRY-2.2"
+          ],
+          "expectedOutputs": [],
+          "validationCommands": [],
+          "approvalRequired": false,
+          "sourceLines": [
+            "[ ] Implement `discover` and `capabilities`."
+          ],
+          "produces": "work.discovery-and-registry-2.3",
+          "inputs": [
+            "work.discovery-and-registry-2.2"
+          ],
+          "timeoutMs": 900000
+        },
+        {
+          "id": "DISCOVERY-AND-REGISTRY-2.4",
+          "title": "[ ] Add human and JSON output",
+          "description": "[ ] Add human and JSON output.",
+          "ownerAgent": "discovery-registry-engineer",
+          "requiredCapabilities": [
+            "repository-tools"
+          ],
+          "dependencies": [
+            "DISCOVERY-AND-REGISTRY-2.3"
+          ],
+          "expectedOutputs": [],
+          "validationCommands": [],
+          "approvalRequired": false,
+          "sourceLines": [
+            "[ ] Add human and JSON output."
+          ],
+          "produces": "work.discovery-and-registry-2.4",
+          "inputs": [
+            "work.discovery-and-registry-2.3"
+          ],
+          "timeoutMs": 900000
+        }
+      ]
+    },
+    {
+      "id": "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-1",
+      "title": "Phase 1: Matching",
+      "feature": "Deterministic Routing and Explainability",
+      "description": "- [ ] Define requirement schema and validation. - [ ] Implement all-required capability matching. - [ ] Implement deterministic tie-breaking.",
+      "ownerAgents": [
+        "switchyard-qa-engineer",
+        "routing-policy-engineer"
+      ],
+      "dependencies": [
+        "DISCOVERY-AND-REGISTRY-2"
+      ],
+      "approvalRequired": true,
+      "tasks": [
+        {
+          "id": "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-1.1",
+          "title": "[ ] Define requirement schema and validation",
+          "description": "[ ] Define requirement schema and validation.",
+          "ownerAgent": "switchyard-qa-engineer",
+          "requiredCapabilities": [
+            "repository-tools"
+          ],
+          "dependencies": [],
+          "expectedOutputs": [],
+          "validationCommands": [],
+          "approvalRequired": false,
+          "sourceLines": [
+            "[ ] Define requirement schema and validation."
+          ],
+          "produces": "work.deterministic-routing-and-explainability-1.1",
+          "inputs": [],
+          "timeoutMs": 900000
+        },
+        {
+          "id": "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-1.2",
+          "title": "[ ] Implement all-required capability matching",
+          "description": "[ ] Implement all-required capability matching.",
+          "ownerAgent": "routing-policy-engineer",
+          "requiredCapabilities": [
+            "repository-tools"
+          ],
+          "dependencies": [
+            "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-1.1"
+          ],
+          "expectedOutputs": [],
+          "validationCommands": [],
+          "approvalRequired": false,
+          "sourceLines": [
+            "[ ] Implement all-required capability matching."
+          ],
+          "produces": "work.deterministic-routing-and-explainability-1.2",
+          "inputs": [
+            "work.deterministic-routing-and-explainability-1.1"
+          ],
+          "timeoutMs": 900000
+        },
+        {
+          "id": "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-1.3",
+          "title": "[ ] Implement deterministic tie-breaking",
+          "description": "[ ] Implement deterministic tie-breaking.",
+          "ownerAgent": "routing-policy-engineer",
+          "requiredCapabilities": [
+            "repository-tools"
+          ],
+          "dependencies": [
+            "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-1.2"
+          ],
+          "expectedOutputs": [],
+          "validationCommands": [],
+          "approvalRequired": false,
+          "sourceLines": [
+            "[ ] Implement deterministic tie-breaking."
+          ],
+          "produces": "work.deterministic-routing-and-explainability-1.3",
+          "inputs": [
+            "work.deterministic-routing-and-explainability-1.2"
+          ],
+          "timeoutMs": 900000
+        }
+      ]
+    },
+    {
+      "id": "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-2",
+      "title": "Phase 2: Explainability",
+      "feature": "Deterministic Routing and Explainability",
+      "description": "- [ ] Implement human-readable explanation output. - [ ] Implement stable JSON decision schema. - [ ] Define no-match and invalid-input exit codes.",
+      "ownerAgents": [
+        "routing-policy-engineer",
+        "switchyard-architect"
+      ],
+      "dependencies": [
+        "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-1"
+      ],
+      "approvalRequired": true,
+      "tasks": [
+        {
+          "id": "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-2.1",
+          "title": "[ ] Implement human-readable explanation output",
+          "description": "[ ] Implement human-readable explanation output.",
+          "ownerAgent": "routing-policy-engineer",
+          "requiredCapabilities": [
+            "repository-tools"
+          ],
+          "dependencies": [],
+          "expectedOutputs": [],
+          "validationCommands": [],
+          "approvalRequired": false,
+          "sourceLines": [
+            "[ ] Implement human-readable explanation output."
+          ],
+          "produces": "work.deterministic-routing-and-explainability-2.1",
+          "inputs": [],
+          "timeoutMs": 900000
+        },
+        {
+          "id": "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-2.2",
+          "title": "[ ] Implement stable JSON decision schema",
+          "description": "[ ] Implement stable JSON decision schema.",
+          "ownerAgent": "switchyard-architect",
+          "requiredCapabilities": [
+            "repository-tools"
+          ],
+          "dependencies": [
+            "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-2.1"
+          ],
+          "expectedOutputs": [],
+          "validationCommands": [],
+          "approvalRequired": false,
+          "sourceLines": [
+            "[ ] Implement stable JSON decision schema."
+          ],
+          "produces": "work.deterministic-routing-and-explainability-2.2",
+          "inputs": [
+            "work.deterministic-routing-and-explainability-2.1"
+          ],
+          "timeoutMs": 900000
+        },
+        {
+          "id": "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-2.3",
+          "title": "[ ] Define no-match and invalid-input exit codes",
+          "description": "[ ] Define no-match and invalid-input exit codes.",
+          "ownerAgent": "routing-policy-engineer",
+          "requiredCapabilities": [
+            "repository-tools"
+          ],
+          "dependencies": [
+            "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-2.2"
+          ],
+          "expectedOutputs": [],
+          "validationCommands": [],
+          "approvalRequired": false,
+          "sourceLines": [
+            "[ ] Define no-match and invalid-input exit codes."
+          ],
+          "produces": "work.deterministic-routing-and-explainability-2.3",
+          "inputs": [
+            "work.deterministic-routing-and-explainability-2.2"
+          ],
+          "timeoutMs": 900000
+        }
+      ]
+    },
+    {
+      "id": "HARNESS-EXECUTION-RUNTIME-1",
+      "title": "Phase 1: Process Runner",
+      "feature": "Harness Execution Runtime",
+      "description": "- [ ] Implement adapter execution request/result types. - [ ] Implement bounded asynchronous process execution. - [ ] Implement timeout, cancellation, and descendant cleanup.",
+      "ownerAgents": [
+        "execution-runtime-engineer"
+      ],
+      "dependencies": [
+        "DISCOVERY-AND-REGISTRY-2",
+        "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-2"
+      ],
+      "approvalRequired": true,
+      "tasks": [
+        {
+          "id": "HARNESS-EXECUTION-RUNTIME-1.1",
+          "title": "[ ] Implement adapter execution request/result types",
+          "description": "[ ] Implement adapter execution request/result types.",
+          "ownerAgent": "execution-runtime-engineer",
+          "requiredCapabilities": [
+            "repository-tools"
+          ],
+          "dependencies": [],
+          "expectedOutputs": [],
+          "validationCommands": [],
+          "approvalRequired": false,
+          "sourceLines": [
+            "[ ] Implement adapter execution request/result types."
+          ],
+          "produces": "work.harness-execution-runtime-1.1",
+          "inputs": [],
+          "timeoutMs": 900000
+        },
+        {
+          "id": "HARNESS-EXECUTION-RUNTIME-1.2",
+          "title": "[ ] Implement bounded asynchronous process execution",
+          "description": "[ ] Implement bounded asynchronous process execution.",
+          "ownerAgent": "execution-runtime-engineer",
+          "requiredCapabilities": [
+            "repository-tools"
+          ],
+          "dependencies": [
+            "HARNESS-EXECUTION-RUNTIME-1.1"
+          ],
+          "expectedOutputs": [],
+          "validationCommands": [],
+          "approvalRequired": false,
+          "sourceLines": [
+            "[ ] Implement bounded asynchronous process execution."
+          ],
+          "produces": "work.harness-execution-runtime-1.2",
+          "inputs": [
+            "work.harness-execution-runtime-1.1"
+          ],
+          "timeoutMs": 900000
+        },
+        {
+          "id": "HARNESS-EXECUTION-RUNTIME-1.3",
+          "title": "[ ] Implement timeout, cancellation, and descendant cleanup",
+          "description": "[ ] Implement timeout, cancellation, and descendant cleanup.",
+          "ownerAgent": "execution-runtime-engineer",
+          "requiredCapabilities": [
+            "repository-tools"
+          ],
+          "dependencies": [
+            "HARNESS-EXECUTION-RUNTIME-1.2"
+          ],
+          "expectedOutputs": [],
+          "validationCommands": [],
+          "approvalRequired": false,
+          "sourceLines": [
+            "[ ] Implement timeout, cancellation, and descendant cleanup."
+          ],
+          "produces": "work.harness-execution-runtime-1.3",
+          "inputs": [
+            "work.harness-execution-runtime-1.2"
+          ],
+          "timeoutMs": 900000
+        },
+        {
+          "id": "HARNESS-EXECUTION-RUNTIME-1.4",
+          "title": "[ ] Implement environment filtering and output capture",
+          "description": "[ ] Implement environment filtering and output capture.",
+          "ownerAgent": "execution-runtime-engineer",
+          "requiredCapabilities": [
+            "repository-tools"
+          ],
+          "dependencies": [
+            "HARNESS-EXECUTION-RUNTIME-1.3"
+          ],
+          "expectedOutputs": [],
+          "validationCommands": [],
+          "approvalRequired": false,
+          "sourceLines": [
+            "[ ] Implement environment filtering and output capture."
+          ],
+          "produces": "work.harness-execution-runtime-1.4",
+          "inputs": [
+            "work.harness-execution-runtime-1.3"
+          ],
+          "timeoutMs": 900000
+        }
+      ]
+    },
+    {
+      "id": "HARNESS-EXECUTION-RUNTIME-2",
+      "title": "Phase 2: CLI Integration",
+      "feature": "Harness Execution Runtime",
+      "description": "- [ ] Connect routing to adapter execution. - [ ] Define exit-code taxonomy. - [ ] Add human/JSON result serializers.",
+      "ownerAgents": [
+        "execution-runtime-engineer"
+      ],
+      "dependencies": [
+        "HARNESS-EXECUTION-RUNTIME-1"
+      ],
+      "approvalRequired": true,
+      "tasks": [
+        {
+          "id": "HARNESS-EXECUTION-RUNTIME-2.1",
+          "title": "[ ] Connect routing to adapter execution",
+          "description": "[ ] Connect routing to adapter execution.",
+          "ownerAgent": "execution-runtime-engineer",
+          "requiredCapabilities": [
+            "repository-tools"
+          ],
+          "dependencies": [],
+          "expectedOutputs": [],
+          "validationCommands": [],
+          "approvalRequired": false,
+          "sourceLines": [
+            "[ ] Connect routing to adapter execution."
+          ],
+          "produces": "work.harness-execution-runtime-2.1",
+          "inputs": [],
+          "timeoutMs": 900000
+        },
+        {
+          "id": "HARNESS-EXECUTION-RUNTIME-2.2",
+          "title": "[ ] Define exit-code taxonomy",
+          "description": "[ ] Define exit-code taxonomy.",
+          "ownerAgent": "execution-runtime-engineer",
+          "requiredCapabilities": [
+            "repository-tools"
+          ],
+          "dependencies": [
+            "HARNESS-EXECUTION-RUNTIME-2.1"
+          ],
+          "expectedOutputs": [],
+          "validationCommands": [],
+          "approvalRequired": false,
+          "sourceLines": [
+            "[ ] Define exit-code taxonomy."
+          ],
+          "produces": "work.harness-execution-runtime-2.2",
+          "inputs": [
+            "work.harness-execution-runtime-2.1"
+          ],
+          "timeoutMs": 900000
+        },
+        {
+          "id": "HARNESS-EXECUTION-RUNTIME-2.3",
+          "title": "[ ] Add human/JSON result serializers",
+          "description": "[ ] Add human/JSON result serializers.",
+          "ownerAgent": "execution-runtime-engineer",
+          "requiredCapabilities": [
+            "repository-tools"
+          ],
+          "dependencies": [
+            "HARNESS-EXECUTION-RUNTIME-2.2"
+          ],
+          "expectedOutputs": [],
+          "validationCommands": [],
+          "approvalRequired": false,
+          "sourceLines": [
+            "[ ] Add human/JSON result serializers."
+          ],
+          "produces": "work.harness-execution-runtime-2.3",
+          "inputs": [
+            "work.harness-execution-runtime-2.2"
+          ],
+          "timeoutMs": 900000
+        },
+        {
+          "id": "HARNESS-EXECUTION-RUNTIME-2.4",
+          "title": "[ ] Add dry-run mode",
+          "description": "[ ] Add dry-run mode.",
+          "ownerAgent": "execution-runtime-engineer",
+          "requiredCapabilities": [
+            "repository-tools"
+          ],
+          "dependencies": [
+            "HARNESS-EXECUTION-RUNTIME-2.3"
+          ],
+          "expectedOutputs": [],
+          "validationCommands": [],
+          "approvalRequired": false,
+          "sourceLines": [
+            "[ ] Add dry-run mode."
+          ],
+          "produces": "work.harness-execution-runtime-2.4",
+          "inputs": [
+            "work.harness-execution-runtime-2.3"
+          ],
+          "timeoutMs": 900000
+        }
+      ]
+    },
+    {
+      "id": "VERIFICATION-AND-RESILIENCE-1",
+      "title": "Phase 1: Probes",
+      "feature": "Verification and Resilience",
+      "description": "- [ ] Define read-only and mutating probe policies. - [ ] Add verification result schema and timestamps. - [ ] Implement bounded adapter probes.",
+      "ownerAgents": [
+        "verification-resilience-engineer"
+      ],
+      "dependencies": [
+        "DISCOVERY-AND-REGISTRY-2",
+        "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-2"
+      ],
+      "approvalRequired": true,
+      "tasks": [
+        {
+          "id": "VERIFICATION-AND-RESILIENCE-1.1",
+          "title": "[ ] Define read-only and mutating probe policies",
+          "description": "[ ] Define read-only and mutating probe policies.",
+          "ownerAgent": "verification-resilience-engineer",
+          "requiredCapabilities": [
+            "repository-tools"
+          ],
+          "dependencies": [],
+          "expectedOutputs": [],
+          "validationCommands": [],
+          "approvalRequired": false,
+          "sourceLines": [
+            "[ ] Define read-only and mutating probe policies."
+          ],
+          "produces": "work.verification-and-resilience-1.1",
+          "inputs": [],
+          "timeoutMs": 900000
+        },
+        {
+          "id": "VERIFICATION-AND-RESILIENCE-1.2",
+          "title": "[ ] Add verification result schema and timestamps",
+          "description": "[ ] Add verification result schema and timestamps.",
+          "ownerAgent": "verification-resilience-engineer",
+          "requiredCapabilities": [
+            "repository-tools"
+          ],
+          "dependencies": [
+            "VERIFICATION-AND-RESILIENCE-1.1"
+          ],
+          "expectedOutputs": [],
+          "validationCommands": [],
+          "approvalRequired": false,
+          "sourceLines": [
+            "[ ] Add verification result schema and timestamps."
+          ],
+          "produces": "work.verification-and-resilience-1.2",
+          "inputs": [
+            "work.verification-and-resilience-1.1"
+          ],
+          "timeoutMs": 900000
+        },
+        {
+          "id": "VERIFICATION-AND-RESILIENCE-1.3",
+          "title": "[ ] Implement bounded adapter probes",
+          "description": "[ ] Implement bounded adapter probes.",
+          "ownerAgent": "verification-resilience-engineer",
+          "requiredCapabilities": [
+            "repository-tools"
+          ],
+          "dependencies": [
+            "VERIFICATION-AND-RESILIENCE-1.2"
+          ],
+          "expectedOutputs": [],
+          "validationCommands": [],
+          "approvalRequired": false,
+          "sourceLines": [
+            "[ ] Implement bounded adapter probes."
+          ],
+          "produces": "work.verification-and-resilience-1.3",
+          "inputs": [
+            "work.verification-and-resilience-1.2"
+          ],
+          "timeoutMs": 900000
+        }
+      ]
+    },
+    {
+      "id": "VERIFICATION-AND-RESILIENCE-2",
+      "title": "Phase 2: Routing Integration",
+      "feature": "Verification and Resilience",
+      "description": "- [ ] Include verification state in candidate ranking. - [ ] Implement explicit preferred-harness and fallback policy. - [ ] Add warnings for probes that may incur cost or external access.",
+      "ownerAgents": [
+        "routing-policy-engineer"
+      ],
+      "dependencies": [
+        "VERIFICATION-AND-RESILIENCE-1"
+      ],
+      "approvalRequired": true,
+      "tasks": [
+        {
+          "id": "VERIFICATION-AND-RESILIENCE-2.1",
+          "title": "[ ] Include verification state in candidate ranking",
+          "description": "[ ] Include verification state in candidate ranking.",
+          "ownerAgent": "routing-policy-engineer",
+          "requiredCapabilities": [
+            "repository-tools"
+          ],
+          "dependencies": [],
+          "expectedOutputs": [],
+          "validationCommands": [],
+          "approvalRequired": false,
+          "sourceLines": [
+            "[ ] Include verification state in candidate ranking."
+          ],
+          "produces": "work.verification-and-resilience-2.1",
+          "inputs": [],
+          "timeoutMs": 900000
+        },
+        {
+          "id": "VERIFICATION-AND-RESILIENCE-2.2",
+          "title": "[ ] Implement explicit preferred-harness and fallback policy",
+          "description": "[ ] Implement explicit preferred-harness and fallback policy.",
+          "ownerAgent": "routing-policy-engineer",
+          "requiredCapabilities": [
+            "repository-tools"
+          ],
+          "dependencies": [
+            "VERIFICATION-AND-RESILIENCE-2.1"
+          ],
+          "expectedOutputs": [],
+          "validationCommands": [],
+          "approvalRequired": false,
+          "sourceLines": [
+            "[ ] Implement explicit preferred-harness and fallback policy."
+          ],
+          "produces": "work.verification-and-resilience-2.2",
+          "inputs": [
+            "work.verification-and-resilience-2.1"
+          ],
+          "timeoutMs": 900000
+        },
+        {
+          "id": "VERIFICATION-AND-RESILIENCE-2.3",
+          "title": "[ ] Add warnings for probes that may incur cost or external access",
+          "description": "[ ] Add warnings for probes that may incur cost or external access.",
+          "ownerAgent": "routing-policy-engineer",
+          "requiredCapabilities": [
+            "repository-tools"
+          ],
+          "dependencies": [
+            "VERIFICATION-AND-RESILIENCE-2.2"
+          ],
+          "expectedOutputs": [],
+          "validationCommands": [],
+          "approvalRequired": false,
+          "sourceLines": [
+            "[ ] Add warnings for probes that may incur cost or external access."
+          ],
+          "produces": "work.verification-and-resilience-2.3",
+          "inputs": [
+            "work.verification-and-resilience-2.2"
+          ],
+          "timeoutMs": 900000
+        }
+      ]
+    },
+    {
+      "id": "ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1",
+      "title": "Phase 1: Contract",
+      "feature": "Adapter Extensibility and Configuration",
+      "description": "- [ ] Define discovery, verification, execution, resume, and fork adapter interfaces. - [ ] Define capability observation and operation support schemas. - [ ] Add adapter conformance fixtures.",
+      "ownerAgents": [
+        "adapter-platform-engineer"
+      ],
+      "dependencies": [
+        "DISCOVERY-AND-REGISTRY-2"
+      ],
+      "approvalRequired": true,
+      "tasks": [
+        {
+          "id": "ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1.1",
+          "title": "[ ] Define discovery, verification, execution, resume, and fork adapter interfaces",
+          "description": "[ ] Define discovery, verification, execution, resume, and fork adapter interfaces.",
+          "ownerAgent": "adapter-platform-engineer",
+          "requiredCapabilities": [
+            "repository-tools"
+          ],
+          "dependencies": [],
+          "expectedOutputs": [],
+          "validationCommands": [],
+          "approvalRequired": false,
+          "sourceLines": [
+            "[ ] Define discovery, verification, execution, resume, and fork adapter interfaces."
+          ],
+          "produces": "work.adapter-extensibility-and-configuration-1.1",
+          "inputs": [],
+          "timeoutMs": 900000
+        },
+        {
+          "id": "ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1.2",
+          "title": "[ ] Define capability observation and operation support schemas",
+          "description": "[ ] Define capability observation and operation support schemas.",
+          "ownerAgent": "adapter-platform-engineer",
+          "requiredCapabilities": [
+            "repository-tools"
+          ],
+          "dependencies": [
+            "ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1.1"
+          ],
+          "expectedOutputs": [],
+          "validationCommands": [],
+          "approvalRequired": false,
+          "sourceLines": [
+            "[ ] Define capability observation and operation support schemas."
+          ],
+          "produces": "work.adapter-extensibility-and-configuration-1.2",
+          "inputs": [
+            "work.adapter-extensibility-and-configuration-1.1"
+          ],
+          "timeoutMs": 900000
+        },
+        {
+          "id": "ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1.3",
+          "title": "[ ] Add adapter conformance fixtures",
+          "description": "[ ] Add adapter conformance fixtures.",
+          "ownerAgent": "adapter-platform-engineer",
+          "requiredCapabilities": [
+            "repository-tools"
+          ],
+          "dependencies": [
+            "ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1.2"
+          ],
+          "expectedOutputs": [],
+          "validationCommands": [],
+          "approvalRequired": false,
+          "sourceLines": [
+            "[ ] Add adapter conformance fixtures."
+          ],
+          "produces": "work.adapter-extensibility-and-configuration-1.3",
+          "inputs": [
+            "work.adapter-extensibility-and-configuration-1.2"
+          ],
+          "timeoutMs": 900000
+        }
+      ]
+    },
+    {
+      "id": "ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-2",
+      "title": "Phase 2: Configuration",
+      "feature": "Adapter Extensibility and Configuration",
+      "description": "- [ ] Define configuration file and environment overrides. - [ ] Implement harness executable overrides and registry location. - [ ] Document adapter registration and testing.",
+      "ownerAgents": [
+        "adapter-platform-engineer"
+      ],
+      "dependencies": [
+        "ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1"
+      ],
+      "approvalRequired": true,
+      "tasks": [
+        {
+          "id": "ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-2.1",
+          "title": "[ ] Define configuration file and environment overrides",
+          "description": "[ ] Define configuration file and environment overrides.",
+          "ownerAgent": "adapter-platform-engineer",
+          "requiredCapabilities": [
+            "repository-tools"
+          ],
+          "dependencies": [],
+          "expectedOutputs": [],
+          "validationCommands": [],
+          "approvalRequired": false,
+          "sourceLines": [
+            "[ ] Define configuration file and environment overrides."
+          ],
+          "produces": "work.adapter-extensibility-and-configuration-2.1",
+          "inputs": [],
+          "timeoutMs": 900000
+        },
+        {
+          "id": "ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-2.2",
+          "title": "[ ] Implement harness executable overrides and registry location",
+          "description": "[ ] Implement harness executable overrides and registry location.",
+          "ownerAgent": "adapter-platform-engineer",
+          "requiredCapabilities": [
+            "repository-tools"
+          ],
+          "dependencies": [
+            "ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-2.1"
+          ],
+          "expectedOutputs": [],
+          "validationCommands": [],
+          "approvalRequired": false,
+          "sourceLines": [
+            "[ ] Implement harness executable overrides and registry location."
+          ],
+          "produces": "work.adapter-extensibility-and-configuration-2.2",
+          "inputs": [
+            "work.adapter-extensibility-and-configuration-2.1"
+          ],
+          "timeoutMs": 900000
+        },
+        {
+          "id": "ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-2.3",
+          "title": "[ ] Document adapter registration and testing",
+          "description": "[ ] Document adapter registration and testing.",
+          "ownerAgent": "adapter-platform-engineer",
+          "requiredCapabilities": [
+            "repository-tools"
+          ],
+          "dependencies": [
+            "ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-2.2"
+          ],
+          "expectedOutputs": [],
+          "validationCommands": [],
+          "approvalRequired": false,
+          "sourceLines": [
+            "[ ] Document adapter registration and testing."
+          ],
+          "produces": "work.adapter-extensibility-and-configuration-2.3",
+          "inputs": [
+            "work.adapter-extensibility-and-configuration-2.2"
+          ],
+          "timeoutMs": 900000
+        }
+      ]
+    },
+    {
+      "id": "MULTI-HARNESS-COMPOSITION-1",
+      "title": "Phase 1: Workflow Model",
+      "feature": "Multi-Harness Composition",
+      "description": "- [ ] Define workflow and stage schemas. - [ ] Define declared artifact/context handoff. - [ ] Validate dependencies and stage ordering.",
+      "ownerAgents": [
+        "workflow-composition-engineer"
+      ],
+      "dependencies": [
+        "HARNESS-EXECUTION-RUNTIME-2",
+        "ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-2"
+      ],
+      "approvalRequired": true,
+      "tasks": [
+        {
+          "id": "MULTI-HARNESS-COMPOSITION-1.1",
+          "title": "[ ] Define workflow and stage schemas",
+          "description": "[ ] Define workflow and stage schemas.",
+          "ownerAgent": "workflow-composition-engineer",
+          "requiredCapabilities": [
+            "repository-tools"
+          ],
+          "dependencies": [],
+          "expectedOutputs": [],
+          "validationCommands": [],
+          "approvalRequired": false,
+          "sourceLines": [
+            "[ ] Define workflow and stage schemas."
+          ],
+          "produces": "work.multi-harness-composition-1.1",
+          "inputs": [],
+          "timeoutMs": 900000
+        },
+        {
+          "id": "MULTI-HARNESS-COMPOSITION-1.2",
+          "title": "[ ] Define declared artifact/context handoff",
+          "description": "[ ] Define declared artifact/context handoff.",
+          "ownerAgent": "workflow-composition-engineer",
+          "requiredCapabilities": [
+            "repository-tools"
+          ],
+          "dependencies": [
+            "MULTI-HARNESS-COMPOSITION-1.1"
+          ],
+          "expectedOutputs": [],
+          "validationCommands": [],
+          "approvalRequired": false,
+          "sourceLines": [
+            "[ ] Define declared artifact/context handoff."
+          ],
+          "produces": "work.multi-harness-composition-1.2",
+          "inputs": [
+            "work.multi-harness-composition-1.1"
+          ],
+          "timeoutMs": 900000
+        },
+        {
+          "id": "MULTI-HARNESS-COMPOSITION-1.3",
+          "title": "[ ] Validate dependencies and stage ordering",
+          "description": "[ ] Validate dependencies and stage ordering.",
+          "ownerAgent": "workflow-composition-engineer",
+          "requiredCapabilities": [
+            "repository-tools"
+          ],
+          "dependencies": [
+            "MULTI-HARNESS-COMPOSITION-1.2"
+          ],
+          "expectedOutputs": [],
+          "validationCommands": [],
+          "approvalRequired": false,
+          "sourceLines": [
+            "[ ] Validate dependencies and stage ordering."
+          ],
+          "produces": "work.multi-harness-composition-1.3",
+          "inputs": [
+            "work.multi-harness-composition-1.2"
+          ],
+          "timeoutMs": 900000
+        }
+      ]
+    },
+    {
+      "id": "MULTI-HARNESS-COMPOSITION-2",
+      "title": "Phase 2: Execution and Demonstration",
+      "feature": "Multi-Harness Composition",
+      "description": "- [ ] Orchestrate sequential adapter calls. - [ ] Persist per-stage results. - [ ] Implement OpenCode-to-Copilot implementation/review example.",
+      "ownerAgents": [
+        "workflow-composition-engineer",
+        "switchyard-qa-engineer"
+      ],
+      "dependencies": [
+        "MULTI-HARNESS-COMPOSITION-1"
+      ],
+      "approvalRequired": true,
+      "tasks": [
+        {
+          "id": "MULTI-HARNESS-COMPOSITION-2.1",
+          "title": "[ ] Orchestrate sequential adapter calls",
+          "description": "[ ] Orchestrate sequential adapter calls.",
+          "ownerAgent": "workflow-composition-engineer",
+          "requiredCapabilities": [
+            "repository-tools"
+          ],
+          "dependencies": [],
+          "expectedOutputs": [],
+          "validationCommands": [],
+          "approvalRequired": false,
+          "sourceLines": [
+            "[ ] Orchestrate sequential adapter calls."
+          ],
+          "produces": "work.multi-harness-composition-2.1",
+          "inputs": [],
+          "timeoutMs": 900000
+        },
+        {
+          "id": "MULTI-HARNESS-COMPOSITION-2.2",
+          "title": "[ ] Persist per-stage results",
+          "description": "[ ] Persist per-stage results.",
+          "ownerAgent": "workflow-composition-engineer",
+          "requiredCapabilities": [
+            "repository-tools"
+          ],
+          "dependencies": [
+            "MULTI-HARNESS-COMPOSITION-2.1"
+          ],
+          "expectedOutputs": [],
+          "validationCommands": [],
+          "approvalRequired": false,
+          "sourceLines": [
+            "[ ] Persist per-stage results."
+          ],
+          "produces": "work.multi-harness-composition-2.2",
+          "inputs": [
+            "work.multi-harness-composition-2.1"
+          ],
+          "timeoutMs": 900000
+        },
+        {
+          "id": "MULTI-HARNESS-COMPOSITION-2.3",
+          "title": "[ ] Implement OpenCode-to-Copilot implementation/review example",
+          "description": "[ ] Implement OpenCode-to-Copilot implementation/review example.",
+          "ownerAgent": "workflow-composition-engineer",
+          "requiredCapabilities": [
+            "repository-tools"
+          ],
+          "dependencies": [
+            "MULTI-HARNESS-COMPOSITION-2.2"
+          ],
+          "expectedOutputs": [],
+          "validationCommands": [],
+          "approvalRequired": false,
+          "sourceLines": [
+            "[ ] Implement OpenCode-to-Copilot implementation/review example."
+          ],
+          "produces": "work.multi-harness-composition-2.3",
+          "inputs": [
+            "work.multi-harness-composition-2.2"
+          ],
+          "timeoutMs": 900000
+        },
+        {
+          "id": "MULTI-HARNESS-COMPOSITION-2.4",
+          "title": "[ ] Add partial-failure reporting",
+          "description": "[ ] Add partial-failure reporting.",
+          "ownerAgent": "switchyard-qa-engineer",
+          "requiredCapabilities": [
+            "repository-tools"
+          ],
+          "dependencies": [
+            "MULTI-HARNESS-COMPOSITION-2.3"
+          ],
+          "expectedOutputs": [],
+          "validationCommands": [],
+          "approvalRequired": false,
+          "sourceLines": [
+            "[ ] Add partial-failure reporting."
+          ],
+          "produces": "work.multi-harness-composition-2.4",
+          "inputs": [
+            "work.multi-harness-composition-2.3"
+          ],
+          "timeoutMs": 900000
+        }
+      ]
+    }
+  ],
+  "warnings": [
+    "Weak owner match for task '[ ] Implement parser fixtures for supported CLI output.' → discovery-registry-engineer",
+    "Weak owner match for task '[ ] Add human and JSON output.' → discovery-registry-engineer",
+    "Weak owner match for task '[ ] Implement all-required capability matching.' → routing-policy-engineer",
+    "Weak owner match for task '[ ] Implement human-readable explanation output.' → routing-policy-engineer",
+    "Weak owner match for task '[ ] Connect routing to adapter execution.' → execution-runtime-engineer",
+    "Weak owner match for task '[ ] Include verification state in candidate ranking.' → routing-policy-engineer",
+    "Weak owner match for task '[ ] Add warnings for probes that may incur cost or external access.' → routing-policy-engineer",
+    "Weak owner match for task '[ ] Add partial-failure reporting.' → switchyard-qa-engineer",
+    "Manifest reconciliation: 9 existing task(s) changed; review their preserved state before running."
+  ],
+  "reconciliation": {
+    "previousGeneratedAt": "2026-09-07T19:03:37.245Z",
+    "preservedTaskIds": [
+      "DISCOVERY-AND-REGISTRY-1.1",
+      "DISCOVERY-AND-REGISTRY-1.2",
+      "DISCOVERY-AND-REGISTRY-1.3",
+      "DISCOVERY-AND-REGISTRY-1.4",
+      "DISCOVERY-AND-REGISTRY-1.5",
+      "DISCOVERY-AND-REGISTRY-2.1",
+      "DISCOVERY-AND-REGISTRY-2.2",
+      "DISCOVERY-AND-REGISTRY-2.3",
+      "DISCOVERY-AND-REGISTRY-2.4",
+      "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-1.1",
+      "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-1.2",
+      "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-1.3",
+      "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-2.1",
+      "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-2.2",
+      "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-2.3",
+      "HARNESS-EXECUTION-RUNTIME-1.1",
+      "HARNESS-EXECUTION-RUNTIME-1.2",
+      "HARNESS-EXECUTION-RUNTIME-1.3",
+      "HARNESS-EXECUTION-RUNTIME-1.4",
+      "HARNESS-EXECUTION-RUNTIME-2.1",
+      "HARNESS-EXECUTION-RUNTIME-2.2",
+      "HARNESS-EXECUTION-RUNTIME-2.3",
+      "HARNESS-EXECUTION-RUNTIME-2.4",
+      "VERIFICATION-AND-RESILIENCE-1.1",
+      "VERIFICATION-AND-RESILIENCE-1.2",
+      "VERIFICATION-AND-RESILIENCE-1.3",
+      "VERIFICATION-AND-RESILIENCE-2.1",
+      "VERIFICATION-AND-RESILIENCE-2.2",
+      "VERIFICATION-AND-RESILIENCE-2.3",
+      "ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1.1",
+      "ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1.2",
+      "ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1.3",
+      "ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-2.1",
+      "ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-2.2",
+      "ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-2.3",
+      "MULTI-HARNESS-COMPOSITION-1.1",
+      "MULTI-HARNESS-COMPOSITION-1.2",
+      "MULTI-HARNESS-COMPOSITION-1.3",
+      "MULTI-HARNESS-COMPOSITION-2.1",
+      "MULTI-HARNESS-COMPOSITION-2.2",
+      "MULTI-HARNESS-COMPOSITION-2.3",
+      "MULTI-HARNESS-COMPOSITION-2.4"
+    ],
+    "newTaskIds": [],
+    "removedTaskIds": [],
+    "changedTaskIds": [
+      "DISCOVERY-AND-REGISTRY-2.4",
+      "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-2.1",
+      "HARNESS-EXECUTION-RUNTIME-1.2",
+      "HARNESS-EXECUTION-RUNTIME-2.1",
+      "HARNESS-EXECUTION-RUNTIME-2.3",
+      "VERIFICATION-AND-RESILIENCE-1.2",
+      "VERIFICATION-AND-RESILIENCE-1.3",
+      "MULTI-HARNESS-COMPOSITION-2.2",
+      "MULTI-HARNESS-COMPOSITION-2.4"
+    ]
+  },
+  "responsibilityMatrixPath": "/home/mcfuzzysquirrel/Projects/switchyard/docs/agent-responsibility-matrix.md"
+}

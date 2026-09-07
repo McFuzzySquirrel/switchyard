@@ -12,6 +12,37 @@ All notable user-facing changes to Switchyard are documented here. The format fo
 
 ### Added
 
+- Added the full, execute-capable `HarnessAdapter` contract with a shared
+  `UnsupportedOperationError`/`assertOperationSupported`/
+  `throwUnsupportedOperation` mechanism so every adapter fails an
+  unsupported operation before any process launch, without adapter-specific
+  branching.
+- Added `HarnessAdapterRegistry` and explicit built-in `opencode`/`copilot`
+  full adapters (`createOpenCodeAdapter`, `createGitHubCopilotAdapter`) that
+  bind their resolved configuration once so discovery, verification,
+  execution, resume, and fork all observe the same executable.
+- Added `createStubHarnessAdapter`, a reusable conformance fixture
+  implementing the full adapter contract without a vendor process, and an
+  adapter-conformance test suite proving registration and fail-fast
+  behavior require no matcher changes.
+- Added a typed local configuration schema (`SwitchyardConfig`) covering
+  registry location, default and per-harness probe policy, and per-harness
+  executable overrides, with actionable, secret-safe field diagnostics on
+  invalid input.
+- Added configuration file loading (`loadSwitchyardConfig`,
+  `readSwitchyardConfig`, `resolveConfigPath`, `defaultConfigPath`,
+  `SWITCHYARD_CONFIG_PATH`) and per-field precedence resolution
+  (`resolveHarnessRuntimeConfig`, `resolveEffectiveRegistryPath`) applying
+  explicit-override > environment-variable > configuration-file > default
+  consistently across executable, timeout, output-length, mutating-probe
+  policy, and registry-path fields.
+- Added `docs/adapter-development.md` covering adapter lifecycle,
+  registration, testing, error handling, and security expectations, and
+  ADR-0002 recording the adapter contract and configuration precedence
+  design.
+
+### Added
+
 - Initial discovery schemas, executable lookup, bounded version/help probing, and built-in OpenCode and GitHub Copilot CLI discovery adapters.
 - Added the versioned `TaskRequirements` schema with normalized capability, preferred harness, fallback, and validation contracts.
 - Added validated local registry reads and atomic, interruption-resilient JSON writes with user-only file permissions.

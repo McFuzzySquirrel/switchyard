@@ -1,9 +1,9 @@
 # Project Progress
 
 ## Current State
-**Phase**: DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-1
+**Phase**: ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1
 **Status**: In Progress
-**Last Updated**: 2026-09-07T20:11:53.955Z
+**Last Updated**: 2026-09-07T20:29:08.272Z
 **Run ID**: faef066b-e967-49ae-ba56-4dbe4255f89d
 **Harness**: copilot
 **Execution Mode**: auto
@@ -29,6 +29,8 @@
   - Files: CHANGELOG.md, src/cli.ts, src/commands/capabilities.ts, src/commands/discover.ts, tests/commands.test.mjs
 - [x] Phase DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-1, Task DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-1.1: [ ] Define requirement schema and validation (@switchyard-qa-engineer)
   - Files: CHANGELOG.md, README.md, src/discovery/registry.ts, src/discovery/schema.ts, tests/discovery-schema.test.mjs
+- [x] Phase ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1, Task ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1.1: [ ] Define discovery, verification, execution, resume, and fork adapter interfaces (@adapter-platform-engineer)
+  - Files: CHANGELOG.md, README.md, src/config/index.ts, src/harness/adapter.ts, src/harness/copilot.ts, src/harness/discovery-adapter.ts, src/harness/index.ts, src/harness/opencode.ts, docs/adapter-development.md, docs/adr/0002-adapter-contract-and-typed-configuration.md, src/config/loader.ts, src/config/resolve.ts, src/config/schema.ts, src/harness/adapter-registry.ts, src/harness/stub.ts, tests/adapter-conformance.test.mjs, tests/harness-config.test.mjs
 
 ## Current Task
 - None currently running

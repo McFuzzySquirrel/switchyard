@@ -1,12 +1,12 @@
 {
   "runId": "faef066b-e967-49ae-ba56-4dbe4255f89d",
   "startedAt": "2026-09-07T19:10:17.558Z",
-  "lastUpdatedAt": "2026-09-07T20:11:53.955Z",
+  "lastUpdatedAt": "2026-09-07T20:29:08.271Z",
   "manifestPath": "/home/mcfuzzysquirrel/Projects/switchyard/docs/EXECUTION-MANIFEST.json",
   "manifestVersion": "1.0",
   "harness": "copilot",
   "status": "running",
-  "currentPhase": "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-1",
+  "currentPhase": "ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1",
   "tasks": {
     "DISCOVERY-AND-REGISTRY-1.1": {
       "taskId": "DISCOVERY-AND-REGISTRY-1.1",
@@ -348,10 +348,32 @@
     },
     "ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1.1": {
       "taskId": "ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1.1",
-      "status": "pending",
+      "status": "complete",
       "ownerAgent": "adapter-platform-engineer",
-      "attempt": 0,
-      "outputFiles": []
+      "attempt": 2,
+      "outputFiles": [
+        "CHANGELOG.md",
+        "README.md",
+        "src/config/index.ts",
+        "src/harness/adapter.ts",
+        "src/harness/copilot.ts",
+        "src/harness/discovery-adapter.ts",
+        "src/harness/index.ts",
+        "src/harness/opencode.ts",
+        "docs/adapter-development.md",
+        "docs/adr/0002-adapter-contract-and-typed-configuration.md",
+        "src/config/loader.ts",
+        "src/config/resolve.ts",
+        "src/config/schema.ts",
+        "src/harness/adapter-registry.ts",
+        "src/harness/stub.ts",
+        "tests/adapter-conformance.test.mjs",
+        "tests/harness-config.test.mjs"
+      ],
+      "startedAt": "2026-09-07T20:26:59.084Z",
+      "completedAt": "2026-09-07T20:29:08.271Z",
+      "agentOutput": "✗ Adapter-platform-engineer Executing task\n  └ \"description\": Required\n\n● Adapter-platform-engineer (model: gpt-5.6-luna) Define adapter interfaces                   1m 26s\n  │ Implemented the adapter contract and supporting extensibility surface.\n  │ Re-run typecheck and whitespace validation (shell)\n  │   │ npm run typecheck && git diff --check\n  │   └ 3 lines…\n  └ List changed files (shell)\n      │ git status --short\n      └ 20 lines…\n\nI’m reviewing the implementation and repository diff to confirm the requested contracts are present, scoped correctly, and validated against the current codebase.\n\n/ Search (glob)\n  │ \"src/**/*adapter*\"\n  └ 3 files found\n\n/ Search (grep)\n  │ \"(DiscoveryAdapter|VerificationAdapter|ExecutionAdapter|ResumeAdapter|ForkAdapter|interface\n  │ HarnessAdapter)\" in **/*.{ts,md}\n  └ 84 lines found\n\n● Inspect adapter changes (shell)\n  │ git status --short && git diff --stat && git diff -- src/harness/adapter.ts\n  └ 169 lines…\n\n● Read adapter.ts\n  │ src/harness/adapter.ts\n  └ 184 lines read\n\n● Read index.ts\n  │ src/harness/index.ts\n  └ 7 lines read\n\n● Read discovery-adapter.ts\n  │ src/harness/discovery-adapter.ts\n  └ L1:90 (90 lines read)\n\n● Read adapter-registry.ts\n  │ src/harness/adapter-registry.ts\n  └ 69 lines read\n\n● Read package.json\n  └ 31 lines read\n\n● Read opencode.ts\n  │ src/harness/opencode.ts\n  └ L1:180 (106 lines read)\n\n● Read copilot.ts\n  │ src/harness/copilot.ts\n  └ L1:180 (101 lines read)\n\n● Read stub.ts\n  │ src/harness/stub.ts\n  └ L1:220 (154 lines read)\n\n● Read tsconfig.json\n  └ 13 lines read\n\nThe requested interfaces are now exported and composed into the full adapter contract, with fail-fast unsupported-operation behavior and documentation in place. I’m running the repository’s required checks before finalizing.\n\n● Check diff whitespace (shell)\n  │ git diff --check\n  └ 1 line…\n\n● Run documentation checks (shell)\n  │ npm run test:docs\n  └ 26 lines…\n\n● Run TypeScript checks (shell)\n  │ npm run typecheck\n  └ 3 lines…\n\n● Run project tests (shell)\n  │ npm test\n  └ 362 lines…\n\n● List final changed files (shell)\n  │ git status --short\n  └ 20 lines…\n\nImplemented the adapter interface layer for discovery, verification, execution, resume, and fork operations.\n\n**Core changes**\n- Added `DiscoveryAdapter`, `VerificationAdapter`, `ExecutionAdapter`, `ResumeAdapter`, and `ForkAdapter`.\n- Composed them into the complete `HarnessAdapter` contract.\n- Added shared operation support declarations and fail-fast `UnsupportedOperationError` handling.\n- Added explicit full-adapter registration and reusable conformance stubs.\n- Updated built-in OpenCode and Copilot adapters to implement the complete contract while accurately declaring discovery-only support.\n\n**Files created or changed**\n- `src/harness/adapter.ts`\n- `src/harness/adapter-registry.ts`\n- `src/harness/stub.ts`\n- `src/harness/index.ts`\n- `src/harness/opencode.ts`\n- `src/harness/copilot.ts`\n- `src/harness/discovery-adapter.ts`\n- `src/config/index.ts`\n- `src/config/loader.ts`\n- `src/config/resolve.ts`\n- `src/config/schema.ts`\n- `tests/adapter-conformance.test.mjs`\n- `tests/harness-config.test.mjs`\n- `docs/adapter-development.md`\n- `docs/adr/0002-adapter-contract-and-typed-configuration.md`\n- `README.md`\n- `CHANGELOG.md`\n- `docs/EXECUTION-AUDIT.jsonl`\n- `docs/WORKFLOW-STATE.json`\n\nAll tests, type checks, documentation checks, and diff validation pass.\n\n",
+      "artifactId": "work-adapter-extensibility-and-configuration-1-1-001"
     },
     "ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1.2": {
       "taskId": "ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1.2",

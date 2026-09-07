@@ -6,7 +6,7 @@ The product direction is described in [`docs/PRD.md`](docs/PRD.md). The library 
 
 ## Current status
 
-The current completed slice covers discovery schemas, executable lookup, bounded version/help probing, built-in discovery adapters, atomic local registry persistence, refreshable registry profiles, and the `discover` and `capabilities` commands. Execution, routing, verification, and composition remain roadmap items.
+The current completed slice covers discovery schemas, executable lookup, bounded version/help probing, built-in discovery adapters, atomic local registry persistence, refreshable registry profiles, the `discover` and `capabilities` commands, the full vendor-neutral `HarnessAdapter` contract with explicit registration, and typed local configuration with environment/executable/registry/probe-policy precedence. Routing, real harness execution/verification, and composition remain roadmap items — built-in adapters currently support `discover` only and fail fast on other operations.
 
 ## Development
 
@@ -66,6 +66,28 @@ duplicates. `preferredHarness` must be a lowercase harness identifier, and
 `assertTaskRequirements`; the schema version is optional for compatibility with
 the original PRD interface.
 
+## Adapters and configuration
+
+`HarnessAdapter` (`src/harness/adapter.ts`) is the vendor-neutral contract for
+discovery, verification, execution, resume, and fork. Built-in `opencode` and
+`copilot` adapters are registered explicitly through `HarnessAdapterRegistry`
+(`src/harness/adapter-registry.ts`); they currently support `discover` only,
+and every other operation rejects with `UnsupportedOperationError` before any
+process is launched. A reusable `createStubHarnessAdapter` fixture
+(`src/harness/stub.ts`) implements the full contract for conformance and
+integration testing without a real vendor binary.
+
+Executable location, probe timeout, maximum probe output length, the
+mutating-probe policy flag, and the registry path all resolve through the same
+precedence: an explicit call-time value, then an environment variable, then a
+typed local configuration file, then a built-in default. See
+[`docs/adapter-development.md`](docs/adapter-development.md) for the full
+precedence table, the adapter lifecycle, registration, testing, error
+handling, and security expectations, and
+[`docs/adr/0002-adapter-contract-and-typed-configuration.md`](docs/adr/0002-adapter-contract-and-typed-configuration.md)
+for the design rationale. Configuration diagnostics always identify the
+adapter and field path and never echo the submitted value.
+
 ## Repository layout
 
 | Path | Purpose |
@@ -73,6 +95,7 @@ the original PRD interface.
 | `src/` | TypeScript library and harness contracts |
 | `tests/` | Node test-runner tests and discovery fixtures |
 | `docs/PRD.md` | Product requirements and roadmap |
+| `docs/adapter-development.md` | Adapter lifecycle, registration, testing, errors, and security |
 | `docs/` | Product, execution, and workflow documentation |
 | `docs/adr/` | Architecture decision records |
 | `docs/templates/` | Starting structures for maintained documents |

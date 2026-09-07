@@ -18,7 +18,10 @@ import {
   type HarnessDiagnostic,
   type HarnessProfile,
 } from "../discovery/schema.ts";
-import type { AdapterOperationSupport } from "./adapter.ts";
+import {
+  DISCOVERY_ONLY_OPERATIONS,
+  type AdapterOperationSupport,
+} from "./adapter.ts";
 
 /**
  * Options shared by all discovery adapters. `executable` is an explicit
@@ -66,14 +69,6 @@ export interface HarnessDiscoveryAdapterDefinition {
    */
   readonly supportedOperations?: AdapterOperationSupport;
 }
-
-const DISCOVERY_ONLY_OPERATIONS: AdapterOperationSupport = Object.freeze({
-  discover: true,
-  verify: false,
-  execute: false,
-  resume: false,
-  fork: false,
-});
 
 function observedCapabilities(
   capabilities: readonly CapabilityName[],

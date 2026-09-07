@@ -1,0 +1,36 @@
+{
+  "type": "work.adapter-extensibility-and-configuration-1.1",
+  "category": "work",
+  "taskId": "ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1.1",
+  "producedBy": "adapter-platform-engineer",
+  "status": "complete",
+  "summary": "[ ] Define discovery, verification, execution, resume, and fork adapter interfaces: [ ] Define discovery, verification, execution, resume, and fork adapter interfaces.",
+  "confidence": 0.9,
+  "inputs": [],
+  "filesChanged": [
+    "CHANGELOG.md",
+    "README.md",
+    "src/config/index.ts",
+    "src/harness/adapter.ts",
+    "src/harness/copilot.ts",
+    "src/harness/discovery-adapter.ts",
+    "src/harness/index.ts",
+    "src/harness/opencode.ts",
+    "docs/adapter-development.md",
+    "docs/adr/0002-adapter-contract-and-typed-configuration.md",
+    "src/config/loader.ts",
+    "src/config/resolve.ts",
+    "src/config/schema.ts",
+    "src/harness/adapter-registry.ts",
+    "src/harness/stub.ts",
+    "tests/adapter-conformance.test.mjs",
+    "tests/harness-config.test.mjs"
+  ],
+  "payload": {
+    "agentOutputExcerpt": "✗ Adapter-platform-engineer Executing task\n  └ \"description\": Required\n\n● Adapter-platform-engineer (model: gpt-5.6-luna) Define adapter interfaces                   1m 26s\n  │ Implemented the adapter contract and supporting extensibility surface.\n  │ Re-run typecheck and whitespace validation (shell)\n  │   │ npm run typecheck && git diff --check\n  │   └ 3 lines…\n  └ List changed files (shell)\n      │ git status --short\n      └ 20 lines…\n\nI’m reviewing the implementation and repository diff to c",
+    "taskDescription": "[ ] Define discovery, verification, execution, resume, and fork adapter interfaces."
+  },
+  "nextActions": [],
+  "artifactId": "work-adapter-extensibility-and-configuration-1-1-001",
+  "createdAt": "2026-09-07T20:29:08.271Z"
+}

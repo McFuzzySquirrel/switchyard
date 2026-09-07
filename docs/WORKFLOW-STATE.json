@@ -1,7 +1,7 @@
 {
   "runId": "faef066b-e967-49ae-ba56-4dbe4255f89d",
   "startedAt": "2026-09-07T19:10:17.558Z",
-  "lastUpdatedAt": "2026-09-07T22:02:33.775Z",
+  "lastUpdatedAt": "2026-09-07T22:04:24.035Z",
   "manifestPath": "/home/mcfuzzysquirrel/Projects/switchyard/docs/EXECUTION-MANIFEST.json",
   "manifestVersion": "1.0",
   "harness": "copilot",
@@ -462,10 +462,21 @@
     },
     "HARNESS-EXECUTION-RUNTIME-2.4": {
       "taskId": "HARNESS-EXECUTION-RUNTIME-2.4",
-      "status": "pending",
+      "status": "complete",
       "ownerAgent": "execution-runtime-engineer",
-      "attempt": 0,
-      "outputFiles": []
+      "attempt": 1,
+      "outputFiles": [
+        "src/harness/process.ts",
+        "tests/process-execution.test.mjs",
+        "tests/run-command.test.mjs"
+      ],
+      "startedAt": "2026-09-07T22:02:33.802Z",
+      "completedAt": "2026-09-07T22:04:24.035Z",
+      "agentOutput": "● codegraph_explore (MCP: codegraph) · dry-run execution runtime run command subprocess options tes…\n  └ The project at /home/mcfuzzysquirrel/Projects/switchyard isn't indexed with c...\n\nI’m tracing the existing run-command and execution paths first so dry-run is added at the shared runtime boundary and preserves the established result contract.\n\n● Read package.json\n  └ 33 lines read\n\n● Read CHANGELOG.md\n  └ L1:80 (80 lines read)\n\n/ Search (glob)\n  │ \"src/**/*.ts\"\n  └ 58 files found\n\n/ Search (glob)\n  │ \"tests/**/*\"\n  └ 17 files found\n\n/ Search (grep)\n  │ \"run|execute|spawn|dry\" in **/*.{ts,mjs} (src)\n  └ 252 lines found\n\n● Read run.ts\n  │ src/commands/run.ts\n  └ 390 lines read\n\n● Read process.ts\n  │ src/harness/process.ts\n  └ 313 lines read\n\n● Read run-command.test.mjs\n  │ tests/run-command.test.mjs\n  └ 512 lines read\n\n● Read cli.ts\n  │ src/cli.ts\n  └ L1:260 (260 lines read)\n\n● Inspect worktree and recent commits (shell)\n  │ git status --short && git log -3 --oneline\n  └ 6 lines…\n\n● Read stub.ts\n  │ src/harness/stub.ts\n  └ 165 lines read\n\n● Read process-execution.test.mjs\n  │ tests/process-execution.test.mjs\n  └ 149 lines read\n\n● Read exit-codes.ts\n  │ src/output/exit-codes.ts\n  └ 56 lines read\n\n● Read adapter.ts\n  │ src/harness/adapter.ts\n  └ L1:220 (220 lines read)\n\n● Read cli.ts\n  │ src/cli.ts\n  └ L260:560 (301 lines read)\n\n● Read opencode.ts\n  │ src/harness/opencode.ts\n  └ 106 lines read\n\n● Read index.ts\n  │ src/harness/index.ts\n  └ 8 lines read\n\n● Read copilot.ts\n  │ src/harness/copilot.ts\n  └ 101 lines read\n\n/ Search (grep)\n  │ \"dry-run|dryRun\" in **/* (docs)\n  └ 43 lines found\n\n● Find existing dry-run commits (shell)\n  │ git log --all --oneline --decorate --grep='dry-run' -10\n  └ 1 line…\n\nThe repository already contains a partial dry-run path from the prior runtime work. I’m validating its boundary behavior now and will tighten any gap between the documented requirement (“never launches the selected task”) and the actual CLI/runtime contract rather than duplicating it.\n\n● Run tests, typecheck, and documentation checks (shell)\n  │ npm test && npm run typecheck && npm run test:docs\n  └ 23 lines…\n\n● Inspect validation result summary (shell)\n  │ tail -n 40\n  │ /tmp/1788818588480-copilot-tool-output-128373-7ec146f8-d9a0-421c-8622-f47c9bd6ebb5.txt\n  └ 41 lines…\n\n● Read 0004-execution-request-result-contract.md\n  │ docs/adr/0004-execution-request-result-contract.md\n  └ L1:140 (55 lines read)\n\n● Read harness-execution-runtime.md\n  │ docs/features/harness-execution-runtime.md\n  └ L1:180 (136 lines read)\n\n● Read PRD.md\n  │ docs/PRD.md\n  └ L120:170 (51 lines read)\n\n● Inspect prior runtime commit scope (shell)\n  │ git show --stat --oneline 6e31ab5 && git show --format= --name-only 6e31ab5 | sed -n '1,80p'\n  └ 17 lines…\n\n● Trace dry-run implementation history (shell)\n  │ git log --oneline --all -- src/commands/run.ts src/harness/process.ts | head -10 && git show\n  │ --stat --oneline HEAD~1\n  └ 22 lines…\n\n/ Search (grep)\n  │ \"dry-run|dry run|no-match\" (docs/PRD.md)\n  └ 15 lines found\n\n/ Search (grep)\n  │ \"dry-run|dry run\" (README.md)\n  └ 23 lines found\n\n● Read EXECUTION-MANIFEST.json\n  │ docs/EXECUTION-MANIFEST.json\n  └ L1:180 (180 lines read)\n\nThe existing path satisfies the core routing guarantee, so I’m making the non-launching boundary explicit in the process runner as well: dry-run exits before any execution-limit setup, then I’ll add coverage for both direct process calls and a missing selected adapter.\n\n● Edit\n  │ Edit src/harness/process.ts\n  │ Edit tests/process-execution.test.mjs\n  └ Edit tests/run-command.test.mjs\n\n● Validate dry-run changes and worktree (shell)\n  │ npm test && npm run typecheck && npm run test:docs && git diff --check && git status --short\n  └ 23 lines…\n\n● Confirm validation completed successfully (shell)\n  │ tail -n 45\n  │ /tmp/1788818652895-copilot-tool-output-128373-e26eb680-8214-47e8-8629-8ecd88457c95.txt\n  └ 46 lines…\n\nImplemented dry-run mode hardening.\n\n**Changed:**\n- `src/harness/process.ts` — dry-run requests now return before any execution-limit setup or process launch.\n- `tests/process-execution.test.mjs` — verifies dry-run bypasses invalid timeout/output settings.\n- `tests/run-command.test.mjs` — verifies dry-run previews selections even when no adapter is installed, without resolving or invoking one.\n\nAll tests, type checks, documentation checks, and whitespace validation pass.\n\n",
+      "artifactId": "work-harness-execution-runtime-2-4-001",
+      "inputArtifactIds": [
+        "work-harness-execution-runtime-2-3-001"
+      ]
     },
     "VERIFICATION-AND-RESILIENCE-1.1": {
       "taskId": "VERIFICATION-AND-RESILIENCE-1.1",

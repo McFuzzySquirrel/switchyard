@@ -3,7 +3,7 @@
 ## Current State
 **Phase**: HARNESS-EXECUTION-RUNTIME-2
 **Status**: In Progress
-**Last Updated**: 2026-09-07T22:02:33.777Z
+**Last Updated**: 2026-09-07T22:04:24.037Z
 **Run ID**: faef066b-e967-49ae-ba56-4dbe4255f89d
 **Harness**: copilot
 **Execution Mode**: auto
@@ -53,6 +53,8 @@
   - Files: CHANGELOG.md, README.md, src/cli.ts, src/output/index.ts, tests/commands.test.mjs, src/output/exit-codes.ts
 - [x] Phase HARNESS-EXECUTION-RUNTIME-2, Task HARNESS-EXECUTION-RUNTIME-2.3: [ ] Add human/JSON result serializers (@execution-runtime-engineer)
   - Files: CHANGELOG.md, src/commands/run.ts, tests/run-command.test.mjs
+- [x] Phase HARNESS-EXECUTION-RUNTIME-2, Task HARNESS-EXECUTION-RUNTIME-2.4: [ ] Add dry-run mode (@execution-runtime-engineer)
+  - Files: src/harness/process.ts, tests/process-execution.test.mjs, tests/run-command.test.mjs
 - [x] Phase VERIFICATION-AND-RESILIENCE-1, Task VERIFICATION-AND-RESILIENCE-1.1: [ ] Define read-only and mutating probe policies (@verification-resilience-engineer)
   - Files: CHANGELOG.md, docs/features/verification-and-resilience.md, package.json, src/config/resolve.ts, src/config/schema.ts, src/harness/adapter.ts, src/index.ts, src/verification/index.ts, src/verification/policy.ts, src/verification/runner.ts, tests/verification-policy.test.mjs
 - [x] Phase VERIFICATION-AND-RESILIENCE-1, Task VERIFICATION-AND-RESILIENCE-1.2: [ ] Add verification result schema and timestamps (@verification-resilience-engineer)
@@ -82,7 +84,6 @@
 - None currently running
 
 ## Remaining
-- [ ] Phase HARNESS-EXECUTION-RUNTIME-2: Phase 2: CLI Integration
 - [ ] Phase MULTI-HARNESS-COMPOSITION-1: Phase 1: Workflow Model
 - [ ] Phase MULTI-HARNESS-COMPOSITION-2: Phase 2: Execution and Demonstration
 

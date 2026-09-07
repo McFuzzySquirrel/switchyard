@@ -109,7 +109,12 @@ test("executeProcess distinguishes nonzero exit, timeout, cancellation, and dry 
   const dryRun = await runProcess({
     executable: fail,
     args: [],
-    request: { task: "dry", dryRun: true },
+    request: {
+      task: "dry",
+      dryRun: true,
+      maxOutputLength: Number.NaN,
+      timeoutMs: Number.NaN,
+    },
   });
   assert.equal(dryRun.status, "dry-run");
   assert.equal(dryRun.exitCode, null);

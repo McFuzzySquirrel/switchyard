@@ -203,6 +203,24 @@ test("run reports unavailable when the selected harness has no registered adapte
   assert.match(result.execution.error, /not registered for execution/);
 });
 
+test("run --dry-run previews an unavailable selection without resolving an adapter", async (t) => {
+  const registryPath = await withRegistry(t);
+
+  const result = await run({
+    registryPath,
+    requirements: { requires: ["headless"] },
+    task: "preview without an installed harness",
+    adapters: [],
+    dryRun: true,
+    now: fixedClock,
+  });
+
+  assert.equal(result.status, "dry-run");
+  assert.equal(result.selectedHarness, "fixture");
+  assert.equal(result.execution.status, "dry-run");
+  assert.equal(result.execution.failureCategory, "none");
+});
+
 test("run rejects launching an adapter that has not declared execute support", async (t) => {
   const registryPath = await withRegistry(t);
   const stub = createStubHarnessAdapter({

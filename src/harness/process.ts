@@ -136,7 +136,6 @@ async function terminateProcessTree(
 }
 
 function resultForNonLaunch(
-  request: ExecutionRequest,
   status: "cancelled" | "dry-run",
   durationMs: number,
 ): ExecutionResult {
@@ -165,17 +164,19 @@ export async function executeProcess(
   request: ExecutionRequest,
 ): Promise<ExecutionResult> {
   const startedAt = performance.now();
+  // A preview must not perform any process setup or inspect launch controls.
+  if (request.dryRun === true) {
+    return resultForNonLaunch("dry-run", Math.round(performance.now() - startedAt));
+  }
+
   const maxOutputLength = nonNegativeLimit(
     request.maxOutputLength,
     DEFAULT_EXECUTION_MAX_OUTPUT_LENGTH,
   );
   const timeoutMs = positiveLimit(request.timeoutMs, DEFAULT_EXECUTION_TIMEOUT_MS);
 
-  if (request.dryRun === true) {
-    return resultForNonLaunch(request, "dry-run", Math.round(performance.now() - startedAt));
-  }
   if (request.signal?.aborted) {
-    return resultForNonLaunch(request, "cancelled", Math.round(performance.now() - startedAt));
+    return resultForNonLaunch("cancelled", Math.round(performance.now() - startedAt));
   }
 
   return new Promise<ExecutionResult>((resolve) => {

@@ -1,12 +1,12 @@
 {
   "runId": "faef066b-e967-49ae-ba56-4dbe4255f89d",
   "startedAt": "2026-09-07T19:10:17.558Z",
-  "lastUpdatedAt": "2026-09-07T20:32:48.068Z",
+  "lastUpdatedAt": "2026-09-07T20:37:50.394Z",
   "manifestPath": "/home/mcfuzzysquirrel/Projects/switchyard/docs/EXECUTION-MANIFEST.json",
   "manifestVersion": "1.0",
   "harness": "copilot",
   "status": "running",
-  "currentPhase": "ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1",
+  "currentPhase": "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-1",
   "tasks": {
     "DISCOVERY-AND-REGISTRY-1.1": {
       "taskId": "DISCOVERY-AND-REGISTRY-1.1",
@@ -235,10 +235,22 @@
     },
     "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-1.3": {
       "taskId": "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-1.3",
-      "status": "pending",
+      "status": "complete",
       "ownerAgent": "routing-policy-engineer",
-      "attempt": 0,
-      "outputFiles": []
+      "attempt": 1,
+      "outputFiles": [
+        "CHANGELOG.md",
+        "README.md",
+        "src/capabilities/matcher.ts",
+        "tests/capability-matcher.test.mjs"
+      ],
+      "startedAt": "2026-09-07T20:32:48.094Z",
+      "completedAt": "2026-09-07T20:37:50.394Z",
+      "agentOutput": "● Routing-policy-engineer (model: gpt-5.6-luna) Implement deterministic tie-breaking          4m 16s\n  │ Implemented deterministic capability tie-breaking and ranking.\n  │ Search (grep)\n  │   │ \"duplicate.*harness|harnesses.*duplicate|profile.id\" (src/discovery/schema.ts)\n  │   └ 7 lines found\n  └ Summarize final changes and verify clean diff formatting (shell)\n      │ git diff --stat && git diff --check && git status --short\n      └ 14 lines…\n\n/ Search (grep)\n  │ \"rankCapabilityMatches|selectBestCapabilityMatch|verificationTier|rankingKey\" (src, tests)\n  └ 17 lines found\n\n● Review routing changes (shell)\n  │ git status --short && git diff --stat && git diff -- src/capabilities/matcher.ts\n  │ tests/capability-matcher.test.mjs README.md CHANGELOG.md\n  └ 262 lines…\n\n● Read schema.ts\n  │ src/discovery/schema.ts\n  └ 1 line read\n\n● Read matcher.ts\n  │ src/capabilities/matcher.ts\n  └ 158 lines read\n\n● Read index.ts\n  │ src/capabilities/index.ts\n  └ 2 lines read\n\n● Read index.ts\n  │ src/index.ts\n  └ 6 lines read\n\n● Run project validation (shell)\n  │ git diff --check && npm test && npm run typecheck && npm run test:docs\n  └ 428 lines…\n\n/ Search (grep)\n  │ \"interface HarnessProfile|type HarnessProfile|lifecycle|status:|verification\"\n  │ (src/discovery/schema.ts)\n  └ 151 lines found\n\n/ Search (grep)\n  │ \"deterministic tie|tie-break|ranking|verified.*discovered|stable harness\" (docs, README.md,\n  │ CHANGELOG.md, src, tests)\n  └ 62 lines found\n\nThe implementation is present and passes the project checks. I found one documentation contradiction: the README still lists deterministic ranking as roadmap work, so I’m correcting that before finalizing.\n\n● Edit\n  └ Edit README.md\n\n● List changed files (shell)\n  │ git status --short\n  └ 7 lines…\n\n● Validate documentation and diff (shell)\n  │ npm run test:docs && git diff --check\n  └ 26 lines…\n\nImplemented deterministic capability tie-breaking.\n\n**Changed files:**\n- `src/capabilities/matcher.ts` — added verification-aware ranking and stable harness-ID tie-breaking.\n- `tests/capability-matcher.test.mjs` — added ranking, tie-breaking, lifecycle, and input-order coverage.\n- `README.md` — documented the completed deterministic ranking behavior and corrected roadmap text.\n- `CHANGELOG.md` — added the Unreleased entry.\n\nExisting modifications to `docs/EXECUTION-AUDIT.jsonl` and `docs/WORKFLOW-STATE.json` were preserved.\n\n",
+      "artifactId": "work-deterministic-routing-and-explainability-1-3-001",
+      "inputArtifactIds": [
+        "work-deterministic-routing-and-explainability-1-2-001"
+      ]
     },
     "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-2.1": {
       "taskId": "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-2.1",

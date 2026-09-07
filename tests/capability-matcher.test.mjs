@@ -5,6 +5,8 @@ import {
   matchCapabilities,
   matchRequiredCapabilities,
   matchesRequiredCapabilities,
+  rankCapabilityMatches,
+  selectBestCapabilityMatch,
 } from "../src/index.ts";
 
 function observation(capability, discoveryStatus = "observed") {
@@ -73,4 +75,90 @@ test("does not treat verification or non-observed discovery as capability eviden
   assert.deepEqual(result.matched, []);
   assert.deepEqual(result.missing, ["mcp"]);
   assert.equal(result.qualifies, false);
+});
+
+test("ranks qualifying candidates deterministically across capability and verification states", () => {
+  const makeProfile = (id, verification = "not-requested", discoveryStatus = "observed") => ({
+    id,
+    capabilities: [{
+      ...observation("headless", discoveryStatus),
+      verification: { status: verification },
+    }],
+  });
+  const cases = [
+    {
+      name: "verified full match outranks discovered full match",
+      profiles: [makeProfile("discovered"), makeProfile("verified", "passed")],
+      expected: ["verified", "discovered"],
+    },
+    {
+      name: "equal matches use harness id rather than input order",
+      profiles: [makeProfile("zeta"), makeProfile("alpha")],
+      expected: ["alpha", "zeta"],
+    },
+    {
+      name: "missing capabilities are excluded",
+      profiles: [
+        makeProfile("complete"),
+        {
+          id: "incomplete",
+          capabilities: [observation("mcp")],
+        },
+      ],
+      expected: ["complete"],
+    },
+    {
+      name: "mixed verification states remain discovered until every requirement is verified",
+      profiles: [{
+        id: "mixed",
+        capabilities: [
+          { ...observation("headless"), verification: { status: "passed" } },
+          { ...observation("mcp"), verification: { status: "failed" } },
+        ],
+      }],
+      expected: ["mixed"],
+    },
+    {
+      name: "stale or discovery-only lifecycle profiles are never presented as verified",
+      profiles: [
+        {
+          ...makeProfile("stale", "passed"),
+          status: "stale",
+        },
+        {
+          ...makeProfile("discovery-only", "passed"),
+          lifecycle: "discovered",
+        },
+        makeProfile("verified", "passed"),
+      ],
+      expected: ["verified", "discovery-only", "stale"],
+    },
+    {
+      name: "no-match produces no candidates",
+      profiles: [makeProfile("missing", "passed", "not-observed")],
+      expected: [],
+    },
+  ];
+
+  for (const scenario of cases) {
+    const ranked = rankCapabilityMatches(
+      scenario.profiles,
+      { requires: scenario.name.includes("mixed") ? ["headless", "mcp"] : ["headless"] },
+    );
+    assert.deepEqual(
+      ranked.map((candidate) => candidate.harnessId),
+      scenario.expected,
+      scenario.name,
+    );
+  }
+
+  const profiles = [makeProfile("zeta"), makeProfile("alpha")];
+  assert.equal(
+    selectBestCapabilityMatch(profiles, { requires: ["headless"] })?.harnessId,
+    "alpha",
+  );
+  assert.deepEqual(
+    rankCapabilityMatches(profiles, { requires: ["headless"] }),
+    rankCapabilityMatches([...profiles].reverse(), { requires: ["headless"] }),
+  );
 });

@@ -14,6 +14,10 @@ All notable user-facing changes to Switchyard are documented here. The format fo
 
 - Added all-required capability matching with deterministic matched/missing
   diagnostics and boolean convenience predicates.
+- Added deterministic capability ranking and selection: fully verified
+  qualifying matches outrank discovered matches and equal-tier ties use the
+  stable harness ID key; stale and discovery-only profiles cannot be promoted
+  to the verified tier.
 - Added the full, execute-capable `HarnessAdapter` contract with a shared
   `UnsupportedOperationError`/`assertOperationSupported`/
   `throwUnsupportedOperation` mechanism so every adapter fails an

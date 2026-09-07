@@ -1,0 +1,25 @@
+{
+  "type": "work.deterministic-routing-and-explainability-1.3",
+  "category": "work",
+  "taskId": "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-1.3",
+  "producedBy": "routing-policy-engineer",
+  "status": "complete",
+  "summary": "[ ] Implement deterministic tie-breaking: [ ] Implement deterministic tie-breaking.",
+  "confidence": 0.9,
+  "inputs": [
+    "work-deterministic-routing-and-explainability-1-2-001"
+  ],
+  "filesChanged": [
+    "CHANGELOG.md",
+    "README.md",
+    "src/capabilities/matcher.ts",
+    "tests/capability-matcher.test.mjs"
+  ],
+  "payload": {
+    "agentOutputExcerpt": "● Routing-policy-engineer (model: gpt-5.6-luna) Implement deterministic tie-breaking          4m 16s\n  │ Implemented deterministic capability tie-breaking and ranking.\n  │ Search (grep)\n  │   │ \"duplicate.*harness|harnesses.*duplicate|profile.id\" (src/discovery/schema.ts)\n  │   └ 7 lines found\n  └ Summarize final changes and verify clean diff formatting (shell)\n      │ git diff --stat && git diff --check && git status --short\n      └ 14 lines…\n\n/ Search (grep)\n  │ \"rankCapabilityMatches|selectBe",
+    "taskDescription": "[ ] Implement deterministic tie-breaking."
+  },
+  "nextActions": [],
+  "artifactId": "work-deterministic-routing-and-explainability-1-3-001",
+  "createdAt": "2026-09-07T20:37:50.394Z"
+}

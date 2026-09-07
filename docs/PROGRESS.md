@@ -1,9 +1,9 @@
 # Project Progress
 
 ## Current State
-**Phase**: DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-1
+**Phase**: ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1
 **Status**: In Progress
-**Last Updated**: 2026-09-07T20:37:50.395Z
+**Last Updated**: 2026-09-07T20:39:34.712Z
 **Run ID**: faef066b-e967-49ae-ba56-4dbe4255f89d
 **Harness**: copilot
 **Execution Mode**: auto
@@ -37,6 +37,8 @@
   - Files: CHANGELOG.md, README.md, src/config/index.ts, src/harness/adapter.ts, src/harness/copilot.ts, src/harness/discovery-adapter.ts, src/harness/index.ts, src/harness/opencode.ts, docs/adapter-development.md, docs/adr/0002-adapter-contract-and-typed-configuration.md, src/config/loader.ts, src/config/resolve.ts, src/config/schema.ts, src/harness/adapter-registry.ts, src/harness/stub.ts, tests/adapter-conformance.test.mjs, tests/harness-config.test.mjs
 - [x] Phase ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1, Task ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1.2: [ ] Define capability observation and operation support schemas (@adapter-platform-engineer)
   - Files: docs/adapter-development.md, docs/features/adapter-extensibility-and-configuration.md, src/harness/adapter-registry.ts, src/harness/adapter.ts, src/harness/discovery-adapter.ts, tests/adapter-conformance.test.mjs
+- [x] Phase ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1, Task ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1.3: [ ] Add adapter conformance fixtures (@adapter-platform-engineer)
+  - Files: docs/features/adapter-extensibility-and-configuration.md, tests/adapter-conformance.test.mjs, tests/fixtures/adapters/conformance-harness.mjs
 
 ## Current Task
 - None currently running
@@ -47,7 +49,6 @@
 - [ ] Phase HARNESS-EXECUTION-RUNTIME-2: Phase 2: CLI Integration
 - [ ] Phase VERIFICATION-AND-RESILIENCE-1: Phase 1: Probes
 - [ ] Phase VERIFICATION-AND-RESILIENCE-2: Phase 2: Routing Integration
-- [ ] Phase ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1: Phase 1: Contract
 - [ ] Phase ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-2: Phase 2: Configuration
 - [ ] Phase MULTI-HARNESS-COMPOSITION-1: Phase 1: Workflow Model
 - [ ] Phase MULTI-HARNESS-COMPOSITION-2: Phase 2: Execution and Demonstration

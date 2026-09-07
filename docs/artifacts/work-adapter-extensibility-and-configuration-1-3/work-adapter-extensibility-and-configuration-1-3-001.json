@@ -1,0 +1,24 @@
+{
+  "type": "work.adapter-extensibility-and-configuration-1.3",
+  "category": "work",
+  "taskId": "ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1.3",
+  "producedBy": "adapter-platform-engineer",
+  "status": "complete",
+  "summary": "[ ] Add adapter conformance fixtures: [ ] Add adapter conformance fixtures.",
+  "confidence": 0.9,
+  "inputs": [
+    "work-adapter-extensibility-and-configuration-1-2-001"
+  ],
+  "filesChanged": [
+    "docs/features/adapter-extensibility-and-configuration.md",
+    "tests/adapter-conformance.test.mjs",
+    "tests/fixtures/adapters/conformance-harness.mjs"
+  ],
+  "payload": {
+    "agentOutputExcerpt": "● skill(adapter-conformance)\n\nI’m grounding the fixture work in the shared checklist and current adapter/test surfaces, then I’ll add reusable conformance coverage without changing matcher behavior.\n\n● Read adapter-checklist.md\n  │ .github/skills/adapter-conformance/references/adapter-checklist.md\n  └ 44 lines read\n\n● Read package.json\n  └ 31 lines read\n\n/ Search (glob)\n  │ \"tests/**/*adapter*\"\n  └ 2 files found\n\n/ Search (glob)\n  │ \"src/harness/**/*\"\n  └ 8 files found\n\n● codegraph_explore (MCP:",
+    "taskDescription": "[ ] Add adapter conformance fixtures."
+  },
+  "nextActions": [],
+  "artifactId": "work-adapter-extensibility-and-configuration-1-3-001",
+  "createdAt": "2026-09-07T20:39:34.710Z"
+}

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { access, chmod, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { access, chmod, copyFile, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -79,6 +79,22 @@ async function exists(path) {
   } catch {
     return false;
   }
+}
+
+async function installConformanceFixture(directory, mode = "available") {
+  const fixture = join(directory, "fixture-harness.mjs");
+  await copyFile(
+    new URL("./fixtures/adapters/conformance-harness.mjs", import.meta.url),
+    fixture,
+  );
+  await chmod(fixture, 0o755);
+  return {
+    executable: fixture,
+    env: {
+      ...process.env,
+      SWITCHYARD_FIXTURE_MODE: mode,
+    },
+  };
 }
 
 test("registers a stub HarnessAdapter through the shared registry with no matcher changes", () => {
@@ -182,6 +198,70 @@ test("a stub can be configured to support fork, proving support is per-instance,
     stub.calls.map((call) => call.operation),
     ["fork"],
   );
+});
+
+test("a checked-in executable fixture exercises discovery success and malformed output", async (t) => {
+  const directory = await mkdtemp(join(tmpdir(), "switchyard-adapter-fixture-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+
+  const available = await installConformanceFixture(directory);
+  const availableProfile = await createOpenCodeAdapter({
+    executable: available.executable,
+    env: available.env,
+    now: fixedClock,
+  }).discover();
+  assert.equal(availableProfile.status, "available");
+  assert.equal(availableProfile.version, "1.0.0");
+  assert.deepEqual(
+    availableProfile.capabilities.map((observation) => observation.capability),
+    ["model-selection", "continue"],
+  );
+
+  const malformed = await installConformanceFixture(directory, "malformed");
+  const malformedProfile = await createOpenCodeAdapter({
+    executable: malformed.executable,
+    env: malformed.env,
+    now: fixedClock,
+  }).discover();
+  assert.equal(malformedProfile.status, "malformed");
+  assert.equal(malformedProfile.capabilities.length, 0);
+  assert.equal(malformedProfile.diagnostics?.[0].code, "probe-malformed");
+
+  const failing = await installConformanceFixture(directory, "failure");
+  const failingProfile = await createOpenCodeAdapter({
+    executable: failing.executable,
+    env: failing.env,
+    now: fixedClock,
+  }).discover();
+  assert.equal(failingProfile.status, "unavailable");
+  assert.equal(failingProfile.capabilities.length, 0);
+  assert.equal(failingProfile.diagnostics?.[0].code, "probe-unavailable");
+});
+
+test("the executable fixture proves unsupported operations fail before launch", async (t) => {
+  const directory = await mkdtemp(join(tmpdir(), "switchyard-adapter-launch-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const sentinel = join(directory, "launched.txt");
+  const fixture = await installConformanceFixture(directory);
+  const adapter = createOpenCodeAdapter({
+    executable: fixture.executable,
+    env: {
+      ...fixture.env,
+      SWITCHYARD_FIXTURE_SENTINEL: sentinel,
+    },
+    now: fixedClock,
+  });
+
+  await assert.rejects(
+    () => adapter.execute({ task: "must not launch" }),
+    (error) => {
+      assert.ok(error instanceof UnsupportedOperationError);
+      assert.equal(error.adapterId, "opencode");
+      assert.equal(error.operation, "execute");
+      return true;
+    },
+  );
+  assert.equal(await exists(sentinel), false);
 });
 
 for (const [label, createAdapter, command] of [

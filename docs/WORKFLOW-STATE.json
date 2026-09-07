@@ -1,12 +1,12 @@
 {
   "runId": "faef066b-e967-49ae-ba56-4dbe4255f89d",
   "startedAt": "2026-09-07T19:10:17.558Z",
-  "lastUpdatedAt": "2026-09-07T20:37:50.394Z",
+  "lastUpdatedAt": "2026-09-07T20:39:34.711Z",
   "manifestPath": "/home/mcfuzzysquirrel/Projects/switchyard/docs/EXECUTION-MANIFEST.json",
   "manifestVersion": "1.0",
   "harness": "copilot",
   "status": "running",
-  "currentPhase": "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-1",
+  "currentPhase": "ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1",
   "tasks": {
     "DISCOVERY-AND-REGISTRY-1.1": {
       "taskId": "DISCOVERY-AND-REGISTRY-1.1",
@@ -423,10 +423,21 @@
     },
     "ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1.3": {
       "taskId": "ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1.3",
-      "status": "pending",
+      "status": "complete",
       "ownerAgent": "adapter-platform-engineer",
-      "attempt": 0,
-      "outputFiles": []
+      "attempt": 1,
+      "outputFiles": [
+        "docs/features/adapter-extensibility-and-configuration.md",
+        "tests/adapter-conformance.test.mjs",
+        "tests/fixtures/adapters/conformance-harness.mjs"
+      ],
+      "startedAt": "2026-09-07T20:37:50.417Z",
+      "completedAt": "2026-09-07T20:39:34.711Z",
+      "agentOutput": "● skill(adapter-conformance)\n\nI’m grounding the fixture work in the shared checklist and current adapter/test surfaces, then I’ll add reusable conformance coverage without changing matcher behavior.\n\n● Read adapter-checklist.md\n  │ .github/skills/adapter-conformance/references/adapter-checklist.md\n  └ 44 lines read\n\n● Read package.json\n  └ 31 lines read\n\n/ Search (glob)\n  │ \"tests/**/*adapter*\"\n  └ 2 files found\n\n/ Search (glob)\n  │ \"src/harness/**/*\"\n  └ 8 files found\n\n● codegraph_explore (MCP: codegraph) · adapter conformance fixtures tests adapter registry discover…\n  └ The project at /home/mcfuzzysquirrel/Projects/switchyard isn't indexed with c...\n\n● Read adapter.ts\n  │ src/harness/adapter.ts\n  └ 289 lines read\n\n● Read adapter-registry.ts\n  │ src/harness/adapter-registry.ts\n  └ 71 lines read\n\n● Read adapter-conformance.test.mjs\n  │ tests/adapter-conformance.test.mjs\n  └ 275 lines read\n\n● Read stub.ts\n  │ src/harness/stub.ts\n  └ 154 lines read\n\n● Read discovery-adapter.ts\n  │ src/harness/discovery-adapter.ts\n  └ 321 lines read\n\n● Read builtin-discovery-adapters.test.mjs\n  │ tests/builtin-discovery-adapters.test.mjs\n  └ 227 lines read\n\n● Read index.ts\n  │ src/harness/index.ts\n  └ 7 lines read\n\n● Read index.ts\n  │ src/index.ts\n  └ 6 lines read\n\n● Read CHANGELOG.md\n  └ 66 lines read\n\n/ Search (grep)\n  │ \"fixture|conformance\" in *.md\n  └ 67 lines found\n\n● Inspect current changes and fixture files (shell)\n  │ git status --short && find tests/fixtures -maxdepth 3 -type f -print | sort\n  └ 5 lines…\n\n● Read README.md\n  └ L1:220 (112 lines read)\n\n● Read opencode.ts\n  │ src/harness/opencode.ts\n  └ 106 lines read\n\n● Read copilot.ts\n  │ src/harness/copilot.ts\n  └ 101 lines read\n\n● Read adapter-extensibility-and-configuration.md\n  │ docs/features/adapter-extensibility-and-configuration.md\n  └ 79 lines read\n\n● Read adapter-development.md\n  │ docs/adapter-development.md\n  └ 157 lines read\n\n/ Search (grep)\n  │ \"Add adapter conformance fixtures|ADAPTER-EXTENSIBILITY|conformance fixture\"\n  └ 22 lines found\n\n/ Search (grep)\n  │ \"fixtures\" (docs/PRD.md, docs/features/adapter-extensibility-and-configuration.md, tests)\n  └ 17 lines found\n\n● Review adapter fixture history and current implementation (shell)\n  │ git log --oneline --all --decorate -12 -- tests/adapter-conformance.test.mjs src/harness/stub.ts\n  │ tests/fixtures && git diff -- tests/adapter-conformance.test.mjs src/harness/stub.ts\n  └ 4 lines…\n\nThe existing stub covers the in-memory contract, but the conformance suite still creates ad hoc vendor processes inline. I’m adding a checked-in, reusable executable fixture with success, malformed, failure, and launch-sentinel modes, then wiring focused tests to exercise the real discovery boundary.\n\n● Edit\n  │ Create tests/fixtures/adapters/conformance-harness.mjs\n  │ Edit tests/adapter-conformance.test.mjs\n  └ Edit docs/features/adapter-extensibility-and-configuration.md\n\n● Read probe.ts\n  │ src/discovery/probe.ts\n  └ L180:360 (181 lines read)\n\n● Typecheck the project (shell)\n  │ npm run typecheck\n  └ 3 lines…\n\n● Run adapter conformance tests (shell)\n  │ npm test -- --test-name-pattern 'adapter|conformance'\n  └ 428 lines…\n\n✗ rg /home/mcfuzzysquirrel/Projects/switchyard/tests/adapter-conformance.test.mjs · pattern: \"insta…\n  └ \"-n\": Expected boolean\n\n/ Search (grep)\n  │ \"installConformanceFixture|async function exists\"\n  └ 73 lines found\n\n● Edit\n  └ Edit tests/adapter-conformance.test.mjs\n\n● Run documentation governance tests (shell)\n  │ npm run test:docs\n  └ 26 lines…\n\n● Re-run adapter conformance tests (shell)\n  │ npm test -- --test-name-pattern 'adapter|conformance'\n  └ 352 lines…\n\n● Read adapter-conformance.test.mjs\n  │ tests/adapter-conformance.test.mjs\n  └ L65:110 (45 lines read)\n\n● Edit\n  └ Edit tests/adapter-conformance.test.mjs\n\n● Check patch formatting and changed files (shell)\n  │ git diff --check && git status --short\n  └ 6 lines…\n\n● Re-run TypeScript typecheck (shell)\n  │ npm run typecheck\n  └ 3 lines…\n\n● Validate adapter conformance fixtures (shell)\n  │ npm test -- --test-name-pattern 'adapter|conformance'\n  └ 437 lines…\n\n● Edit\n  └ Edit tests/adapter-conformance.test.mjs\n\n● Edit\n  └ Edit tests/adapter-conformance.test.mjs\n\n● Run documentation governance tests (shell)\n  │ npm run test:docs\n  └ 26 lines…\n\n● Run the TypeScript typecheck (shell)\n  │ npm run typecheck\n  └ 3 lines…\n\n● Run the full test suite (shell)\n  │ npm test\n  └ 410 lines…\n\n● Review final adapter fixture diff (shell)\n  │ git diff --stat && git diff -- docs/features/adapter-extensibility-and-configuration.md\n  │ tests/adapter-conformance.test.mjs tests/fixtures/adapters/conformance-harness.mjs && git status\n  │ --short\n  └ 129 lines…\n\nAdded reusable adapter conformance fixtures and wired them into the conformance suite.\n\n**Created**\n- `tests/fixtures/adapters/conformance-harness.mjs`\n\n**Changed**\n- `tests/adapter-conformance.test.mjs`\n  - Added available, malformed, and failing executable fixture scenarios.\n  - Added sentinel-based verification that unsupported operations fail before launch.\n- `docs/features/adapter-extensibility-and-configuration.md`\n  - Marked adapter conformance fixtures complete.\n\nAll tests, typecheck, and documentation checks pass.\n\n",
+      "artifactId": "work-adapter-extensibility-and-configuration-1-3-001",
+      "inputArtifactIds": [
+        "work-adapter-extensibility-and-configuration-1-2-001"
+      ]
     },
     "ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-2.1": {
       "taskId": "ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-2.1",

@@ -43,7 +43,7 @@ Configuration uses a documented local file and environment overrides. Adapter di
 ### Phase 1: Contract
 - [ ] Define discovery, verification, execution, resume, and fork adapter interfaces.
 - [x] Define capability observation and operation support schemas.
-- [ ] Add adapter conformance fixtures.
+- [x] Add adapter conformance fixtures.
 
 ### Phase 2: Configuration
 - [ ] Define configuration file and environment overrides.

@@ -15,7 +15,12 @@ import type {
   HarnessProfile,
   LocalRegistry,
 } from "../discovery/schema.ts";
-import { resolveRegistryPath } from "../config/registry.ts";
+import {
+  loadSwitchyardConfig,
+  resolveEffectiveRegistryPath,
+  resolveHarnessRuntimeConfig,
+  type SwitchyardConfig,
+} from "../config/index.ts";
 import { redactSecrets } from "../discovery/probe.ts";
 
 export const COMMAND_SCHEMA_VERSION = 1 as const;
@@ -24,6 +29,10 @@ export type DiscoveryCommandStatus = "success" | "partial" | "empty";
 
 export interface DiscoverCommandOptions extends HarnessDiscoveryOptions {
   readonly registryPath?: RegistryPath;
+  /** Explicit local configuration file; `SWITCHYARD_CONFIG_PATH` is used otherwise. */
+  readonly configPath?: string | URL;
+  /** Pre-loaded configuration, useful for embedding and tests. */
+  readonly config?: SwitchyardConfig;
   readonly adapters?: readonly HarnessDiscoveryAdapter[];
   /** Probe the adapters even when a cached registry exists. */
   readonly refresh?: boolean;
@@ -121,11 +130,31 @@ function presentationFailures(
 export async function discover(
   options: DiscoverCommandOptions = {},
 ): Promise<DiscoverCommandResult> {
-  const registryPath = resolveRegistryPath(
-    options.registryPath,
-    { env: options.env },
-  );
+  const config = options.config ?? await loadSwitchyardConfig(options.configPath, {
+    env: options.env,
+  });
+  const registryPath = resolveEffectiveRegistryPath(options.registryPath, config, {
+    env: options.env,
+  });
   const adapters = options.adapters ?? BUILT_IN_DISCOVERY_ADAPTERS;
+  const resolvedAdapters: readonly HarnessDiscoveryAdapter[] = adapters.map((adapter) => ({
+    ...adapter,
+    discover: () => {
+      const runtime = resolveHarnessRuntimeConfig(adapter.id, config, options, options.env);
+      return adapter.discover({
+        ...(runtime.executable === undefined ? {} : { executable: runtime.executable }),
+        ...(runtime.configuredExecutable === undefined
+          ? {}
+          : { configuredExecutable: runtime.configuredExecutable }),
+        ...(runtime.cwd === undefined ? {} : { cwd: runtime.cwd }),
+        ...(runtime.env === undefined ? {} : { env: runtime.env }),
+        timeoutMs: runtime.timeoutMs,
+        maxOutputLength: runtime.maxOutputLength,
+        ...(options.signal === undefined ? {} : { signal: options.signal }),
+        ...(options.now === undefined ? {} : { now: options.now }),
+      });
+    },
+  }));
   const cached = await readRegistry(registryPath);
 
   let registry: LocalRegistry;
@@ -133,7 +162,7 @@ export async function discover(
   let failures: readonly RegistryRefreshFailure[] = [];
 
   if (cached === undefined || options.refresh === true) {
-    const refreshedResult = await refreshRegistry(registryPath, adapters, {
+    const refreshedResult = await refreshRegistry(registryPath, resolvedAdapters, {
       ...options,
       ...(options.harnessId === undefined ? {} : { harnessId: options.harnessId }),
     });

@@ -104,6 +104,13 @@ handling, and security expectations, and
 for the design rationale. Configuration diagnostics always identify the
 adapter and field path and never echo the submitted value.
 
+The `discover` command loads the per-user JSON configuration automatically.
+Use `SWITCHYARD_CONFIG_PATH` (or `discover({ configPath })` as a library
+caller) to select another file. Per-harness environment variables such as
+`SWITCHYARD_OPENCODE_EXECUTABLE` and
+`SWITCHYARD_OPENCODE_PROBE_TIMEOUT_MS` override matching file entries without
+changing adapter code.
+
 ## Repository layout
 
 | Path | Purpose |

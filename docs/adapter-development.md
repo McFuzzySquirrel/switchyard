@@ -96,7 +96,7 @@ Other adapter-local errors (a failed probe, a malformed help response, an execut
 
 ## 5. Configuration
 
-Adapters do not read environment variables or configuration files themselves. A caller resolves configuration once via `resolveHarnessRuntimeConfig` (`src/config/resolve.ts`) and passes the result to the adapter factory:
+Adapters do not read environment variables or configuration files themselves. A caller resolves configuration once via `resolveHarnessRuntimeConfig` (`src/config/resolve.ts`) and passes the result to the adapter factory. The built-in `discover` command performs this wiring automatically for each registered adapter:
 
 ```ts
 import { resolveHarnessRuntimeConfig, loadSwitchyardConfig } from "switchyard/config";
@@ -106,6 +106,11 @@ const config = await loadSwitchyardConfig(); // reads the local config file, or 
 const resolved = resolveHarnessRuntimeConfig("opencode", config, { executable: cliFlagValue });
 const adapter = createOpenCodeAdapter(resolved);
 ```
+
+For embedded callers, `discover({ configPath, env, adapters })` loads the same
+typed file and applies the resolved per-harness options before probing. This
+keeps executable and probe-policy overrides consistent without requiring each
+adapter to parse configuration independently.
 
 Every configurable field — executable location, probe timeout, maximum output length, and the mutating-probe policy flag — resolves with the **same precedence**: an explicit call-time value (for example, a CLI flag), then an environment variable, then the local configuration file, then a built-in default. Nothing skips a tier.
 

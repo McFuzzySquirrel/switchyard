@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { promisify } from "node:util";
@@ -92,6 +92,46 @@ test("discover refreshes missing registries and returns a stable command payload
   const json = JSON.parse(formatDiscoverJson(result));
   assert.equal(json.schemaVersion, 1);
   assert.equal(json.harnesses[0].capabilities[0].discovery.evidence.excerpt, "Usage: fixture --[REDACTED]");
+});
+
+test("discover loads the local adapter config and applies per-harness environment overrides", async (t) => {
+  const directory = await mkdtemp(join(tmpdir(), "switchyard-configured-command-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const configPath = join(directory, "config.json");
+  const registryPath = join(directory, "registry.json");
+  await writeFile(
+    configPath,
+    JSON.stringify({
+      schemaVersion: 1,
+      registryPath,
+      probePolicy: { timeoutMs: 3000, maxOutputLength: 2048 },
+      harnesses: { fixture: { executable: "/config/fixture" } },
+    }),
+  );
+
+  let received;
+  const adapter = {
+    id: "fixture",
+    discover: async (options) => {
+      received = options;
+      return profile();
+    },
+  };
+
+  await discover({
+    configPath,
+    adapters: [adapter],
+    env: {
+      SWITCHYARD_FIXTURE_EXECUTABLE: "/env/fixture",
+      SWITCHYARD_FIXTURE_PROBE_TIMEOUT_MS: "9000",
+    },
+    now: () => new Date(observedAt),
+  });
+
+  assert.equal(received.executable, "/env/fixture");
+  assert.equal(received.configuredExecutable, "/config/fixture");
+  assert.equal(received.timeoutMs, 9000);
+  assert.equal(received.maxOutputLength, 2048);
 });
 
 test("capabilities reads cached data without launching a harness and filters verified observations", async (t) => {

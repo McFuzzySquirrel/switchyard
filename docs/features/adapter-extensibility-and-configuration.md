@@ -46,9 +46,9 @@ Configuration uses a documented local file and environment overrides. Adapter di
 - [x] Add adapter conformance fixtures.
 
 ### Phase 2: Configuration
-- [ ] Define configuration file and environment overrides.
-- [ ] Implement harness executable overrides and registry location.
-- [ ] Document adapter registration and testing.
+- [x] Define configuration file and environment overrides.
+- [x] Implement harness executable overrides and registry location.
+- [x] Document adapter registration and testing.
 
 ## 6. Testing Strategy
 

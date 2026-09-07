@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
-import { mkdtemp, rm } from "node:fs/promises";
+import { execFile } from "node:child_process";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { promisify } from "node:util";
 import test from "node:test";
 
 import {
@@ -11,15 +13,19 @@ import {
   formatDiscoverJson,
   formatCapabilitiesHuman,
   formatDiscoverHuman,
+  explain,
+  formatExplainJson,
+  formatExplainHuman,
   runCli,
 } from "../src/index.ts";
 
 const observedAt = "2026-09-07T19:00:00.000Z";
+const execFileAsync = promisify(execFile);
 
-function profile(id = "fixture", verification = "not-requested") {
-  const observation = {
+function profile(id = "fixture", verification = "not-requested", capabilityNames = ["headless"]) {
+  const observations = capabilityNames.map((capability) => ({
     schemaVersion: 1,
-    capability: "headless",
+    capability,
     discovery: {
       status: "observed",
       source: "help",
@@ -45,7 +51,7 @@ function profile(id = "fixture", verification = "not-requested") {
           }
         : {}),
     },
-  };
+  }));
   return {
     schemaVersion: 1,
     id,
@@ -53,7 +59,7 @@ function profile(id = "fixture", verification = "not-requested") {
     executable: "/tmp/fixture",
     executableSource: "path",
     version: "1.2.3",
-    capabilities: [observation],
+    capabilities: observations,
     status: "available",
     lifecycle: "registered",
     availability: { status: "available", checkedAt: observedAt },
@@ -154,4 +160,152 @@ test("CLI emits JSON on stdout and uses a partial exit category for unavailable 
   assert.equal(payload.command, "discover");
   assert.equal(payload.status, "partial");
   assert.equal(payload.harnesses[0].status, "unavailable");
+});
+
+test("explain-specific options remain invalid for existing commands", async () => {
+  const stderr = [];
+  const exitCode = await runCli(
+    ["capabilities", "--requires=headless"],
+    { stderr: (text) => stderr.push(text) },
+  );
+
+  assert.equal(exitCode, 2);
+  assert.match(stderr.join(""), /only supported by the explain command/);
+});
+
+test("explain produces complete, stable all-required ranking data without mutating the registry", async (t) => {
+  const directory = await mkdtemp(join(tmpdir(), "switchyard-explain-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const registryPath = join(directory, "registry.json");
+  const adapter = {
+    id: "fixture",
+    discover: async () => profile("fixture", "not-requested", ["headless", "mcp"]),
+  };
+  await discover({ registryPath, adapters: [adapter], now: () => new Date(observedAt) });
+
+  const before = await readFile(registryPath, "utf8");
+  const result = await explain({
+    registryPath,
+    requirements: { requires: ["headless", "mcp"] },
+    now: () => new Date(observedAt),
+  });
+  const after = await readFile(registryPath, "utf8");
+
+  assert.equal(result.status, "success");
+  assert.equal(result.selectedHarness, "fixture");
+  assert.deepEqual(result.candidates[0].matched, ["headless", "mcp"]);
+  assert.deepEqual(result.candidates[0].missing, []);
+  assert.deepEqual(
+    result.candidates[0].verification.map((item) => item.verificationStatus),
+    ["not-requested", "not-requested"],
+  );
+  assert.equal(result.candidates[0].ranking.verificationTier, "discovered");
+  assert.equal(
+    formatExplainHuman(result),
+    formatExplainHuman(await explain({
+      registryPath,
+      requirements: { requires: ["headless", "mcp"] },
+      now: () => new Date(observedAt),
+    })),
+    "human explanations must be byte-stable",
+  );
+  assert.equal(before, after, "explain must not mutate the registry");
+
+  const human = formatExplainHuman(result);
+  const json = JSON.parse(formatExplainJson(result));
+  assert.match(human, /Requirements: headless, mcp/);
+  assert.match(human, /Selection: fixture/);
+  assert.equal(json.status, result.status);
+  assert.deepEqual(json.requirements.requires, result.requirements.requires);
+  assert.equal(json.selectedHarness, result.selectedHarness);
+  assert.deepEqual(
+    json.candidates.map((candidate) => ({
+      harnessId: candidate.harnessId,
+      matched: candidate.matched,
+      missing: candidate.missing,
+      qualifies: candidate.qualifies,
+    })),
+    result.candidates.map((candidate) => ({
+      harnessId: candidate.harnessId,
+      matched: candidate.matched,
+      missing: candidate.missing,
+      qualifies: candidate.qualifies,
+    })),
+  );
+
+  const repeated = await explain({
+    registryPath,
+    requirements: { requires: ["headless", "mcp"] },
+    now: () => new Date(observedAt),
+  });
+  assert.equal(formatExplainJson(result), formatExplainJson(repeated));
+});
+
+test("explain has distinct invalid-input and no-match CLI outcomes", async (t) => {
+  const directory = await mkdtemp(join(tmpdir(), "switchyard-explain-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const registryPath = join(directory, "registry.json");
+  const adapter = {
+    id: "fixture",
+    discover: async () => profile("fixture"),
+  };
+  await discover({ registryPath, adapters: [adapter], now: () => new Date(observedAt) });
+
+  const noMatchStdout = [];
+  const noMatchCode = await runCli(
+    ["explain", `--requires=mcp`, "--json", "--registry", registryPath],
+    { stdout: (text) => noMatchStdout.push(text), stderr: () => {} },
+  );
+  assert.equal(noMatchCode, 4);
+  const noMatch = JSON.parse(noMatchStdout.join(""));
+  assert.equal(noMatch.status, "no-match");
+  assert.equal(noMatch.candidates[0].missing[0], "mcp");
+
+  const invalidStdout = [];
+  const invalidCode = await runCli(
+    ["explain", "--requires=headless,headless", "--json"],
+    { stdout: (text) => invalidStdout.push(text), stderr: () => {} },
+  );
+  assert.equal(invalidCode, 2);
+  const invalid = JSON.parse(invalidStdout.join(""));
+  assert.equal(invalid.status, "invalid-input");
+  assert.equal(invalid.error.code, "invalid-input");
+  assert.match(invalid.error.message, /duplicate/i);
+});
+
+test("explain subprocess emits stable JSON for success and distinct no-match/invalid exits", async (t) => {
+  const directory = await mkdtemp(join(tmpdir(), "switchyard-explain-subprocess-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const registryPath = join(directory, "registry.json");
+  await discover({
+    registryPath,
+    adapters: [{ id: "fixture", discover: async () => profile("fixture") }],
+    now: () => new Date(observedAt),
+  });
+
+  const run = (args) => execFileAsync(
+    process.execPath,
+    ["--experimental-strip-types", "src/cli.ts", ...args],
+    { cwd: process.cwd(), encoding: "utf8" },
+  );
+  const success = await run(["explain", "--requires=headless", "--json", "--registry", registryPath]);
+  assert.equal(success.stderr, "");
+  assert.equal(JSON.parse(success.stdout).selectedHarness, "fixture");
+
+  await assert.rejects(
+    run(["explain", "--requires=mcp", "--json", "--registry", registryPath]),
+    (error) => {
+      assert.equal(error.code, 4);
+      assert.equal(JSON.parse(error.stdout).status, "no-match");
+      return true;
+    },
+  );
+  await assert.rejects(
+    run(["explain", "--requires=headless,headless", "--json"]),
+    (error) => {
+      assert.equal(error.code, 2);
+      assert.equal(JSON.parse(error.stdout).status, "invalid-input");
+      return true;
+    },
+  );
 });

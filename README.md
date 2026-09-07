@@ -6,7 +6,7 @@ The product direction is described in [`docs/PRD.md`](docs/PRD.md). The library 
 
 ## Current status
 
-The current completed slice covers discovery schemas, executable lookup, bounded version/help probing, built-in discovery adapters, atomic local registry persistence, refreshable registry profiles, the `discover` and `capabilities` commands, normalized all-required capability matching with deterministic ranking, the full vendor-neutral `HarnessAdapter` contract with explicit registration, and typed local configuration with environment/executable/registry/probe-policy precedence. Real harness execution/verification and composition remain roadmap items — built-in adapters currently support `discover` only and fail fast on other operations.
+The current completed slice covers discovery schemas, executable lookup, bounded version/help probing, built-in discovery adapters, atomic local registry persistence, refreshable registry profiles, the `discover`, `capabilities`, and `explain` commands, normalized all-required capability matching with deterministic ranking and human-readable explanations, the full vendor-neutral `HarnessAdapter` contract with explicit registration, and typed local configuration with environment/executable/registry/probe-policy precedence. Real harness execution/verification and composition remain roadmap items — built-in adapters currently support `discover` only and fail fast on other operations.
 
 ## Development
 
@@ -33,6 +33,8 @@ npx switchyard discover
 npx switchyard discover --refresh --json
 npx switchyard capabilities
 npx switchyard capabilities --verified --json
+npx switchyard explain --requires=headless,repository-access
+npx switchyard explain --requires=headless --json
 ```
 
 `discover` probes OpenCode and GitHub Copilot on the first run and stores a
@@ -41,6 +43,13 @@ is supplied. Use `--registry PATH` or `SWITCHYARD_REGISTRY_PATH` for an
 explicit local file, which is useful in CI and tests. A missing or malformed
 harness is reported in its profile and does not discard successful profiles.
 `capabilities` only reads the registry; it never launches a harness.
+`explain` also only reads the registry and never launches a harness or mutates
+the registry. It reports every candidate's matched and missing capabilities,
+verification state, deterministic ranking inputs, and selection reason.
+Requirements are all-required. Use `--preferred-harness=<id>` to request a
+preferred qualifying harness; fallback remains disabled unless
+`--allow-fallback` is explicitly supplied. Invalid requirements exit `2`, and
+valid requirements with no qualifying selection exit `4`.
 
 JSON output is versioned with `schemaVersion: 1`. Human output is plain text
 with the same statuses and profile data, and diagnostics are redacted before

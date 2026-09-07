@@ -9,6 +9,10 @@ All notable user-facing changes to Switchyard are documented here. The format fo
   discovery refreshes, verified-capability filtering, and redacted diagnostics.
 - Centralized human and JSON command serializers so CLI output uses the same
   versioned payload and redaction rules.
+- Added `switchyard explain --requires=<capability,...> [--json]` with
+  deterministic all-required matching, verified-before-discovered ranking,
+  stable candidate explanations, explicit preferred-harness/fallback policy,
+  and distinct invalid-input (`2`) and no-match (`4`) exit categories.
 
 ### Added
 

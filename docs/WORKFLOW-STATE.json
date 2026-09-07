@@ -1,12 +1,12 @@
 {
   "runId": "faef066b-e967-49ae-ba56-4dbe4255f89d",
   "startedAt": "2026-09-07T19:10:17.558Z",
-  "lastUpdatedAt": "2026-09-07T20:39:34.711Z",
+  "lastUpdatedAt": "2026-09-07T20:50:36.617Z",
   "manifestPath": "/home/mcfuzzysquirrel/Projects/switchyard/docs/EXECUTION-MANIFEST.json",
   "manifestVersion": "1.0",
   "harness": "copilot",
   "status": "running",
-  "currentPhase": "ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1",
+  "currentPhase": "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-2",
   "tasks": {
     "DISCOVERY-AND-REGISTRY-1.1": {
       "taskId": "DISCOVERY-AND-REGISTRY-1.1",
@@ -254,10 +254,24 @@
     },
     "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-2.1": {
       "taskId": "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-2.1",
-      "status": "pending",
+      "status": "complete",
       "ownerAgent": "routing-policy-engineer",
-      "attempt": 0,
-      "outputFiles": []
+      "attempt": 1,
+      "outputFiles": [
+        "CHANGELOG.md",
+        "README.md",
+        "docs/features/deterministic-routing-and-explainability.md",
+        "src/capabilities/matcher.ts",
+        "src/cli.ts",
+        "src/commands/index.ts",
+        "tests/capability-matcher.test.mjs",
+        "tests/commands.test.mjs",
+        "src/commands/explain.ts"
+      ],
+      "startedAt": "2026-09-07T20:39:34.732Z",
+      "completedAt": "2026-09-07T20:50:36.617Z",
+      "agentOutput": "● skill(versioned-cli-contracts)\n\n● Read cli-contract-checklist.md\n  │ .github/skills/versioned-cli-contracts/references/cli-contract-checklist.md\n  └ 44 lines read\n\n/ Search (glob)\n  │ \"**/*explain*\"\n  └ 4 files found\n\n/ Search (glob)\n  │ \"**/*routing*\"\n  └ 5 files found\n\n● codegraph_explore (MCP: codegraph) · human-readable explanation output routing policy explain exp…\n  └ The project at /home/mcfuzzysquirrel/Projects/switchyard isn't indexed with c...\n\n● Routing-policy-engineer (model: gpt-5.6-luna) Implement human-readable explanations        10m 15s\n  │ Implemented human-readable routing explanations.\n  │ Smoke-test human explain CLI output (shell)\n  │   │ set +e; node --experimental-strip-types src/cli.ts explain --requires=headless\n  │   │ --registry=/tmp/switchyard-missing-human-registry.json; code=$?; printf 'exit=%s\\n' \"$code\";\n  │   rm\n  │   │ -f /tmp/switchyard-missing-human-registry.json; exit 0\n  │   └ 4 lines…\n  └ Smoke-test human explain CLI output (shell)\n      │ set +e; node --experimental-strip-types src/cli.ts explain --requires=headless --registry\n      │ /tmp/switchyard-missing-human-registry.json; code=$?; printf 'exit=%s\\n' \"$code\"; rm -f\n      │ /tmp/switchyard-missing-human-registry.json; exit 0\n      └ 11 lines…\n\n/ Search (grep)\n  │ \"explain|Explanation|human-readable\" (src, tests, README.md, CHANGELOG.md,\n  │ docs/features/deterministic-routing-and-explainability.md)\n  └ 81 lines found\n\n● Inspect changed files and whitespace (shell)\n  │ git status --short && git diff --stat && git diff --check\n  └ 23 lines…\n\n● Read explain.ts\n  │ src/commands/explain.ts\n  └ 372 lines read\n\n● Read matcher.ts\n  │ src/capabilities/matcher.ts\n  └ 194 lines read\n\n● Read cli.ts\n  │ src/cli.ts\n  └ L1:260 (260 lines read)\n\n● Read README.md\n  └ L1:180 (121 lines read)\n\n● Read CHANGELOG.md\n  └ L1:40 (40 lines read)\n\n/ Search (grep)\n  │ \"commands/index|formatExplain|explainCommand\" (src)\n  └ 10 lines found\n\n● Run documentation tests (shell)\n  │ npm run test:docs\n  └ 26 lines…\n\n● Run TypeScript typecheck (shell)\n  │ npm run typecheck\n  └ 3 lines…\n\n● Run project test suite (shell)\n  │ npm test\n  └ 440 lines…\n\nImplemented human-readable routing explanation output.\n\n**Changed files:**\n- `src/commands/explain.ts` — added explanation generation, formatting, ranking details, selection reasons, and redacted diagnostics.\n- `src/capabilities/matcher.ts` — exposed deterministic ranking inputs for explanations.\n- `src/cli.ts` — added the `explain` command, options, output modes, and exit categories.\n- `src/commands/index.ts` — exported explanation APIs.\n- `tests/capability-matcher.test.mjs`\n- `tests/commands.test.mjs`\n- `README.md`\n- `CHANGELOG.md`\n- `docs/features/deterministic-routing-and-explainability.md`\n\nThe command now supports plain-text and JSON output, candidate qualification details, verification state, deterministic ranking data, preferred-harness/fallback policy, and distinct invalid-input (`2`) and no-match (`4`) outcomes.\n\n",
+      "artifactId": "work-deterministic-routing-and-explainability-2-1-001"
     },
     "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-2.2": {
       "taskId": "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-2.2",

@@ -13,6 +13,14 @@ import {
   formatDiscoverHuman,
   type DiscoverCommandOptions,
 } from "./commands/discover.ts";
+import {
+  explain,
+  explainInvalidInput,
+  formatExplainJson,
+  formatExplainHuman,
+  ExplainInputError,
+  type ExplainCommandOptions,
+} from "./commands/explain.ts";
 import type { HarnessDiscoveryAdapter } from "./harness/discovery-adapter.ts";
 import { redactSecrets } from "./discovery/probe.ts";
 import { COMMAND_SCHEMA_VERSION } from "./commands/discover.ts";
@@ -22,6 +30,7 @@ export const CLI_EXIT_CODES = Object.freeze({
   partial: 1,
   usage: 2,
   failure: 3,
+  noMatch: 4,
 });
 
 export interface CliIo {
@@ -30,10 +39,13 @@ export interface CliIo {
 }
 
 interface ParsedArguments {
-  readonly command: "discover" | "capabilities" | "help";
+  readonly command: "discover" | "capabilities" | "explain" | "help";
   readonly json: boolean;
   readonly refresh: boolean;
   readonly verified: boolean;
+  readonly requires?: string;
+  readonly preferredHarness?: string;
+  readonly allowFallback: boolean;
   readonly registryPath?: string;
   readonly harnessId?: string;
   readonly staleAfterMs?: number;
@@ -41,7 +53,7 @@ interface ParsedArguments {
 }
 
 function usageError(message: string): Error {
-  return new Error(`${message}\nUsage: switchyard <discover|capabilities> [options]`);
+  return new Error(`${message}\nUsage: switchyard <discover|capabilities|explain> [options]`);
 }
 
 function valueAfter(args: readonly string[], index: number, option: string): string {
@@ -60,15 +72,19 @@ function parseArguments(args: readonly string[]): ParsedArguments {
       json: false,
       refresh: false,
       verified: false,
+      allowFallback: false,
     };
   }
-  if (command !== "discover" && command !== "capabilities") {
+  if (command !== "discover" && command !== "capabilities" && command !== "explain") {
     throw usageError(`Unknown command '${command}'`);
   }
 
   let json = false;
   let refresh = false;
   let verified = false;
+  let requires: string | undefined;
+  let preferredHarness: string | undefined;
+  let allowFallback = false;
   let registryPath: string | undefined;
   let harnessId: string | undefined;
   let staleAfterMs: number | undefined;
@@ -85,6 +101,26 @@ function parseArguments(args: readonly string[]): ParsedArguments {
         break;
       case "--verified":
         verified = true;
+        break;
+      case "--requires":
+        if (command !== "explain") {
+          throw usageError(`${argument} is only supported by the explain command`);
+        }
+        requires = valueAfter(args, index, "--requires");
+        index += 1;
+        break;
+      case "--preferred-harness":
+        if (command !== "explain") {
+          throw usageError(`${argument} is only supported by the explain command`);
+        }
+        preferredHarness = valueAfter(args, index, "--preferred-harness");
+        index += 1;
+        break;
+      case "--allow-fallback":
+        if (command !== "explain") {
+          throw usageError(`${argument} is only supported by the explain command`);
+        }
+        allowFallback = true;
         break;
       case "--registry":
         registryPath = valueAfter(args, index, "--registry");
@@ -108,7 +144,19 @@ function parseArguments(args: readonly string[]): ParsedArguments {
         index += 1;
         break;
       default:
-        throw usageError(`Unknown option '${argument}'`);
+        if (argument.startsWith("--requires=")) {
+          if (command !== "explain") {
+            throw usageError(`${argument.split("=")[0]} is only supported by the explain command`);
+          }
+          requires = argument.slice("--requires=".length);
+        } else if (argument.startsWith("--preferred-harness=")) {
+          if (command !== "explain") {
+            throw usageError(`${argument.split("=")[0]} is only supported by the explain command`);
+          }
+          preferredHarness = argument.slice("--preferred-harness=".length);
+        } else {
+          throw usageError(`Unknown option '${argument}'`);
+        }
     }
   }
 
@@ -117,6 +165,9 @@ function parseArguments(args: readonly string[]): ParsedArguments {
     json,
     refresh,
     verified,
+    ...(requires === undefined ? {} : { requires }),
+    ...(preferredHarness === undefined ? {} : { preferredHarness }),
+    allowFallback,
     ...(registryPath === undefined ? {} : { registryPath }),
     ...(harnessId === undefined ? {} : { harnessId }),
     ...(staleAfterMs === undefined ? {} : { staleAfterMs }),
@@ -126,15 +177,19 @@ function parseArguments(args: readonly string[]): ParsedArguments {
 
 function printHelp(): string {
   return [
-    "Usage: switchyard <discover|capabilities> [options]",
+    "Usage: switchyard <discover|capabilities|explain> [options]",
     "",
     "Commands:",
     "  discover       inspect configured harnesses and update the local registry",
     "  capabilities   read normalized capabilities without launching a harness",
+    "  explain        explain deterministic selection without launching a harness",
     "",
     "Options:",
     "  --refresh                 probe adapters instead of using a cached registry",
     "  --verified                show only verified capabilities (capabilities)",
+    "  --requires <capabilities> required comma-separated capabilities (explain)",
+    "  --preferred-harness <id>  prefer a qualifying harness (explain)",
+    "  --allow-fallback          allow fallback when the preferred harness misses requirements",
     "  --registry <path>         override the local registry path",
     "  --harness-id <id>         refresh one adapter (discover)",
     "  --executable <path>       override the executable for discovery",
@@ -145,7 +200,7 @@ function printHelp(): string {
 
 function commandOptions(
   parsed: ParsedArguments,
-): DiscoverCommandOptions | CapabilitiesCommandOptions {
+): DiscoverCommandOptions | CapabilitiesCommandOptions | ExplainCommandOptions {
   if (parsed.command === "discover") {
     const options: DiscoverCommandOptions = {
       ...(parsed.registryPath === undefined ? {} : { registryPath: parsed.registryPath }),
@@ -156,11 +211,30 @@ function commandOptions(
     };
     return options;
   }
+  if (parsed.command === "capabilities") {
+    return {
+      ...(parsed.registryPath === undefined ? {} : { registryPath: parsed.registryPath }),
+      ...(parsed.verified ? { verified: true } : {}),
+      ...(parsed.staleAfterMs === undefined ? {} : { staleAfterMs: parsed.staleAfterMs }),
+    };
+  }
+  const requires = (parsed.requires ?? "").split(",").map((item) => item.trim());
   return {
     ...(parsed.registryPath === undefined ? {} : { registryPath: parsed.registryPath }),
-    ...(parsed.verified ? { verified: true } : {}),
+    requirements: {
+      schemaVersion: 1,
+      requires,
+      ...(parsed.preferredHarness === undefined
+        ? {}
+        : { preferredHarness: parsed.preferredHarness }),
+      ...(parsed.allowFallback ? { allowFallback: true } : {}),
+    },
     ...(parsed.staleAfterMs === undefined ? {} : { staleAfterMs: parsed.staleAfterMs }),
   };
+}
+
+function explainJsonRequested(args: readonly string[]): boolean {
+  return args[0] === "explain" && args.includes("--json");
 }
 
 /**
@@ -181,7 +255,20 @@ export async function runCli(
     parsed = parseArguments(args);
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
-    writeStderr(message);
+    if (explainJsonRequested(args)) {
+      writeStdout(JSON.stringify({
+        schemaVersion: COMMAND_SCHEMA_VERSION,
+        command: "explain",
+        status: "invalid-input",
+        error: {
+          code: "invalid-input",
+          message: redactSecrets(message),
+          issues: [],
+        },
+      }));
+    } else {
+      writeStderr(message);
+    }
     return CLI_EXIT_CODES.usage;
   }
 
@@ -199,21 +286,36 @@ export async function runCli(
           ...(options as DiscoverCommandOptions),
           ...(_adapters === undefined ? {} : { adapters: _adapters }),
         })
-      : await capabilities(options as CapabilitiesCommandOptions);
+      : parsed.command === "capabilities"
+        ? await capabilities(options as CapabilitiesCommandOptions)
+        : await explain(options as ExplainCommandOptions);
     if (parsed.json) {
       writeStdout(parsed.command === "discover"
         ? formatDiscoverJson(result as Awaited<ReturnType<typeof discover>>)
-        : formatCapabilitiesJson(result as Awaited<ReturnType<typeof capabilities>>));
+        : parsed.command === "capabilities"
+          ? formatCapabilitiesJson(result as Awaited<ReturnType<typeof capabilities>>)
+          : formatExplainJson(result as Awaited<ReturnType<typeof explain>>));
     } else {
       writeStdout(parsed.command === "discover"
         ? formatDiscoverHuman(result as Awaited<ReturnType<typeof discover>>)
-        : formatCapabilitiesHuman(result as Awaited<ReturnType<typeof capabilities>>));
+        : parsed.command === "capabilities"
+          ? formatCapabilitiesHuman(result as Awaited<ReturnType<typeof capabilities>>)
+          : formatExplainHuman(result as Awaited<ReturnType<typeof explain>>));
     }
-    return result.status === "partial"
-      ? CLI_EXIT_CODES.partial
-      : CLI_EXIT_CODES.success;
+    if (result.status === "partial") return CLI_EXIT_CODES.partial;
+    if (result.status === "no-match") return CLI_EXIT_CODES.noMatch;
+    return CLI_EXIT_CODES.success;
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
+    if (error instanceof ExplainInputError) {
+      const invalid = explainInvalidInput(error);
+      if (parsed.json) {
+        writeStdout(formatExplainJson(invalid));
+      } else {
+        writeStderr(formatExplainHuman(invalid));
+      }
+      return CLI_EXIT_CODES.usage;
+    }
     if (parsed.json) {
       writeStdout(JSON.stringify({
         schemaVersion: COMMAND_SCHEMA_VERSION,

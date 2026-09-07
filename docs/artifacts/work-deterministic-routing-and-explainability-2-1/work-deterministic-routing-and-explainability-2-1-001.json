@@ -1,0 +1,28 @@
+{
+  "type": "work.deterministic-routing-and-explainability-2.1",
+  "category": "work",
+  "taskId": "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-2.1",
+  "producedBy": "routing-policy-engineer",
+  "status": "complete",
+  "summary": "[ ] Implement human-readable explanation output: [ ] Implement human-readable explanation output.",
+  "confidence": 0.9,
+  "inputs": [],
+  "filesChanged": [
+    "CHANGELOG.md",
+    "README.md",
+    "docs/features/deterministic-routing-and-explainability.md",
+    "src/capabilities/matcher.ts",
+    "src/cli.ts",
+    "src/commands/index.ts",
+    "tests/capability-matcher.test.mjs",
+    "tests/commands.test.mjs",
+    "src/commands/explain.ts"
+  ],
+  "payload": {
+    "agentOutputExcerpt": "● skill(versioned-cli-contracts)\n\n● Read cli-contract-checklist.md\n  │ .github/skills/versioned-cli-contracts/references/cli-contract-checklist.md\n  └ 44 lines read\n\n/ Search (glob)\n  │ \"**/*explain*\"\n  └ 4 files found\n\n/ Search (glob)\n  │ \"**/*routing*\"\n  └ 5 files found\n\n● codegraph_explore (MCP: codegraph) · human-readable explanation output routing policy explain exp…\n  └ The project at /home/mcfuzzysquirrel/Projects/switchyard isn't indexed with c...\n\n● Routing-policy-engineer (model: gpt-5",
+    "taskDescription": "[ ] Implement human-readable explanation output."
+  },
+  "nextActions": [],
+  "artifactId": "work-deterministic-routing-and-explainability-2-1-001",
+  "createdAt": "2026-09-07T20:50:36.617Z"
+}

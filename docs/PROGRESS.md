@@ -1,9 +1,9 @@
 # Project Progress
 
 ## Current State
-**Phase**: ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1
+**Phase**: DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-2
 **Status**: In Progress
-**Last Updated**: 2026-09-07T20:39:34.712Z
+**Last Updated**: 2026-09-07T20:50:36.619Z
 **Run ID**: faef066b-e967-49ae-ba56-4dbe4255f89d
 **Harness**: copilot
 **Execution Mode**: auto
@@ -33,6 +33,8 @@
   - Files: CHANGELOG.md, README.md, src/capabilities/index.ts, src/capabilities/matcher.ts, tests/capability-matcher.test.mjs
 - [x] Phase DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-1, Task DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-1.3: [ ] Implement deterministic tie-breaking (@routing-policy-engineer)
   - Files: CHANGELOG.md, README.md, src/capabilities/matcher.ts, tests/capability-matcher.test.mjs
+- [x] Phase DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-2, Task DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-2.1: [ ] Implement human-readable explanation output (@routing-policy-engineer)
+  - Files: CHANGELOG.md, README.md, docs/features/deterministic-routing-and-explainability.md, src/capabilities/matcher.ts, src/cli.ts, src/commands/index.ts, tests/capability-matcher.test.mjs, tests/commands.test.mjs, src/commands/explain.ts
 - [x] Phase ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1, Task ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1.1: [ ] Define discovery, verification, execution, resume, and fork adapter interfaces (@adapter-platform-engineer)
   - Files: CHANGELOG.md, README.md, src/config/index.ts, src/harness/adapter.ts, src/harness/copilot.ts, src/harness/discovery-adapter.ts, src/harness/index.ts, src/harness/opencode.ts, docs/adapter-development.md, docs/adr/0002-adapter-contract-and-typed-configuration.md, src/config/loader.ts, src/config/resolve.ts, src/config/schema.ts, src/harness/adapter-registry.ts, src/harness/stub.ts, tests/adapter-conformance.test.mjs, tests/harness-config.test.mjs
 - [x] Phase ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1, Task ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1.2: [ ] Define capability observation and operation support schemas (@adapter-platform-engineer)

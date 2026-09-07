@@ -44,17 +44,27 @@
 
 `switchyard explain --requires=<capability,...> [--json]` performs selection without execution. Output lists requirements, each candidate's match state, ranking inputs, and the selected harness.
 
+The command reads the cached registry only. It requires at least one
+normalized capability, matches every requirement (not any requirement), and
+uses the shared ranking policy: fully verified matches first, discovered-only
+matches second, then ascending harness ID. `--preferred-harness=<id>` selects
+that harness only when it qualifies; fallback is disabled unless
+`--allow-fallback` is supplied. A successful explanation exits `0`; a
+non-qualifying request exits `4`; malformed requirements use the usage exit
+`2`. Human and JSON output carry the same decision data, and JSON uses the
+versioned command schema (`schemaVersion: 1`).
+
 ## 5. Implementation Tasks
 
 ### Phase 1: Matching
-- [ ] Define requirement schema and validation.
-- [ ] Implement all-required capability matching.
-- [ ] Implement deterministic tie-breaking.
+- [x] Define requirement schema and validation.
+- [x] Implement all-required capability matching.
+- [x] Implement deterministic tie-breaking.
 
 ### Phase 2: Explainability
-- [ ] Implement human-readable explanation output.
-- [ ] Implement stable JSON decision schema.
-- [ ] Define no-match and invalid-input exit codes.
+- [x] Implement human-readable explanation output.
+- [x] Implement stable JSON decision schema.
+- [x] Define no-match and invalid-input exit codes.
 
 ## 6. Testing Strategy
 

@@ -32,6 +32,15 @@ export interface RankedCapabilityMatch extends CapabilityMatch {
   readonly rankingKey: readonly [number, string];
 }
 
+export interface CapabilityRankingInputs {
+  readonly verificationTier: CapabilityVerificationTier;
+  readonly rankingKey: readonly [number, string];
+  readonly verifiedRequired: readonly CapabilityName[];
+  readonly requiredCount: number;
+  readonly profileStatus?: HarnessProfile["status"];
+  readonly lifecycle?: HarnessProfile["lifecycle"];
+}
+
 type RoutableHarnessProfile = Pick<HarnessProfile, "id" | "capabilities"> &
   Partial<Pick<HarnessProfile, "status" | "lifecycle">>;
 
@@ -67,6 +76,39 @@ function verifiedCapabilities(
 
 function compareStableIds(left: string, right: string): number {
   return left < right ? -1 : left > right ? 1 : 0;
+}
+
+/**
+ * Returns the complete, pure set of ranking inputs for one profile. This is
+ * also used by explainability callers so a non-qualifying candidate can be
+ * described without inventing a second ranking policy.
+ */
+export function capabilityRankingInputs(
+  profile: RoutableHarnessProfile,
+  requirements: TaskRequirements | readonly CapabilityName[],
+): CapabilityRankingInputs {
+  const required = requiredCapabilities(requirements);
+  const verified = verifiedCapabilities(profile.capabilities);
+  const verifiedTierEligible =
+    profile.status !== "stale" &&
+    profile.lifecycle !== "discovered";
+  const verifiedRequired = verifiedTierEligible
+    ? required.filter((capability) => verified.has(capability))
+    : [];
+  const fullyVerified =
+    required.length > 0 &&
+    verifiedTierEligible &&
+    required.every((capability) => verified.has(capability));
+  const tier = fullyVerified ? 1 : 0;
+
+  return {
+    verificationTier: fullyVerified ? "verified" : "discovered",
+    rankingKey: [tier, profile.id],
+    verifiedRequired,
+    requiredCount: required.length,
+    ...(profile.status === undefined ? {} : { profileStatus: profile.status }),
+    ...(profile.lifecycle === undefined ? {} : { lifecycle: profile.lifecycle }),
+  };
 }
 
 /**
@@ -124,17 +166,11 @@ export function rankCapabilityMatches(
   return profiles
     .map((profile): RankedCapabilityMatch => {
       const match = matchRequiredCapabilities(profile, required);
-      const verified = verifiedCapabilities(profile.capabilities);
-      const fullyVerified =
-        required.length > 0 &&
-        profile.status !== "stale" &&
-        profile.lifecycle !== "discovered" &&
-        required.every((capability) => verified.has(capability));
-      const tier = fullyVerified ? 1 : 0;
+      const ranking = capabilityRankingInputs(profile, required);
       return {
         ...match,
-        verificationTier: fullyVerified ? "verified" : "discovered",
-        rankingKey: [tier, profile.id],
+        verificationTier: ranking.verificationTier,
+        rankingKey: ranking.rankingKey,
       };
     })
     .filter((candidate) => candidate.qualifies)

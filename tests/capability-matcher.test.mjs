@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  capabilityRankingInputs,
   matchCapabilities,
   matchRequiredCapabilities,
   matchesRequiredCapabilities,
@@ -161,4 +162,73 @@ test("ranks qualifying candidates deterministically across capability and verifi
     rankCapabilityMatches(profiles, { requires: ["headless"] }),
     rankCapabilityMatches([...profiles].reverse(), { requires: ["headless"] }),
   );
+});
+
+test("reports stable ranking inputs for every candidate state", () => {
+  const cases = [
+    {
+      name: "verified",
+      profile: {
+        id: "verified",
+        status: "available",
+        lifecycle: "registered",
+        capabilities: [{
+          ...observation("headless"),
+          verification: { status: "passed" },
+        }],
+      },
+      expected: {
+        verificationTier: "verified",
+        rankingKey: [1, "verified"],
+        verifiedRequired: ["headless"],
+      },
+    },
+    {
+      name: "stale discovered",
+      profile: {
+        id: "stale",
+        status: "stale",
+        lifecycle: "registered",
+        capabilities: [{
+          ...observation("headless"),
+          verification: { status: "passed" },
+        }],
+      },
+      expected: {
+        verificationTier: "discovered",
+        rankingKey: [0, "stale"],
+        verifiedRequired: [],
+      },
+    },
+    {
+      name: "missing",
+      profile: {
+        id: "missing",
+        status: "available",
+        lifecycle: "registered",
+        capabilities: [observation("mcp")],
+      },
+      expected: {
+        verificationTier: "discovered",
+        rankingKey: [0, "missing"],
+        verifiedRequired: [],
+      },
+    },
+  ];
+
+  for (const scenario of cases) {
+    const ranking = capabilityRankingInputs(
+      scenario.profile,
+      { requires: ["headless"] },
+    );
+    assert.deepEqual(
+      {
+        verificationTier: ranking.verificationTier,
+        rankingKey: ranking.rankingKey,
+        verifiedRequired: ranking.verifiedRequired,
+      },
+      scenario.expected,
+      scenario.name,
+    );
+  }
 });

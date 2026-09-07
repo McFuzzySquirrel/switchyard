@@ -78,10 +78,32 @@ failure diagnostics, and terminate the process group (or Windows process
 tree) for timeout and cancellation.
 
 ### Phase 2: CLI Integration
-- [ ] Connect routing to adapter execution.
-- [ ] Define exit-code taxonomy.
-- [ ] Add human/JSON result serializers.
-- [ ] Add dry-run mode.
+- [x] Connect routing to adapter execution.
+- [x] Define exit-code taxonomy.
+- [x] Add human/JSON result serializers.
+- [x] Add dry-run mode.
+
+`switchyard run` (`src/commands/run.ts`) connects a deterministic routing
+decision to adapter execution. It calls `explain` for selection — never
+reimplementing matching or ranking — then resolves the selected harness ID
+against a `HarnessAdapterRegistry` (the built-in registry by default, or an
+injected one for embedding/tests). For a normal run, before calling `execute`, it checks
+`adapter.supportedOperations.execute` and reports `status: "unavailable"`
+with `failureCategory: "unavailable"` for a missing or non-executing
+adapter, without launching a process; a defensive catch handles
+`UnsupportedOperationError` the same way if an adapter's own guard fires.
+`RunCommandResult` statuses are `success`, `dry-run`, `no-match`,
+`invalid-input`, `unavailable`, and `execution-failure` (which covers a
+non-zero exit, timeout, or cancellation — the nested `execution` field keeps
+the finer-grained `ExecutionResult` status and failure category).
+`--dry-run` returns a synthetic `dry-run` execution result after routing and
+does not resolve or invoke an adapter; this keeps previews safe even when the
+selected harness is not installed.
+`CLI_EXIT_CODES.unavailable` (`5`) was added; `no-match` (`4`),
+`invalid-input` (`2`), and `execution-failure`/generic `failure` (`3`) reuse
+existing categories. See
+[ADR-0006](../adr/0006-run-command-execution-routing.md) for the full
+rationale.
 
 ## 6. Testing Strategy
 

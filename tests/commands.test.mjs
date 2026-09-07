@@ -35,6 +35,7 @@ test("CLI exposes stable exit categories for invalid input and no-match decision
     usage: 2,
     failure: 3,
     noMatch: 4,
+    unavailable: 5,
   });
 });
 
@@ -322,7 +323,7 @@ test("explain-specific options remain invalid for existing commands", async () =
   );
 
   assert.equal(exitCode, 2);
-  assert.match(stderr.join(""), /only supported by the explain command/);
+  assert.match(stderr.join(""), /only supported by the explain and run commands/);
 });
 
 test("explain produces complete, stable all-required ranking data without mutating the registry", async (t) => {

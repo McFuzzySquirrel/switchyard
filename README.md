@@ -6,7 +6,7 @@ The product direction is described in [`docs/PRD.md`](docs/PRD.md). The library 
 
 ## Current status
 
-The current completed slice covers discovery schemas, executable lookup, bounded version/help probing, built-in discovery adapters, atomic local registry persistence, refreshable registry profiles, the `discover`, `capabilities`, and `explain` commands, normalized all-required capability matching with deterministic ranking and human-readable explanations, the full vendor-neutral `HarnessAdapter` contract with explicit registration, typed local configuration with environment/executable/registry/probe-policy precedence, and the bounded process execution runtime. Built-in adapters currently support `discover` only and fail fast on other operations.
+The current completed slice covers discovery schemas, executable lookup, bounded version/help probing, built-in discovery adapters, atomic local registry persistence, refreshable registry profiles, the `discover`, `capabilities`, `explain`, and `run` commands, normalized all-required capability matching with deterministic ranking and human-readable explanations, the full vendor-neutral `HarnessAdapter` contract with explicit registration, typed local configuration with environment/executable/registry/probe-policy precedence, and the bounded process execution runtime connected to routed selection. Built-in adapters currently support `discover` only and fail fast on other operations, so `run` against them deterministically reports `unavailable` until a real `execute` implementation is registered.
 
 ## Development
 
@@ -36,6 +36,8 @@ npx switchyard capabilities --verified --json
 npx switchyard explain --requires=headless,repository-access
 npx switchyard explain --requires=headless --json
 npx switchyard capabilities --config ./switchyard.config.json
+npx switchyard run --requires=headless "fix the failing test"
+npx switchyard run --requires=headless --dry-run --json "fix the failing test"
 ```
 
 `discover` probes OpenCode and GitHub Copilot on the first run and stores a
@@ -55,6 +57,23 @@ preferred qualifying harness; fallback remains disabled unless
 `--allow-fallback` is explicitly supplied. Invalid requirements exit `2`
 (`CLI_EXIT_CODES.invalidInput`), and valid requirements with no qualifying
 selection exit `4` (`CLI_EXIT_CODES.noMatch`).
+
+`run --requires=<capabilities> [--json] [--dry-run] [--cwd PATH]
+[--timeout-ms MS] "<task>"` connects that same routing decision to adapter
+execution: it calls `explain` internally for selection, then executes the
+selected harness's `execute` operation with a controlled working directory,
+environment, timeout, and cancellation boundary (`src/harness/process.ts`).
+It never launches a harness for `no-match` or `invalid-input` decisions, and
+`--dry-run` describes the selected request without resolving or invoking an
+adapter, making previews safe even when the harness is not installed. A
+normal run whose harness is not registered, or whose adapter has not declared `execute`
+support, is reported as `status: "unavailable"` and exits `5`
+(`CLI_EXIT_CODES.unavailable`) before any process starts. A completed
+execution that failed, timed out, or was cancelled is reported as
+`status: "execution-failure"` and exits `3` (`CLI_EXIT_CODES.failure`); the
+JSON result's nested `execution` field retains the finer-grained
+`ExecutionResult` status and failure category. `no-match` and
+`invalid-input` reuse the same `4` and `2` exit categories as `explain`.
 
 JSON output is versioned with `schemaVersion: 1`. All command JSON payloads use
 the shared `serializeCommandJson` contract exported from `src/output/index.ts`;

@@ -4,6 +4,24 @@ All notable user-facing changes to Switchyard are documented here. The format fo
 
 ## [Unreleased]
 
+- Added `switchyard run --requires=<capabilities> [--json] [--dry-run]
+  [--cwd PATH] [--timeout-ms MS] "<task>"`, connecting deterministic routing
+  (`explain`) to adapter execution. `run` never reimplements matching or
+  ranking: it selects a harness through `explain`, checks
+  `adapter.supportedOperations.execute` before any process launch, and
+  reports a missing or non-executing adapter as `status: "unavailable"`
+  rather than throwing. Added the `RunCommandResult` status taxonomy
+  (`success`, `dry-run`, `no-match`, `invalid-input`, `unavailable`,
+  `execution-failure`) with versioned JSON output (`formatRunJson`) and a
+  stable human presentation (`formatRunHuman`), and extended
+  `CLI_EXIT_CODES` with `unavailable` (`5`); `no-match` (`4`),
+  `invalid-input` (`2`), and generic `failure` (`3`) are reused from the
+  existing exit-code taxonomy. See
+  [ADR-0006](docs/adr/0006-run-command-execution-routing.md).
+  Dry-run previews return a synthetic result after routing and never resolve
+  or invoke an adapter.
+- `--requires`, `--preferred-harness`, and `--allow-fallback` are now shared
+  between `explain` and `run` instead of being explain-only options.
 - Implemented the `discover` and `capabilities` commands with versioned JSON
   output, plain-text presentation, per-user registry path resolution, cached
   discovery refreshes, verified-capability filtering, and redacted diagnostics.

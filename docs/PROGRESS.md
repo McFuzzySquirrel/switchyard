@@ -1,9 +1,9 @@
 # Project Progress
 
 ## Current State
-**Phase**: VERIFICATION-AND-RESILIENCE-1
+**Phase**: HARNESS-EXECUTION-RUNTIME-1
 **Status**: In Progress
-**Last Updated**: 2026-09-07T21:20:45.760Z
+**Last Updated**: 2026-09-07T21:22:35.104Z
 **Run ID**: faef066b-e967-49ae-ba56-4dbe4255f89d
 **Harness**: copilot
 **Execution Mode**: auto
@@ -45,6 +45,8 @@
   - Files: CHANGELOG.md, README.md, docs/features/harness-execution-runtime.md, src/harness/index.ts, docs/adr/0005-bounded-process-execution.md, src/harness/process.ts, tests/process-execution.test.mjs
 - [x] Phase HARNESS-EXECUTION-RUNTIME-1, Task HARNESS-EXECUTION-RUNTIME-1.3: [ ] Implement timeout, cancellation, and descendant cleanup (@execution-runtime-engineer)
   - Files: src/harness/process.ts, tests/process-execution.test.mjs
+- [x] Phase HARNESS-EXECUTION-RUNTIME-1, Task HARNESS-EXECUTION-RUNTIME-1.4: [ ] Implement environment filtering and output capture (@execution-runtime-engineer)
+  - Files: CHANGELOG.md, src/harness/process.ts, tests/process-execution.test.mjs
 - [x] Phase VERIFICATION-AND-RESILIENCE-1, Task VERIFICATION-AND-RESILIENCE-1.1: [ ] Define read-only and mutating probe policies (@verification-resilience-engineer)
   - Files: CHANGELOG.md, docs/features/verification-and-resilience.md, package.json, src/config/resolve.ts, src/config/schema.ts, src/harness/adapter.ts, src/index.ts, src/verification/index.ts, src/verification/policy.ts, src/verification/runner.ts, tests/verification-policy.test.mjs
 - [x] Phase VERIFICATION-AND-RESILIENCE-1, Task VERIFICATION-AND-RESILIENCE-1.2: [ ] Add verification result schema and timestamps (@verification-resilience-engineer)
@@ -68,7 +70,6 @@
 - None currently running
 
 ## Remaining
-- [ ] Phase HARNESS-EXECUTION-RUNTIME-1: Phase 1: Process Runner
 - [ ] Phase HARNESS-EXECUTION-RUNTIME-2: Phase 2: CLI Integration
 - [ ] Phase VERIFICATION-AND-RESILIENCE-2: Phase 2: Routing Integration
 - [ ] Phase MULTI-HARNESS-COMPOSITION-1: Phase 1: Workflow Model

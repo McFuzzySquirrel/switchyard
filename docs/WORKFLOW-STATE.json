@@ -1,12 +1,12 @@
 {
   "runId": "faef066b-e967-49ae-ba56-4dbe4255f89d",
   "startedAt": "2026-09-07T19:10:17.558Z",
-  "lastUpdatedAt": "2026-09-07T21:20:45.758Z",
+  "lastUpdatedAt": "2026-09-07T21:22:35.102Z",
   "manifestPath": "/home/mcfuzzysquirrel/Projects/switchyard/docs/EXECUTION-MANIFEST.json",
   "manifestVersion": "1.0",
   "harness": "copilot",
   "status": "running",
-  "currentPhase": "VERIFICATION-AND-RESILIENCE-1",
+  "currentPhase": "HARNESS-EXECUTION-RUNTIME-1",
   "tasks": {
     "DISCOVERY-AND-REGISTRY-1.1": {
       "taskId": "DISCOVERY-AND-REGISTRY-1.1",
@@ -384,10 +384,21 @@
     },
     "HARNESS-EXECUTION-RUNTIME-1.4": {
       "taskId": "HARNESS-EXECUTION-RUNTIME-1.4",
-      "status": "pending",
+      "status": "complete",
       "ownerAgent": "execution-runtime-engineer",
-      "attempt": 0,
-      "outputFiles": []
+      "attempt": 1,
+      "outputFiles": [
+        "CHANGELOG.md",
+        "src/harness/process.ts",
+        "tests/process-execution.test.mjs"
+      ],
+      "startedAt": "2026-09-07T21:20:45.785Z",
+      "completedAt": "2026-09-07T21:22:35.102Z",
+      "agentOutput": "● skill(safe-subprocess-fixtures)\n\nI’m inspecting the existing process contract, tests, and project scripts before making the environment/output changes.\n\n● List directory src/harness\n  └ 9 files found\n\n● Read process-execution.test.mjs\n  │ tests/process-execution.test.mjs\n  └ 110 lines read\n\n● Read process.ts\n  │ src/harness/process.ts\n  └ 307 lines read\n\n● Read process-fixture-playbook.md\n  │ .github/skills/safe-subprocess-fixtures/references/process-fixture-playbook.md\n  └ 67 lines read\n\n● Read package.json\n  └ 33 lines read\n\n● Read adapter.ts\n  │ src/harness/adapter.ts\n  └ 371 lines read\n\n● Read probe.ts\n  │ src/discovery/probe.ts\n  └ 493 lines read\n\n● Read index.ts\n  │ src/index.ts\n  └ 8 lines read\n\n/ Search (grep)\n  │ \"environmentPolicy|maxOutputLength|stdoutTruncated|executeProcess|runProcess\" in *.{ts,mjs}\n  │ (src, tests)\n  └ 102 lines found\n\n● Inspect current changes (shell)\n  │ git status --short && git diff -- src/harness/process.ts tests/process-execution.test.mjs\n  └ 3 lines…\n\n● Run focused process tests (shell)\n  │ npm test -- --test-name-pattern='process|adapter conformance'\n  └ 566 lines…\n\n/ Search (grep)\n  │ \"environment filtering|output capture|environmentPolicy|execution runtime|output\" in *.{md,json}\n  │ (docs, README.md)\n  └ 87 lines found\n\n● Inspect process history and worktree (shell)\n  │ git log --oneline -8 -- src/harness/process.ts && git diff --stat && git status --short\n  └ 8 lines…\n\n● Read 0005-bounded-process-execution.md\n  │ docs/adr/0005-bounded-process-execution.md\n  └ 38 lines read\n\n● Read PRD.md\n  │ docs/PRD.md\n  └ L380:425 (46 lines read)\n\n● Read README.md\n  └ L90:135 (46 lines read)\n\n● Read index.ts\n  │ src/harness/index.ts\n  └ 8 lines read\n\n● Review prior process runtime implementation (shell)\n  │ git show 1d0f268:src/harness/process.ts | sed -n '1,260p'\n  └ 261 lines…\n\nThe runtime already has the core boundary from the prior execution slice; I’m tightening one unsafe edge case now: a direct request for zero output must mean “capture nothing,” not silently fall back to the 64 KiB default. I’m also expanding the focused fixture assertions to prove allow/deny behavior and independent stream bounds.\n\n● Edit\n  │ Edit src/harness/process.ts\n  └ Edit tests/process-execution.test.mjs\n\n● Edit\n  └ Edit tests/process-execution.test.mjs\n\n● Read CHANGELOG.md\n  └ L1:40 (40 lines read)\n\n● Run TypeScript typecheck (shell)\n  │ npm run typecheck\n  └ 3 lines…\n\n● Run execution runtime tests (shell)\n  │ npm test -- --test-name-pattern='executeProcess'\n  └ 23 lines…\n\n● Inspect focused test failure (shell)\n  │ tail -80 /tmp/1788816124224-copilot-tool-output-105796-aed7b05c-b202-43bc-9f32-8cf14c05adf6.txt\n  └ 81 lines…\n\n● Locate failed assertion (shell)\n  │ grep -A14 -B4 -n 'not ok'\n  │ /tmp/1788816124224-copilot-tool-output-105796-aed7b05c-b202-43bc-9f32-8cf14c05adf6.txt\n  └ 20 lines…\n\n● Edit\n  └ Edit tests/process-execution.test.mjs\n\n● Edit\n  └ Edit CHANGELOG.md\n\nThe focused test exposed only an overly short fixture payload, not a runtime defect; I corrected the fixture and documented the now-explicit zero-limit contract. I’m running the required project checks together.\n\n● Run documentation governance tests (shell)\n  │ npm run test:docs\n  └ 26 lines…\n\n● Run TypeScript typecheck (shell)\n  │ npm run typecheck\n  └ 3 lines…\n\n● Run full test suite (shell)\n  │ npm test\n  └ 23 lines…\n\n● Confirm full test result (shell)\n  │ tail -20 /tmp/1788816146412-copilot-tool-output-105796-d3ed9000-6f51-4ffa-ac54-d29efd5d8917.txt\n  └ 21 lines…\n\n● Review final changes (shell)\n  │ git diff -- src/harness/process.ts tests/process-execution.test.mjs CHANGELOG.md && git status\n  │ --short\n  └ 113 lines…\n\nImplemented environment filtering and bounded output capture improvements.\n\n**Changed files**\n- `src/harness/process.ts`\n  - Allows `maxOutputLength: 0` to intentionally capture no output while preserving truncation metadata.\n- `tests/process-execution.test.mjs`\n  - Verifies allow/deny environment behavior.\n  - Verifies zero-length capture.\n  - Verifies independent stdout/stderr limits and truncation markers.\n- `CHANGELOG.md`\n  - Documented the zero-output-limit behavior.\n\nAll tests, documentation checks, and TypeScript typechecking pass.\n\n",
+      "artifactId": "work-harness-execution-runtime-1-4-001",
+      "inputArtifactIds": [
+        "work-harness-execution-runtime-1-3-001"
+      ]
     },
     "HARNESS-EXECUTION-RUNTIME-2.1": {
       "taskId": "HARNESS-EXECUTION-RUNTIME-2.1",

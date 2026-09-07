@@ -31,6 +31,8 @@ All notable user-facing changes to Switchyard are documented here. The format fo
   with direct argv spawning, controlled environment inheritance, per-stream
   output limits, redacted diagnostics, timeout/cancellation classification,
   and process-tree cleanup.
+- Clarified that an execution output limit of zero intentionally captures no
+  output while preserving truncation metadata.
 - Added the vendor-neutral execution request/result contract with controlled
   working-directory and environment-policy fields, safe stdin/cancellation
   inputs, bounded output metadata, lifecycle status, and stable failure

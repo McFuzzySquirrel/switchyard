@@ -24,9 +24,9 @@ test("executeProcess captures bounded output and applies environment policy", as
 
   const result = await executeProcess(script, [], {
     task: "ignored by the process boundary",
-    environmentPolicy: { inherit: false, allow: ["VISIBLE"] },
+    environmentPolicy: { inherit: false, allow: ["VISIBLE"], deny: ["SECRET"] },
     env: { VISIBLE: "yes", SECRET: "TOKEN_123" },
-    maxOutputLength: 12,
+    maxOutputLength: 128,
     nonInteractive: true,
   });
 
@@ -34,10 +34,49 @@ test("executeProcess captures bounded output and applies environment policy", as
   assert.equal(result.status, "succeeded");
   assert.equal(result.failureCategory, "none");
   assert.equal(result.exitCode, 0);
-  assert.equal(result.stdout.length <= 12, true);
-  assert.equal(result.stderr.length <= 12, true);
+  assert.equal(result.stdout, "stdout:yes:");
+  assert.equal(result.stderr, "key=");
+  assert.equal(result.stdoutTruncated, false);
+  assert.equal(result.stderrTruncated, false);
+  assert.equal(result.stderr.includes("TOKEN_123"), false);
+  assert.equal(result.stdout.includes("TOKEN_123"), false);
+});
+
+test("executeProcess treats zero as a valid output limit", async (t) => {
+  const directory = await mkdtemp(join(tmpdir(), "switchyard-execution-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const script = await makeScript(directory, "large-output.sh", 'printf "0123456789"');
+
+  const result = await executeProcess(script, [], {
+    task: "zero-output",
+    maxOutputLength: 0,
+  });
+
+  assert.equal(result.succeeded, true);
+  assert.equal(result.stdout, "");
+  assert.equal(result.stdoutTruncated, true);
+});
+
+test("executeProcess bounds stdout and stderr independently", async (t) => {
+  const directory = await mkdtemp(join(tmpdir(), "switchyard-execution-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const script = await makeScript(
+    directory,
+    "large-output.sh",
+    'printf "abcdefghijklmnopqrst"; printf "uvwxyz0123456789abcd" >&2',
+  );
+
+  const result = await executeProcess(script, [], {
+    task: "bounded-output",
+    maxOutputLength: 16,
+  });
+
+  assert.equal(result.stdout.length, 16);
+  assert.equal(result.stderr.length, 16);
   assert.equal(result.stdoutTruncated, true);
   assert.equal(result.stderrTruncated, true);
+  assert.equal(result.stdout.endsWith("[truncated]"), true);
+  assert.equal(result.stderr.endsWith("[truncated]"), true);
 });
 
 test("executeProcess distinguishes nonzero exit, timeout, cancellation, and dry run", async (t) => {

@@ -49,6 +49,12 @@ function positiveLimit(value: number | undefined, fallback: number): number {
     : Math.floor(value);
 }
 
+function nonNegativeLimit(value: number | undefined, fallback: number): number {
+  return value === undefined || !Number.isFinite(value) || value < 0
+    ? fallback
+    : Math.floor(value);
+}
+
 function buildEnvironment(
   policy: ExecutionEnvironmentPolicy | undefined,
   explicit: Readonly<Record<string, string | undefined>> | undefined,
@@ -159,7 +165,7 @@ export async function executeProcess(
   request: ExecutionRequest,
 ): Promise<ExecutionResult> {
   const startedAt = performance.now();
-  const maxOutputLength = positiveLimit(
+  const maxOutputLength = nonNegativeLimit(
     request.maxOutputLength,
     DEFAULT_EXECUTION_MAX_OUTPUT_LENGTH,
   );

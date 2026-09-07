@@ -107,10 +107,22 @@ const resolved = resolveHarnessRuntimeConfig("opencode", config, { executable: c
 const adapter = createOpenCodeAdapter(resolved);
 ```
 
+`resolveHarnessRuntimeConfig` emits a single normalized `executable` plus
+`executableSource` (`override` for explicit/env values, `configured` for the
+local file). Pass that resolved object to the adapter factory; do not pass a
+different executable to individual methods. The compatibility
+`configuredExecutable` field remains available for discovery-only consumers
+when the configuration-file value wins precedence, but new full-adapter code
+should treat `executable` as the one shared override for discovery,
+verification, execution, resume, and fork.
+
 For embedded callers, `discover({ configPath, env, adapters })` loads the same
-typed file and applies the resolved per-harness options before probing. This
-keeps executable and probe-policy overrides consistent without requiring each
-adapter to parse configuration independently.
+typed file and applies the resolved per-harness options before probing.
+`capabilities({ configPath })` and `explain({ configPath })` also use the
+configuration file's `registryPath` when no explicit `registryPath` or
+`SWITCHYARD_REGISTRY_PATH` is supplied. This keeps executable, probe-policy,
+and registry-location overrides consistent without requiring each adapter or
+command to parse configuration independently.
 
 Every configurable field — executable location, probe timeout, maximum output length, and the mutating-probe policy flag — resolves with the **same precedence**: an explicit call-time value (for example, a CLI flag), then an environment variable, then the local configuration file, then a built-in default. Nothing skips a tier.
 
@@ -124,7 +136,11 @@ Every configurable field — executable location, probe timeout, maximum output 
 
 `<HARNESS>` is the harness id upper-cased with non-alphanumeric characters replaced by `_` (for example, `opencode` → `OPENCODE`).
 
-The local configuration file lives at the platform-appropriate path returned by `defaultConfigPath()` (override with `SWITCHYARD_CONFIG_PATH` or an explicit path passed to `resolveConfigPath`/`loadSwitchyardConfig`). It is a JSON document validated against the typed schema in `src/config/schema.ts`:
+The local configuration file lives at the platform-appropriate path returned
+by `defaultConfigPath()` (override with `--config`,
+`SWITCHYARD_CONFIG_PATH`, or an explicit path passed to
+`resolveConfigPath`/`loadSwitchyardConfig`). It is a JSON document validated
+against the typed schema in `src/config/schema.ts`:
 
 ```json
 {

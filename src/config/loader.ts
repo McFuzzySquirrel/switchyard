@@ -87,9 +87,15 @@ export function resolveConfigPath(
     throw new TypeError("Configuration path must be a non-empty local path without NUL characters");
   }
   const env = options.env ?? process.env;
-  const configured =
-    explicitPath ??
-    environmentValue(env, "SWITCHYARD_CONFIG_PATH", options.platform ?? DEFAULT_PLATFORM);
+  const envValue = environmentValue(
+    env,
+    "SWITCHYARD_CONFIG_PATH",
+    options.platform ?? DEFAULT_PLATFORM,
+  );
+  if (explicitPath === undefined && envValue !== undefined && envValue.includes("\u0000")) {
+    throw new TypeError("Configuration path from SWITCHYARD_CONFIG_PATH must not contain NUL characters");
+  }
+  const configured = explicitPath ?? (envValue === "" ? undefined : envValue);
   return resolve(configured ?? defaultConfigPath(options));
 }
 

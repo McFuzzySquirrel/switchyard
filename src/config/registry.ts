@@ -76,7 +76,14 @@ export function resolveRegistryPath(
     throw new TypeError("Registry path must be a non-empty local path without NUL characters");
   }
   const env = options.env ?? process.env;
-  const configured = explicitPath ??
-    environmentValue(env, "SWITCHYARD_REGISTRY_PATH", options.platform ?? DEFAULT_PLATFORM);
+  const envValue = environmentValue(
+    env,
+    "SWITCHYARD_REGISTRY_PATH",
+    options.platform ?? DEFAULT_PLATFORM,
+  );
+  if (explicitPath === undefined && envValue !== undefined && envValue.includes("\u0000")) {
+    throw new TypeError("Registry path from SWITCHYARD_REGISTRY_PATH must not contain NUL characters");
+  }
+  const configured = explicitPath ?? (envValue === "" ? undefined : envValue);
   return resolve(configured ?? defaultRegistryPath(options));
 }

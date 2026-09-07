@@ -48,6 +48,7 @@ interface ParsedArguments {
   readonly preferredHarness?: string;
   readonly allowFallback: boolean;
   readonly registryPath?: string;
+  readonly configPath?: string;
   readonly harnessId?: string;
   readonly staleAfterMs?: number;
   readonly executable?: string;
@@ -87,6 +88,7 @@ function parseArguments(args: readonly string[]): ParsedArguments {
   let preferredHarness: string | undefined;
   let allowFallback = false;
   let registryPath: string | undefined;
+  let configPath: string | undefined;
   let harnessId: string | undefined;
   let staleAfterMs: number | undefined;
   let executable: string | undefined;
@@ -125,6 +127,10 @@ function parseArguments(args: readonly string[]): ParsedArguments {
         break;
       case "--registry":
         registryPath = valueAfter(args, index, "--registry");
+        index += 1;
+        break;
+      case "--config":
+        configPath = valueAfter(args, index, "--config");
         index += 1;
         break;
       case "--harness-id":
@@ -170,6 +176,7 @@ function parseArguments(args: readonly string[]): ParsedArguments {
     ...(preferredHarness === undefined ? {} : { preferredHarness }),
     allowFallback,
     ...(registryPath === undefined ? {} : { registryPath }),
+    ...(configPath === undefined ? {} : { configPath }),
     ...(harnessId === undefined ? {} : { harnessId }),
     ...(staleAfterMs === undefined ? {} : { staleAfterMs }),
     ...(executable === undefined ? {} : { executable }),
@@ -192,6 +199,7 @@ function printHelp(): string {
     "  --preferred-harness <id>  prefer a qualifying harness (explain)",
     "  --allow-fallback          allow fallback when the preferred harness misses requirements",
     "  --registry <path>         override the local registry path",
+    "  --config <path>           read local configuration from this file",
     "  --harness-id <id>         refresh one adapter (discover)",
     "  --executable <path>       override the executable for discovery",
     "  --stale-after-ms <ms>     mark older cached profiles as stale",
@@ -205,6 +213,7 @@ function commandOptions(
   if (parsed.command === "discover") {
     const options: DiscoverCommandOptions = {
       ...(parsed.registryPath === undefined ? {} : { registryPath: parsed.registryPath }),
+      ...(parsed.configPath === undefined ? {} : { configPath: parsed.configPath }),
       ...(parsed.refresh ? { refresh: true } : {}),
       ...(parsed.harnessId === undefined ? {} : { harnessId: parsed.harnessId }),
       ...(parsed.staleAfterMs === undefined ? {} : { staleAfterMs: parsed.staleAfterMs }),
@@ -215,6 +224,7 @@ function commandOptions(
   if (parsed.command === "capabilities") {
     return {
       ...(parsed.registryPath === undefined ? {} : { registryPath: parsed.registryPath }),
+      ...(parsed.configPath === undefined ? {} : { configPath: parsed.configPath }),
       ...(parsed.verified ? { verified: true } : {}),
       ...(parsed.staleAfterMs === undefined ? {} : { staleAfterMs: parsed.staleAfterMs }),
     };
@@ -222,6 +232,7 @@ function commandOptions(
   const requires = (parsed.requires ?? "").split(",").map((item) => item.trim());
   return {
     ...(parsed.registryPath === undefined ? {} : { registryPath: parsed.registryPath }),
+    ...(parsed.configPath === undefined ? {} : { configPath: parsed.configPath }),
     requirements: {
       schemaVersion: 1,
       requires,

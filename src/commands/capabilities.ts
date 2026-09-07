@@ -14,10 +14,18 @@ import {
   type DiscoveryCommandStatus,
 } from "./discover.ts";
 import { serializeCommandJson } from "../output/json.ts";
-import { resolveRegistryPath } from "../config/registry.ts";
+import {
+  loadSwitchyardConfig,
+  resolveEffectiveRegistryPath,
+  type SwitchyardConfig,
+} from "../config/index.ts";
 
 export interface CapabilitiesCommandOptions {
   readonly registryPath?: RegistryPath;
+  /** Explicit local configuration file; `SWITCHYARD_CONFIG_PATH` is used otherwise. */
+  readonly configPath?: string | URL;
+  /** Pre-loaded configuration, useful for embedding and tests. */
+  readonly config?: SwitchyardConfig;
   readonly verified?: boolean;
   readonly staleAfterMs?: number;
   readonly now?: () => Date;
@@ -89,10 +97,12 @@ function presentationProfile(
 export async function capabilities(
   options: CapabilitiesCommandOptions = {},
 ): Promise<CapabilitiesCommandResult> {
-  const registryPath = resolveRegistryPath(
-    options.registryPath,
-    { env: options.env },
-  );
+  const config = options.config ?? await loadSwitchyardConfig(options.configPath, {
+    env: options.env,
+  });
+  const registryPath = resolveEffectiveRegistryPath(options.registryPath, config, {
+    env: options.env,
+  });
   const cached = await readRegistry(registryPath);
   const registry: LocalRegistry | undefined = cached === undefined
     ? undefined

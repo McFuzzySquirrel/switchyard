@@ -1,9 +1,9 @@
 # Project Progress
 
 ## Current State
-**Phase**: DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-2
+**Phase**: ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-2
 **Status**: In Progress
-**Last Updated**: 2026-09-07T20:56:29.180Z
+**Last Updated**: 2026-09-07T21:05:01.844Z
 **Run ID**: faef066b-e967-49ae-ba56-4dbe4255f89d
 **Harness**: copilot
 **Execution Mode**: auto
@@ -45,6 +45,8 @@
   - Files: docs/features/adapter-extensibility-and-configuration.md, tests/adapter-conformance.test.mjs, tests/fixtures/adapters/conformance-harness.mjs
 - [x] Phase ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-2, Task ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-2.1: [ ] Define configuration file and environment overrides (@adapter-platform-engineer)
   - Files: README.md, docs/adapter-development.md, docs/features/adapter-extensibility-and-configuration.md, src/commands/discover.ts, tests/commands.test.mjs
+- [x] Phase ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-2, Task ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-2.2: [ ] Implement harness executable overrides and registry location (@adapter-platform-engineer)
+  - Files: CHANGELOG.md, README.md, docs/adapter-development.md, docs/features/adapter-extensibility-and-configuration.md, docs/features/discovery-and-registry.md, src/cli.ts, src/commands/capabilities.ts, src/commands/discover.ts, src/commands/explain.ts, src/config/loader.ts, src/config/registry.ts, src/config/resolve.ts, src/harness/discovery-adapter.ts, tests/adapter-conformance.test.mjs, tests/commands.test.mjs, tests/harness-config.test.mjs
 
 ## Current Task
 - None currently running

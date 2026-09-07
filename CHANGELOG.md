@@ -51,6 +51,9 @@ All notable user-facing changes to Switchyard are documented here. The format fo
   explicit-override > environment-variable > configuration-file > default
   consistently across executable, timeout, output-length, mutating-probe
   policy, and registry-path fields.
+- Normalized executable overrides into one resolved adapter field with a
+  preserved source (`override` or `configured`), and made `capabilities` and
+  `explain` honor the typed configuration file's registry location.
 - Added `docs/adapter-development.md` covering adapter lifecycle,
   registration, testing, error handling, and security expectations, and
   ADR-0002 recording the adapter contract and configuration precedence

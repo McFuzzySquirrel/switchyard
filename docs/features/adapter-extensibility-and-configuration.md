@@ -36,7 +36,7 @@
 
 ## 4. UI / Interaction Design
 
-Configuration uses a documented local file and environment overrides. Adapter diagnostics identify the adapter ID and supported operations without exposing secrets. Built-in adapters are registered explicitly.
+Configuration uses a documented local file, `--config`/`SWITCHYARD_CONFIG_PATH`, and environment overrides. Registry-reading commands share the same registry-location precedence, and adapter executable overrides are normalized once before discovery, verification, or execution observe them. Adapter diagnostics identify the adapter ID and supported operations without exposing secrets. Built-in adapters are registered explicitly.
 
 ## 5. Implementation Tasks
 

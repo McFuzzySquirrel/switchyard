@@ -1,5 +1,8 @@
+import { posix, win32 } from "node:path";
+
 import { ConfigValidationError, type ConfigIssue, type SwitchyardConfig } from "./schema.ts";
 import { resolveRegistryPath, type RegistryPathOptions } from "./registry.ts";
+import type { ExecutableSource } from "../discovery/schema.ts";
 
 export type ConfigResolutionPlatform = "darwin" | "linux" | "win32";
 
@@ -25,17 +28,38 @@ export interface HarnessRuntimeOverrides {
   readonly platform?: ConfigResolutionPlatform;
 }
 
+export interface ResolvedExecutableOverride {
+  /**
+   * The single, normalized executable override every adapter operation on
+   * the constructed instance must use. When the containing
+   * `executableOverride` is absent, adapters search PATH using their
+   * built-in command.
+   */
+  readonly executable: string;
+  /** How discovery should report the executable once it is located. */
+  readonly source: Extract<ExecutableSource, "override" | "configured">;
+  /** Field that supplied the value, suitable for actionable diagnostics. */
+  readonly field: string;
+}
+
 /**
  * A single harness's fully resolved runtime configuration. `executable`
- * carries the highest-precedence (explicit or environment) override and
- * `configuredExecutable` carries the local-config-file value; both map
- * directly onto `HarnessDiscoveryOptions`, so passing this object's fields
- * to discovery, verification, and execution guarantees the same resolved
- * location is used everywhere.
+ * is the one normalized executable override selected from explicit,
+ * environment, or local configuration values; `executableSource` preserves
+ * whether discovery should report it as an explicit override or a configured
+ * executable. Passing this object to an adapter factory gives discovery,
+ * verification, and execution the same executable without re-resolving.
+ *
+ * `configuredExecutable` is retained as a compatibility alias for older
+ * discovery-only wiring. New callers should prefer `executable` plus
+ * `executableSource`/`executableOverride`.
  */
 export interface ResolvedHarnessRuntimeConfig {
   readonly harnessId: string;
+  readonly executableOverride?: ResolvedExecutableOverride;
   readonly executable?: string;
+  readonly executableSource?: Extract<ExecutableSource, "override" | "configured">;
+  readonly executableField?: string;
   readonly configuredExecutable?: string;
   readonly cwd?: string;
   readonly env?: Readonly<Record<string, string | undefined>>;
@@ -47,6 +71,7 @@ export interface ResolvedHarnessRuntimeConfig {
 export const DEFAULT_PROBE_TIMEOUT_MS = 5000;
 export const DEFAULT_PROBE_MAX_OUTPUT_LENGTH = 8192;
 export const DEFAULT_ALLOW_MUTATING_PROBES = false;
+const MAX_EXECUTABLE_PATH_LENGTH = 4096;
 
 function environmentKeySegment(harnessId: string): string {
   return harnessId.toUpperCase().replace(/[^A-Z0-9]/g, "_");
@@ -64,6 +89,91 @@ function readEnv(
   }
   const value = env[name];
   return value === undefined || value.length === 0 ? undefined : value;
+}
+
+function validateExecutableValue(
+  value: string,
+  field: string,
+  issues: ConfigIssue[],
+): boolean {
+  if (value.length === 0) {
+    issues.push({ path: field, message: "must be a non-empty string" });
+    return false;
+  }
+  if (value.length > MAX_EXECUTABLE_PATH_LENGTH) {
+    issues.push({
+      path: field,
+      message: `must be at most ${MAX_EXECUTABLE_PATH_LENGTH} characters`,
+    });
+    return false;
+  }
+  if (value.includes("\u0000")) {
+    issues.push({ path: field, message: "must not contain NUL characters" });
+    return false;
+  }
+  return true;
+}
+
+function normalizeExecutablePath(
+  value: string,
+  cwd: string,
+  platform: ConfigResolutionPlatform,
+): string {
+  const pathApi = platform === "win32" ? win32 : posix;
+  return pathApi.normalize(pathApi.isAbsolute(value) ? value : pathApi.resolve(cwd, value));
+}
+
+function resolveExecutableOverride(
+  harnessId: string,
+  config: SwitchyardConfig,
+  overrides: HarnessRuntimeOverrides,
+  env: Readonly<Record<string, string | undefined>>,
+  platform: ConfigResolutionPlatform,
+  issues: ConfigIssue[],
+): ResolvedExecutableOverride | undefined {
+  const segment = environmentKeySegment(harnessId);
+  const envName = `SWITCHYARD_${segment}_EXECUTABLE`;
+  const envExecutable = readEnv(env, envName, platform);
+  const harnessConfig = config.harnesses?.[harnessId];
+  const cwd = overrides.cwd ?? process.cwd();
+
+  const candidates: readonly {
+    readonly value: string | undefined;
+    readonly source: Extract<ExecutableSource, "override" | "configured">;
+    readonly field: string;
+  }[] = [
+    {
+      value: overrides.executable,
+      source: "override",
+      field: `overrides.${harnessId}.executable`,
+    },
+    {
+      value: envExecutable,
+      source: "override",
+      field: `env.${envName}`,
+    },
+    {
+      value: harnessConfig?.executable,
+      source: "configured",
+      field: `$.harnesses.${harnessId}.executable`,
+    },
+  ];
+
+  for (const candidate of candidates) {
+    if (candidate.value === undefined) {
+      continue;
+    }
+    if (!validateExecutableValue(candidate.value, candidate.field, issues)) {
+      return undefined;
+    }
+    return {
+      executable: normalizeExecutablePath(candidate.value, cwd, platform),
+      source: candidate.source,
+      field: candidate.field,
+    };
+  }
+
+  return undefined;
 }
 
 function parseEnvPositiveInteger(
@@ -120,9 +230,14 @@ export function resolveHarnessRuntimeConfig(
   const segment = environmentKeySegment(harnessId);
   const harnessConfig = config.harnesses?.[harnessId];
 
-  const envExecutable = readEnv(env, `SWITCHYARD_${segment}_EXECUTABLE`, platform);
-  const executable = overrides.executable ?? envExecutable;
-  const configuredExecutable = harnessConfig?.executable;
+  const executableOverride = resolveExecutableOverride(
+    harnessId,
+    config,
+    overrides,
+    env,
+    platform,
+    issues,
+  );
 
   const envTimeoutMs =
     parseEnvPositiveInteger(env, `SWITCHYARD_${segment}_PROBE_TIMEOUT_MS`, platform, issues) ??
@@ -164,8 +279,13 @@ export function resolveHarnessRuntimeConfig(
 
   return {
     harnessId,
-    ...(executable === undefined ? {} : { executable }),
-    ...(configuredExecutable === undefined ? {} : { configuredExecutable }),
+    ...(executableOverride === undefined ? {} : { executableOverride }),
+    ...(executableOverride === undefined ? {} : { executable: executableOverride.executable }),
+    ...(executableOverride === undefined ? {} : { executableSource: executableOverride.source }),
+    ...(executableOverride === undefined ? {} : { executableField: executableOverride.field }),
+    ...(executableOverride?.source === "configured"
+      ? { configuredExecutable: executableOverride.executable }
+      : {}),
     ...(overrides.cwd === undefined ? {} : { cwd: overrides.cwd }),
     ...(overrides.env === undefined ? {} : { env: overrides.env }),
     timeoutMs,

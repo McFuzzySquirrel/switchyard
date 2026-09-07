@@ -150,8 +150,15 @@ test("resolves per-harness executable and probe policy with explicit > environme
 
   // File value applies when nothing else overrides it.
   const fileOnly = resolveHarnessRuntimeConfig("opencode", config, {}, {});
+  assert.equal(fileOnly.executable, "/config/opencode");
+  assert.equal(fileOnly.executableSource, "configured");
+  assert.equal(fileOnly.executableField, "$.harnesses.opencode.executable");
+  assert.deepEqual(fileOnly.executableOverride, {
+    executable: "/config/opencode",
+    source: "configured",
+    field: "$.harnesses.opencode.executable",
+  });
   assert.equal(fileOnly.configuredExecutable, "/config/opencode");
-  assert.equal(fileOnly.executable, undefined);
   assert.equal(fileOnly.timeoutMs, 6000);
   assert.equal(fileOnly.maxOutputLength, 2048);
   assert.equal(fileOnly.allowMutatingProbes, false);
@@ -163,7 +170,9 @@ test("resolves per-harness executable and probe policy with explicit > environme
     SWITCHYARD_ALLOW_MUTATING_PROBES: "true",
   });
   assert.equal(envOverridden.executable, "/env/opencode");
-  assert.equal(envOverridden.configuredExecutable, "/config/opencode");
+  assert.equal(envOverridden.executableSource, "override");
+  assert.equal(envOverridden.executableField, "env.SWITCHYARD_OPENCODE_EXECUTABLE");
+  assert.equal(envOverridden.configuredExecutable, undefined);
   assert.equal(envOverridden.timeoutMs, 9000);
   assert.equal(envOverridden.allowMutatingProbes, true);
 
@@ -178,6 +187,8 @@ test("resolves per-harness executable and probe policy with explicit > environme
     },
   );
   assert.equal(explicit.executable, "/explicit/opencode");
+  assert.equal(explicit.executableSource, "override");
+  assert.equal(explicit.executableField, "overrides.opencode.executable");
   assert.equal(explicit.timeoutMs, 1234);
 
   // With nothing configured at all, built-in defaults apply.
@@ -187,6 +198,54 @@ test("resolves per-harness executable and probe policy with explicit > environme
   assert.equal(defaults.timeoutMs, 5000);
   assert.equal(defaults.maxOutputLength, 8192);
   assert.equal(defaults.allowMutatingProbes, false);
+});
+
+test("normalizes one executable override before adapter construction", () => {
+  const config = {
+    schemaVersion: 1,
+    harnesses: {
+      opencode: { executable: "bin/opencode-from-config" },
+    },
+  };
+
+  const fromConfig = resolveHarnessRuntimeConfig(
+    "opencode",
+    config,
+    { cwd: "/workspace/project" },
+    {},
+  );
+  assert.equal(fromConfig.executable, "/workspace/project/bin/opencode-from-config");
+  assert.equal(fromConfig.executableSource, "configured");
+
+  const fromEnv = resolveHarnessRuntimeConfig(
+    "opencode",
+    config,
+    { cwd: "/workspace/project" },
+    { SWITCHYARD_OPENCODE_EXECUTABLE: "tools/opencode-from-env" },
+  );
+  assert.equal(fromEnv.executable, "/workspace/project/tools/opencode-from-env");
+  assert.equal(fromEnv.executableSource, "override");
+
+  const explicit = resolveHarnessRuntimeConfig(
+    "opencode",
+    config,
+    { cwd: "/workspace/project", executable: "tools/opencode-explicit" },
+    { SWITCHYARD_OPENCODE_EXECUTABLE: "tools/opencode-from-env" },
+  );
+  assert.equal(explicit.executable, "/workspace/project/tools/opencode-explicit");
+  assert.equal(explicit.executableSource, "override");
+});
+
+test("normalizes executable overrides with the selected platform path semantics", () => {
+  const resolved = resolveHarnessRuntimeConfig(
+    "copilot",
+    {},
+    { cwd: "C:\\workspace\\project", platform: "win32" },
+    { SWITCHYARD_COPILOT_EXECUTABLE: "bin\\copilot.exe" },
+  );
+
+  assert.equal(resolved.executable, "C:\\workspace\\project\\bin\\copilot.exe");
+  assert.equal(resolved.executableSource, "override");
 });
 
 test("rejects an unparseable environment override with an actionable, variable-named diagnostic", () => {
@@ -221,6 +280,27 @@ test("rejects an unparseable environment override with an actionable, variable-n
     (error) => {
       assert.ok(error instanceof ConfigValidationError);
       assert.equal(error.issues[0].path, "env.SWITCHYARD_ALLOW_MUTATING_PROBES");
+      return true;
+    },
+  );
+
+  assert.throws(
+    () =>
+      resolveHarnessRuntimeConfig(
+        "opencode",
+        {},
+        {},
+        { SWITCHYARD_OPENCODE_EXECUTABLE: "bad\0path-token=should-not-leak" },
+      ),
+    (error) => {
+      assert.ok(error instanceof ConfigValidationError);
+      assert.deepEqual(error.issues, [
+        {
+          path: "env.SWITCHYARD_OPENCODE_EXECUTABLE",
+          message: "must not contain NUL characters",
+        },
+      ]);
+      assert.equal(error.message.includes("should-not-leak"), false);
       return true;
     },
   );

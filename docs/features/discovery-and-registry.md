@@ -50,7 +50,7 @@
 
 ## 4. UI / Interaction Design
 
-`switchyard discover [--refresh] [--json]` reports each configured harness, executable path, version, discovered capabilities, and status. `switchyard capabilities [--verified] [--json]` reads the registry without launching a task. Both commands use a versioned JSON payload (`schemaVersion: 1`) and equivalent plain-text output; `--registry` and `SWITCHYARD_REGISTRY_PATH` select an explicit local registry.
+`switchyard discover [--refresh] [--json]` reports each configured harness, executable path, version, discovered capabilities, and status. `switchyard capabilities [--verified] [--json]` reads the registry without launching a task. Registry-reading commands use a versioned JSON payload (`schemaVersion: 1`) and equivalent plain-text output; `--registry`, `SWITCHYARD_REGISTRY_PATH`, and `registryPath` in the selected configuration file choose the local registry, while `--config`/`SWITCHYARD_CONFIG_PATH` selects that configuration file.
 
 ## 5. Implementation Tasks
 

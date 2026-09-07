@@ -343,6 +343,32 @@ esac`,
     assert.equal(profile.executableSource, "override");
     assert.equal(profile.version, "2.0.0");
   });
+
+  test(`${label} built-in adapter preserves normalized configured executable source`, async (t) => {
+    const directory = await mkdtemp(join(tmpdir(), "switchyard-adapter-configured-"));
+    t.after(() => rm(directory, { recursive: true, force: true }));
+    const configured = await makeScript(
+      directory,
+      `configured-${command}`,
+      `
+case "$1" in
+  --version) echo "${command} 3.0.0"; exit 0 ;;
+  --help) echo "Usage: ${command}"; exit 0 ;;
+  *) exit 32 ;;
+esac`,
+    );
+
+    const adapter = createAdapter({
+      executable: configured,
+      executableSource: "configured",
+      env: { PATH: "" },
+      now: fixedClock,
+    });
+    const profile = await adapter.discover();
+    assert.equal(profile.executable, configured);
+    assert.equal(profile.executableSource, "configured");
+    assert.equal(profile.version, "3.0.0");
+  });
 }
 
 test("createBuiltInHarnessAdapters resolves each harness's configuration independently", () => {

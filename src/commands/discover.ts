@@ -147,6 +147,9 @@ export async function discover(
       const runtime = resolveHarnessRuntimeConfig(adapter.id, config, options, options.env);
       return adapter.discover({
         ...(runtime.executable === undefined ? {} : { executable: runtime.executable }),
+        ...(runtime.executableSource === undefined
+          ? {}
+          : { executableSource: runtime.executableSource }),
         ...(runtime.configuredExecutable === undefined
           ? {}
           : { configuredExecutable: runtime.configuredExecutable }),

@@ -133,9 +133,105 @@ test("discover loads the local adapter config and applies per-harness environmen
   });
 
   assert.equal(received.executable, "/env/fixture");
-  assert.equal(received.configuredExecutable, "/config/fixture");
+  assert.equal(received.executableSource, "override");
+  assert.equal(received.configuredExecutable, undefined);
   assert.equal(received.timeoutMs, 9000);
   assert.equal(received.maxOutputLength, 2048);
+});
+
+test("discover passes a normalized config-file executable as the configured source", async (t) => {
+  const directory = await mkdtemp(join(tmpdir(), "switchyard-configured-executable-command-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const configPath = join(directory, "config.json");
+  const registryPath = join(directory, "registry.json");
+  await writeFile(
+    configPath,
+    JSON.stringify({
+      schemaVersion: 1,
+      registryPath,
+      harnesses: { fixture: { executable: "bin/fixture" } },
+    }),
+  );
+
+  let received;
+  const adapter = {
+    id: "fixture",
+    discover: async (options) => {
+      received = options;
+      return profile();
+    },
+  };
+
+  await discover({
+    configPath,
+    adapters: [adapter],
+    cwd: directory,
+    now: () => new Date(observedAt),
+  });
+
+  assert.equal(received.executable, join(directory, "bin/fixture"));
+  assert.equal(received.executableSource, "configured");
+  assert.equal(received.configuredExecutable, join(directory, "bin/fixture"));
+});
+
+test("capabilities and explain honor registryPath from the typed config file", async (t) => {
+  const directory = await mkdtemp(join(tmpdir(), "switchyard-configured-registry-command-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const configPath = join(directory, "config.json");
+  const registryPath = join(directory, "registry-from-config.json");
+  await writeFile(
+    configPath,
+    JSON.stringify({
+      schemaVersion: 1,
+      registryPath,
+    }),
+  );
+  await discover({
+    registryPath,
+    adapters: [{ id: "fixture", discover: async () => profile("fixture", "passed") }],
+    now: () => new Date(observedAt),
+  });
+
+  const capabilitiesResult = await capabilities({
+    configPath,
+    verified: true,
+    now: () => new Date(observedAt),
+  });
+  assert.equal(capabilitiesResult.registryPath, registryPath);
+  assert.equal(capabilitiesResult.status, "success");
+  assert.equal(capabilitiesResult.harnesses[0].id, "fixture");
+
+  const explainResult = await explain({
+    configPath,
+    requirements: { requires: ["headless"] },
+    now: () => new Date(observedAt),
+  });
+  assert.equal(explainResult.registryPath, registryPath);
+  assert.equal(explainResult.selectedHarness, "fixture");
+});
+
+test("CLI --config applies registryPath from the selected configuration file", async (t) => {
+  const directory = await mkdtemp(join(tmpdir(), "switchyard-cli-configured-registry-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const configPath = join(directory, "config.json");
+  const registryPath = join(directory, "registry-from-cli-config.json");
+  await writeFile(configPath, JSON.stringify({ schemaVersion: 1, registryPath }));
+  await discover({
+    registryPath,
+    adapters: [{ id: "fixture", discover: async () => profile("fixture", "passed") }],
+    now: () => new Date(observedAt),
+  });
+
+  const stdout = [];
+  const exitCode = await runCli(
+    ["capabilities", "--config", configPath, "--json"],
+    { stdout: (text) => stdout.push(text), stderr: () => {} },
+  );
+
+  assert.equal(exitCode, 0);
+  const payload = JSON.parse(stdout.join(""));
+  assert.equal(payload.registryPath, registryPath);
+  assert.equal(payload.harnesses[0].id, "fixture");
 });
 
 test("capabilities reads cached data without launching a harness and filters verified observations", async (t) => {

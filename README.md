@@ -35,16 +35,20 @@ npx switchyard capabilities
 npx switchyard capabilities --verified --json
 npx switchyard explain --requires=headless,repository-access
 npx switchyard explain --requires=headless --json
+npx switchyard capabilities --config ./switchyard.config.json
 ```
 
 `discover` probes OpenCode and GitHub Copilot on the first run and stores a
 per-user registry. Subsequent runs use the cached snapshot unless `--refresh`
-is supplied. Use `--registry PATH` or `SWITCHYARD_REGISTRY_PATH` for an
-explicit local file, which is useful in CI and tests. A missing or malformed
-harness is reported in its profile and does not discard successful profiles.
-`capabilities` only reads the registry; it never launches a harness.
-`explain` also only reads the registry and never launches a harness or mutates
-the registry. It reports every candidate's matched and missing capabilities,
+is supplied. Use `--registry PATH`, `SWITCHYARD_REGISTRY_PATH`, or
+`registryPath` in the typed configuration file for an explicit local file,
+which is useful in CI and tests. `--config PATH` (or
+`SWITCHYARD_CONFIG_PATH`) selects a non-default configuration file for every
+registry-reading command. A missing or malformed harness is reported in its
+profile and does not discard successful profiles. `capabilities` only reads
+the registry; it never launches a harness. `explain` also only reads the
+registry and never launches a harness or mutates the registry. It reports
+every candidate's matched and missing capabilities,
 verification state, deterministic ranking inputs, and selection reason.
 Requirements are all-required. Use `--preferred-harness=<id>` to request a
 preferred qualifying harness; fallback remains disabled unless
@@ -104,7 +108,10 @@ integration testing without a real vendor binary.
 Executable location, probe timeout, maximum probe output length, the
 mutating-probe policy flag, and the registry path all resolve through the same
 precedence: an explicit call-time value, then an environment variable, then a
-typed local configuration file, then a built-in default. See
+typed local configuration file, then a built-in default. Executable values are
+normalized once into a single resolved override before adapter construction,
+so discovery, future verification, and future execution share the same
+executable and source classification. See
 [`docs/adapter-development.md`](docs/adapter-development.md) for the full
 precedence table, the adapter lifecycle, registration, testing, error
 handling, and security expectations, and
@@ -112,12 +119,12 @@ handling, and security expectations, and
 for the design rationale. Configuration diagnostics always identify the
 adapter and field path and never echo the submitted value.
 
-The `discover` command loads the per-user JSON configuration automatically.
-Use `SWITCHYARD_CONFIG_PATH` (or `discover({ configPath })` as a library
-caller) to select another file. Per-harness environment variables such as
-`SWITCHYARD_OPENCODE_EXECUTABLE` and
-`SWITCHYARD_OPENCODE_PROBE_TIMEOUT_MS` override matching file entries without
-changing adapter code.
+The `discover`, `capabilities`, and `explain` commands load the per-user JSON
+configuration automatically. Use `--config PATH`, `SWITCHYARD_CONFIG_PATH`, or
+the corresponding `{ configPath }` library option to select another file.
+Per-harness environment variables such as `SWITCHYARD_OPENCODE_EXECUTABLE`
+and `SWITCHYARD_OPENCODE_PROBE_TIMEOUT_MS` override matching file entries
+without changing adapter code.
 
 ## Repository layout
 

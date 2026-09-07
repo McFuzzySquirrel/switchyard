@@ -25,11 +25,20 @@ import {
 } from "./adapter.ts";
 
 /**
- * Options shared by all discovery adapters. `executable` is an explicit
- * per-invocation override and is checked before configured locations or PATH.
+ * Options shared by all discovery adapters. `executable` is the resolved
+ * executable override selected by configuration resolution and is checked
+ * before PATH. `executableSource` preserves whether it came from an
+ * explicit/env override or from the local configuration file.
  */
 export interface HarnessDiscoveryOptions {
+  /**
+   * One normalized executable override selected by configuration resolution.
+   * When `executableSource` is omitted, this is treated as an explicit
+   * override for backwards-compatible callers.
+   */
   readonly executable?: string;
+  readonly executableSource?: Extract<HarnessProfile["executableSource"], "override" | "configured">;
+  /** @deprecated Prefer `executable` with `executableSource: "configured"`. */
   readonly configuredExecutable?: string;
   readonly cwd?: string;
   readonly env?: Readonly<Record<string, string | undefined>>;
@@ -140,7 +149,7 @@ function unavailableLocation(
   options: HarnessDiscoveryOptions,
 ): { readonly executable: string; readonly source: HarnessProfile["executableSource"] } {
   if (options.executable !== undefined) {
-    return { executable: options.executable, source: "override" };
+    return { executable: options.executable, source: options.executableSource ?? "override" };
   }
   if (options.configuredExecutable !== undefined) {
     return { executable: options.configuredExecutable, source: "configured" };
@@ -179,10 +188,14 @@ export function createHarnessDiscoveryAdapter(
         );
       }
       const lookupOptions: ExecutableLookupOptions = {
-        ...(options.executable === undefined ? {} : { overrides: [options.executable] }),
-        ...(options.configuredExecutable === undefined
+        ...(options.executable === undefined || options.executableSource === "configured"
           ? {}
-          : { configured: [options.configuredExecutable] }),
+          : { overrides: [options.executable] }),
+        ...(options.executable !== undefined && options.executableSource === "configured"
+          ? { configured: [options.executable] }
+          : options.configuredExecutable === undefined
+            ? {}
+            : { configured: [options.configuredExecutable] }),
         ...(options.cwd === undefined ? {} : { cwd: options.cwd }),
         ...(options.env === undefined ? {} : { env: options.env }),
       };

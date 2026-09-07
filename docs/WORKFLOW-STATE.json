@@ -1,12 +1,12 @@
 {
   "runId": "faef066b-e967-49ae-ba56-4dbe4255f89d",
   "startedAt": "2026-09-07T19:10:17.558Z",
-  "lastUpdatedAt": "2026-09-07T20:56:29.178Z",
+  "lastUpdatedAt": "2026-09-07T21:05:01.842Z",
   "manifestPath": "/home/mcfuzzysquirrel/Projects/switchyard/docs/EXECUTION-MANIFEST.json",
   "manifestVersion": "1.0",
   "harness": "copilot",
   "status": "running",
-  "currentPhase": "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-2",
+  "currentPhase": "ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-2",
   "tasks": {
     "DISCOVERY-AND-REGISTRY-1.1": {
       "taskId": "DISCOVERY-AND-REGISTRY-1.1",
@@ -494,10 +494,34 @@
     },
     "ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-2.2": {
       "taskId": "ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-2.2",
-      "status": "pending",
+      "status": "complete",
       "ownerAgent": "adapter-platform-engineer",
-      "attempt": 0,
-      "outputFiles": []
+      "attempt": 1,
+      "outputFiles": [
+        "CHANGELOG.md",
+        "README.md",
+        "docs/adapter-development.md",
+        "docs/features/adapter-extensibility-and-configuration.md",
+        "docs/features/discovery-and-registry.md",
+        "src/cli.ts",
+        "src/commands/capabilities.ts",
+        "src/commands/discover.ts",
+        "src/commands/explain.ts",
+        "src/config/loader.ts",
+        "src/config/registry.ts",
+        "src/config/resolve.ts",
+        "src/harness/discovery-adapter.ts",
+        "tests/adapter-conformance.test.mjs",
+        "tests/commands.test.mjs",
+        "tests/harness-config.test.mjs"
+      ],
+      "startedAt": "2026-09-07T20:56:29.204Z",
+      "completedAt": "2026-09-07T21:05:01.842Z",
+      "agentOutput": "● skill(adapter-conformance)\n\n● Adapter-platform-engineer (model: gpt-5.6-luna) Implement executable overrides               8m 5s\n  │ Implemented harness executable overrides and registry location support.\n  │ Edit\n  │   └ Edit src/config/resolve.ts\n  └ Confirm final diff is clean (shell)\n      │ git --no-pager diff --check && git status --short\n      └ 19 lines…\n\n● Review implemented changes and whitespace (shell)\n  │ git status --short && git diff --stat && git diff --check\n  └ 38 lines…\n\nImplemented harness executable overrides and registry location support.\n\n**Changed files:**\n- `src/config/resolve.ts`\n- `src/config/loader.ts`\n- `src/config/registry.ts`\n- `src/harness/discovery-adapter.ts`\n- `src/cli.ts`\n- `src/commands/discover.ts`\n- `src/commands/capabilities.ts`\n- `src/commands/explain.ts`\n- `tests/harness-config.test.mjs`\n- `tests/commands.test.mjs`\n- `tests/adapter-conformance.test.mjs`\n- `README.md`\n- `CHANGELOG.md`\n- `docs/adapter-development.md`\n- `docs/features/adapter-extensibility-and-configuration.md`\n- `docs/features/discovery-and-registry.md`\n\nThe implementation adds deterministic executable precedence, shared override handling across discovery and execution, configurable registry paths, `--config` support, path validation/redaction, Windows path normalization, and expanded conformance coverage. No new files were created. Existing `docs/EXECUTION-AUDIT.jsonl` and `docs/WORKFLOW-STATE.json` modifications were preserved untouched.\n\n",
+      "artifactId": "work-adapter-extensibility-and-configuration-2-2-001",
+      "inputArtifactIds": [
+        "work-adapter-extensibility-and-configuration-2-1-001"
+      ]
     },
     "ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-2.3": {
       "taskId": "ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-2.3",

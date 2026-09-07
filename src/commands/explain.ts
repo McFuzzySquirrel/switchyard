@@ -17,7 +17,11 @@ import {
   type TaskRequirements,
 } from "../discovery/schema.ts";
 import { redactSecrets } from "../discovery/probe.ts";
-import { resolveRegistryPath } from "../config/registry.ts";
+import {
+  loadSwitchyardConfig,
+  resolveEffectiveRegistryPath,
+  type SwitchyardConfig,
+} from "../config/index.ts";
 import {
   DECISION_SCHEMA_VERSION,
   type DecisionJsonEnvelope,
@@ -106,6 +110,10 @@ export class ExplainInputError extends Error {
 
 export interface ExplainCommandOptions {
   readonly registryPath?: RegistryPath;
+  /** Explicit local configuration file; `SWITCHYARD_CONFIG_PATH` is used otherwise. */
+  readonly configPath?: string | URL;
+  /** Pre-loaded configuration, useful for embedding and tests. */
+  readonly config?: SwitchyardConfig;
   readonly requirements: unknown;
   readonly staleAfterMs?: number;
   readonly now?: () => Date;
@@ -232,7 +240,12 @@ export async function explain(
     throw error;
   }
 
-  const registryPath = resolveRegistryPath(options.registryPath, { env: options.env });
+  const config = options.config ?? await loadSwitchyardConfig(options.configPath, {
+    env: options.env,
+  });
+  const registryPath = resolveEffectiveRegistryPath(options.registryPath, config, {
+    env: options.env,
+  });
   const cached = await readRegistry(registryPath);
   const registry = cached === undefined
     ? undefined

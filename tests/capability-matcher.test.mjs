@@ -232,3 +232,36 @@ test("reports stable ranking inputs for every candidate state", () => {
     );
   }
 });
+
+test("only passed verification can promote a qualifying candidate", () => {
+  const statuses = [
+    "not-requested",
+    "failed",
+    "skipped",
+    "timed-out",
+    "unavailable",
+  ];
+  const profiles = statuses.map((status) => ({
+    id: status,
+    capabilities: [{
+      ...observation("headless"),
+      verification: { status },
+    }],
+  }));
+  profiles.push({
+    id: "passed",
+    capabilities: [{
+      ...observation("headless"),
+      verification: { status: "passed" },
+    }],
+  });
+
+  const ranked = rankCapabilityMatches(profiles, { requires: ["headless"] });
+
+  assert.equal(ranked[0].harnessId, "passed");
+  assert.equal(ranked[0].verificationTier, "verified");
+  assert.deepEqual(
+    ranked.slice(1).map((candidate) => candidate.verificationTier),
+    statuses.map(() => "discovered"),
+  );
+});

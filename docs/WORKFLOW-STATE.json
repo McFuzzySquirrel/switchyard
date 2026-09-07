@@ -1,12 +1,12 @@
 {
   "runId": "faef066b-e967-49ae-ba56-4dbe4255f89d",
   "startedAt": "2026-09-07T19:10:17.558Z",
-  "lastUpdatedAt": "2026-09-07T21:22:35.102Z",
+  "lastUpdatedAt": "2026-09-07T21:23:46.807Z",
   "manifestPath": "/home/mcfuzzysquirrel/Projects/switchyard/docs/EXECUTION-MANIFEST.json",
   "manifestVersion": "1.0",
   "harness": "copilot",
   "status": "running",
-  "currentPhase": "HARNESS-EXECUTION-RUNTIME-1",
+  "currentPhase": "VERIFICATION-AND-RESILIENCE-2",
   "tasks": {
     "DISCOVERY-AND-REGISTRY-1.1": {
       "taskId": "DISCOVERY-AND-REGISTRY-1.1",
@@ -500,10 +500,17 @@
     },
     "VERIFICATION-AND-RESILIENCE-2.1": {
       "taskId": "VERIFICATION-AND-RESILIENCE-2.1",
-      "status": "pending",
+      "status": "complete",
       "ownerAgent": "routing-policy-engineer",
-      "attempt": 0,
-      "outputFiles": []
+      "attempt": 1,
+      "outputFiles": [
+        "docs/features/verification-and-resilience.md",
+        "tests/capability-matcher.test.mjs"
+      ],
+      "startedAt": "2026-09-07T21:22:35.127Z",
+      "completedAt": "2026-09-07T21:23:46.807Z",
+      "agentOutput": "● codegraph_explore (MCP: codegraph) · candidate ranking verification state routing policy rank can…\n  └ The project at /home/mcfuzzysquirrel/Projects/switchyard isn't indexed with c...\n\n● Read package.json\n  └ 33 lines read\n\n/ Search (glob)\n  │ \"**/*routing*\"\n  └ 8 files found\n\n/ Search (grep)\n  │ \"rank|ranking|candidate|verification\" (src, test, tests)\n  └ 36 files found\n\n● Read matcher.ts\n  │ src/capabilities/matcher.ts\n  └ 194 lines read\n\n● Read deterministic-routing-and-explainability.md\n  │ docs/features/deterministic-routing-and-explainability.md\n  └ 99 lines read\n\n● Read policy.ts\n  │ src/verification/policy.ts\n  └ 121 lines read\n\n● Read verification-schema.test.mjs\n  │ tests/verification-schema.test.mjs\n  └ 44 lines read\n\n● Read index.ts\n  │ src/capabilities/index.ts\n  └ 2 lines read\n\n● Read decision.ts\n  │ src/output/decision.ts\n  └ 49 lines read\n\n● Read capability-matcher.test.mjs\n  │ tests/capability-matcher.test.mjs\n  └ 234 lines read\n\n● Read explain.ts\n  │ src/commands/explain.ts\n  └ 386 lines read\n\n● Read schema.ts\n  │ src/discovery/schema.ts\n  └ L1:260 (260 lines read)\n\n● Read commands.test.mjs\n  │ tests/commands.test.mjs\n  └ L1:260 (260 lines read)\n\n/ Search (grep)\n  │ \"rankingKey|verificationTier|rankCapabilityMatches|verificationOrder\" in *.ts\n  └ 27 lines found\n\n● Inspect worktree and routing history (shell)\n  │ git status --short && git log -5 --oneline -- src/capabilities/matcher.ts\n  │ src/commands/explain.ts\n  └ 8 lines…\n\n/ Search (grep)\n  │ \"rankCapabilityMatches|capabilityRankingInputs|verificationTier\" in *.mjs (tests)\n  └ 11 lines found\n\n/ Search (grep)\n  │ \"verification state|verification-aware|ranking|rank\" in *.md (docs)\n  └ 17 lines found\n\n● Inspect recent implementation commits (shell)\n  │ git log --all --oneline --decorate -15\n  └ 16 lines…\n\n● Read verification-and-resilience.md\n  │ docs/features/verification-and-resilience.md\n  └ 99 lines read\n\n● Read CHANGELOG.md\n  └ 101 lines read\n\n/ Search (grep)\n  │ \"verificationStatus|verification.*rank|ranking\" (tests/commands.test.mjs)\n  └ 40 lines found\n\n● Inspect deterministic ranking implementation (shell)\n  │ git show --stat --oneline 3e2ac7f && git show --format= -- src/capabilities/matcher.ts 3e2ac7f |\n  │ head -240\n  └ 11 lines…\n\n/ Search (grep)\n  │ \"status: \"(failed|skipped|timed-out|unavailable|not-requested)\"\" in *.mjs (tests)\n  └ 5 lines found\n\n/ Search (grep)\n  │ \"VERIFICATION-AND-RESILIENCE|Include verification state\" in *.jsonl (docs)\n  └ 21 lines found\n\n● Review committed matcher behavior (shell)\n  │ git show 3e2ac7f:src/capabilities/matcher.ts | sed -n '1,240p'\n  └ 159 lines…\n\n● Trace ranking implementation provenance (shell)\n  │ git blame -L 1,220 -- src/capabilities/matcher.ts | tail -120\n  └ 121 lines…\n\n● List matcher changes (shell)\n  │ git log --all --oneline -- src/capabilities/matcher.ts\n  └ 4 lines…\n\n● Run project validation (shell)\n  │ npm test && npm run typecheck && npm run test:docs\n  └ 23 lines…\n\nThe routing layer already exposes verification-aware ranking and explainability data; I’m aligning the verification feature documentation with that implemented contract and adding coverage for non-passing verification states so the task is explicitly complete.\n\n● Edit\n  │ Edit docs/features/verification-and-resilience.md\n  └ Edit tests/capability-matcher.test.mjs\n\n● Inspect final focused diff (shell)\n  │ git diff --check && git diff -- docs/features/verification-and-resilience.md\n  │ tests/capability-matcher.test.mjs\n  └ 55 lines…\n\n● Run typecheck and documentation tests (shell)\n  │ npm run typecheck && npm run test:docs\n  └ 30 lines…\n\n● Run ranking and verification tests (shell)\n  │ npm test -- --test-name-pattern='verification|ranking'\n  └ 23 lines…\n\nImplemented verification-aware candidate ranking coverage.\n\n**Changed files**\n- `tests/capability-matcher.test.mjs` — Added regression coverage ensuring only `passed` verification promotes a qualifying candidate; failed, skipped, timed-out, unavailable, and not-requested states remain discovered-tier.\n- `docs/features/verification-and-resilience.md` — Marked verification-aware candidate ranking complete.\n\nThe existing matcher ranks fully verified candidates ahead of discovery-only candidates and exposes the verification tier in explainability output.\n\n",
+      "artifactId": "work-verification-and-resilience-2-1-001"
     },
     "VERIFICATION-AND-RESILIENCE-2.2": {
       "taskId": "VERIFICATION-AND-RESILIENCE-2.2",

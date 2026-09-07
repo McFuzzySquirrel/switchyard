@@ -46,7 +46,7 @@
 - [x] Implement bounded adapter probes.
 
 ### Phase 2: Routing Integration
-- [ ] Include verification state in candidate ranking.
+- [x] Include verification state in candidate ranking.
 - [ ] Implement explicit preferred-harness and fallback policy.
 - [ ] Add warnings for probes that may incur cost or external access.
 

@@ -6,7 +6,9 @@ import test from "node:test";
 
 import {
   capabilities,
+  formatCapabilitiesJson,
   discover,
+  formatDiscoverJson,
   formatCapabilitiesHuman,
   formatDiscoverHuman,
   runCli,
@@ -81,6 +83,9 @@ test("discover refreshes missing registries and returns a stable command payload
   assert.deepEqual(result.harnesses.map((harness) => harness.id), ["fixture"]);
   assert.equal(result.harnesses[0].capabilities[0].discovery.evidence.excerpt, "Usage: fixture --[REDACTED]");
   assert.match(formatDiscoverHuman(result), /Fixture Harness \(fixture\): available/);
+  const json = JSON.parse(formatDiscoverJson(result));
+  assert.equal(json.schemaVersion, 1);
+  assert.equal(json.harnesses[0].capabilities[0].discovery.evidence.excerpt, "Usage: fixture --[REDACTED]");
 });
 
 test("capabilities reads cached data without launching a harness and filters verified observations", async (t) => {
@@ -111,6 +116,9 @@ test("capabilities reads cached data without launching a harness and filters ver
   assert.deepEqual(result.harnesses[0].capabilities.map((item) => item.capability), ["headless"]);
   assert.equal(result.harnesses[0].capabilities[0].verification.evidence.excerpt, "[REDACTED]");
   assert.match(formatCapabilitiesHuman(result), /verification: passed/);
+  const json = JSON.parse(formatCapabilitiesJson(result));
+  assert.equal(json.command, "capabilities");
+  assert.equal(json.harnesses[0].capabilities[0].verification.evidence.excerpt, "[REDACTED]");
 });
 
 test("CLI emits JSON on stdout and uses a partial exit category for unavailable profiles", async (t) => {

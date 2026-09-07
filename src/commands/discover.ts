@@ -169,6 +169,10 @@ export const discoverHarnesses = discover;
 export const discoverCommand = discover;
 export const runDiscoverCommand = discover;
 
+export function formatDiscoverJson(result: DiscoverCommandResult): string {
+  return JSON.stringify(result, null, 2);
+}
+
 export function formatDiscoverHuman(result: DiscoverCommandResult): string {
   const lines = [
     "Switchyard discovery",

@@ -7,6 +7,8 @@ All notable user-facing changes to Switchyard are documented here. The format fo
 - Implemented the `discover` and `capabilities` commands with versioned JSON
   output, plain-text presentation, per-user registry path resolution, cached
   discovery refreshes, verified-capability filtering, and redacted diagnostics.
+- Centralized human and JSON command serializers so CLI output uses the same
+  versioned payload and redaction rules.
 
 ### Added
 

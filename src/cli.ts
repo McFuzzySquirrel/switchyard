@@ -3,15 +3,19 @@
 import { fileURLToPath } from "node:url";
 import {
   capabilities,
+  formatCapabilitiesJson,
   formatCapabilitiesHuman,
   type CapabilitiesCommandOptions,
 } from "./commands/capabilities.ts";
 import {
   discover,
+  formatDiscoverJson,
   formatDiscoverHuman,
   type DiscoverCommandOptions,
 } from "./commands/discover.ts";
 import type { HarnessDiscoveryAdapter } from "./harness/discovery-adapter.ts";
+import { redactSecrets } from "./discovery/probe.ts";
+import { COMMAND_SCHEMA_VERSION } from "./commands/discover.ts";
 
 export const CLI_EXIT_CODES = Object.freeze({
   success: 0,
@@ -197,7 +201,9 @@ export async function runCli(
         })
       : await capabilities(options as CapabilitiesCommandOptions);
     if (parsed.json) {
-      writeStdout(JSON.stringify(result, null, 2));
+      writeStdout(parsed.command === "discover"
+        ? formatDiscoverJson(result as Awaited<ReturnType<typeof discover>>)
+        : formatCapabilitiesJson(result as Awaited<ReturnType<typeof capabilities>>));
     } else {
       writeStdout(parsed.command === "discover"
         ? formatDiscoverHuman(result as Awaited<ReturnType<typeof discover>>)
@@ -210,13 +216,13 @@ export async function runCli(
     const message = error instanceof Error ? error.message : String(error);
     if (parsed.json) {
       writeStdout(JSON.stringify({
-        schemaVersion: 1,
+        schemaVersion: COMMAND_SCHEMA_VERSION,
         command: parsed.command,
         status: "error",
-        error: { message },
+        error: { message: redactSecrets(message) },
       }));
     } else {
-      writeStderr(`${parsed.command} failed: ${message}`);
+      writeStderr(`${parsed.command} failed: ${redactSecrets(message)}`);
     }
     return CLI_EXIT_CODES.failure;
   }

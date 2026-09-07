@@ -122,6 +122,10 @@ export const inspectCapabilities = capabilities;
 export const capabilitiesCommand = capabilities;
 export const runCapabilitiesCommand = capabilities;
 
+export function formatCapabilitiesJson(result: CapabilitiesCommandResult): string {
+  return JSON.stringify(result, null, 2);
+}
+
 export function formatCapabilitiesHuman(result: CapabilitiesCommandResult): string {
   const lines = [
     "Switchyard capabilities",

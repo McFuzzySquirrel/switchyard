@@ -22,8 +22,12 @@ import {
   type SwitchyardConfig,
 } from "../config/index.ts";
 import { redactSecrets } from "../discovery/probe.ts";
+import {
+  COMMAND_SCHEMA_VERSION,
+  serializeCommandJson,
+} from "../output/json.ts";
 
-export const COMMAND_SCHEMA_VERSION = 1 as const;
+export { COMMAND_SCHEMA_VERSION } from "../output/json.ts";
 
 export type DiscoveryCommandStatus = "success" | "partial" | "empty";
 
@@ -199,7 +203,7 @@ export const discoverCommand = discover;
 export const runDiscoverCommand = discover;
 
 export function formatDiscoverJson(result: DiscoverCommandResult): string {
-  return JSON.stringify(result, null, 2);
+  return serializeCommandJson(result);
 }
 
 export function formatDiscoverHuman(result: DiscoverCommandResult): string {

@@ -51,9 +51,17 @@ preferred qualifying harness; fallback remains disabled unless
 `--allow-fallback` is explicitly supplied. Invalid requirements exit `2`, and
 valid requirements with no qualifying selection exit `4`.
 
-JSON output is versioned with `schemaVersion: 1`. Human output is plain text
-with the same statuses and profile data, and diagnostics are redacted before
-either output format is emitted.
+JSON output is versioned with `schemaVersion: 1`. All command JSON payloads use
+the shared `serializeCommandJson` contract exported from `src/output/index.ts`;
+the serializer preserves command-owned fields while enforcing the common
+`schemaVersion`, `command`, and `status` envelope. The explain payload is the
+versioned routing-decision contract (`DECISION_SCHEMA_VERSION`) and keeps
+success, no-match, and invalid-input as distinct status variants. Consumers
+can use `parseDecisionJson` to validate that discriminator before applying
+command-specific validation. Human output
+is plain text with the same statuses and decision data, and diagnostics are
+redacted before either output format is emitted. New fields are additive; a
+schema-version bump is reserved for incompatible changes.
 
 ## Requirement schema
 

@@ -18,9 +18,14 @@ import {
 } from "../discovery/schema.ts";
 import { redactSecrets } from "../discovery/probe.ts";
 import { resolveRegistryPath } from "../config/registry.ts";
-import { COMMAND_SCHEMA_VERSION } from "./discover.ts";
+import {
+  DECISION_SCHEMA_VERSION,
+  type DecisionJsonEnvelope,
+  type DecisionStatus,
+} from "../output/decision.ts";
+import { serializeCommandJson } from "../output/json.ts";
 
-export type ExplainCommandStatus = "success" | "no-match";
+export type ExplainCommandStatus = Exclude<DecisionStatus, "invalid-input">;
 
 export interface ExplainVerificationInput {
   readonly capability: CapabilityName;
@@ -60,9 +65,7 @@ export interface ExplainPolicy {
   readonly fallbackUsed: boolean;
 }
 
-export interface ExplainCommandResult {
-  readonly schemaVersion: typeof COMMAND_SCHEMA_VERSION;
-  readonly command: "explain";
+export interface ExplainCommandResult extends DecisionJsonEnvelope {
   readonly status: ExplainCommandStatus;
   readonly registryPath: string;
   readonly requirements: TaskRequirements;
@@ -78,9 +81,7 @@ export interface ExplainCommandResult {
   readonly reason: string;
 }
 
-export interface ExplainInvalidInputResult {
-  readonly schemaVersion: typeof COMMAND_SCHEMA_VERSION;
-  readonly command: "explain";
+export interface ExplainInvalidInputResult extends DecisionJsonEnvelope {
   readonly status: "invalid-input";
   readonly error: {
     readonly code: "invalid-input";
@@ -284,7 +285,7 @@ export async function explain(
   }
 
   return {
-    schemaVersion: COMMAND_SCHEMA_VERSION,
+    schemaVersion: DECISION_SCHEMA_VERSION,
     command: "explain",
     status: selected === undefined ? "no-match" : "success",
     registryPath,
@@ -313,7 +314,7 @@ export const runExplainCommand = explain;
 export function formatExplainJson(
   result: ExplainCommandResult | ExplainInvalidInputResult,
 ): string {
-  return JSON.stringify(result, null, 2);
+  return serializeCommandJson(result);
 }
 
 export function formatExplainHuman(
@@ -360,7 +361,7 @@ export function explainInvalidInput(
   error: ExplainInputError,
 ): ExplainInvalidInputResult {
   return {
-    schemaVersion: COMMAND_SCHEMA_VERSION,
+    schemaVersion: DECISION_SCHEMA_VERSION,
     command: "explain",
     status: "invalid-input",
     error: {

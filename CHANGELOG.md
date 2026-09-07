@@ -9,6 +9,11 @@ All notable user-facing changes to Switchyard are documented here. The format fo
   discovery refreshes, verified-capability filtering, and redacted diagnostics.
 - Centralized human and JSON command serializers so CLI output uses the same
   versioned payload and redaction rules.
+- Added the shared versioned command JSON envelope and routing-decision
+  contract. `serializeCommandJson`, `parseCommandJson`, and
+  `parseDecisionJson` are exported for script and library consumers, while
+  `explain --json` preserves the schema-version-1 success, no-match, and
+  invalid-input variants.
 - Added `switchyard explain --requires=<capability,...> [--json]` with
   deterministic all-required matching, verified-before-discovered ranking,
   stable candidate explanations, explicit preferred-harness/fallback policy,

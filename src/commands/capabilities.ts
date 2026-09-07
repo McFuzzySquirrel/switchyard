@@ -13,6 +13,7 @@ import {
   COMMAND_SCHEMA_VERSION,
   type DiscoveryCommandStatus,
 } from "./discover.ts";
+import { serializeCommandJson } from "../output/json.ts";
 import { resolveRegistryPath } from "../config/registry.ts";
 
 export interface CapabilitiesCommandOptions {
@@ -123,7 +124,7 @@ export const capabilitiesCommand = capabilities;
 export const runCapabilitiesCommand = capabilities;
 
 export function formatCapabilitiesJson(result: CapabilitiesCommandResult): string {
-  return JSON.stringify(result, null, 2);
+  return serializeCommandJson(result);
 }
 
 export function formatCapabilitiesHuman(result: CapabilitiesCommandResult): string {

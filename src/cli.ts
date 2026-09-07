@@ -24,6 +24,7 @@ import {
 import type { HarnessDiscoveryAdapter } from "./harness/discovery-adapter.ts";
 import { redactSecrets } from "./discovery/probe.ts";
 import { COMMAND_SCHEMA_VERSION } from "./commands/discover.ts";
+import { serializeCommandJson } from "./output/json.ts";
 
 export const CLI_EXIT_CODES = Object.freeze({
   success: 0,
@@ -256,7 +257,7 @@ export async function runCli(
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
     if (explainJsonRequested(args)) {
-      writeStdout(JSON.stringify({
+      writeStdout(serializeCommandJson({
         schemaVersion: COMMAND_SCHEMA_VERSION,
         command: "explain",
         status: "invalid-input",
@@ -317,11 +318,14 @@ export async function runCli(
       return CLI_EXIT_CODES.usage;
     }
     if (parsed.json) {
-      writeStdout(JSON.stringify({
+      writeStdout(serializeCommandJson({
         schemaVersion: COMMAND_SCHEMA_VERSION,
         command: parsed.command,
         status: "error",
-        error: { message: redactSecrets(message) },
+        error: {
+          code: "command-failed",
+          message: redactSecrets(message),
+        },
       }));
     } else {
       writeStderr(`${parsed.command} failed: ${redactSecrets(message)}`);

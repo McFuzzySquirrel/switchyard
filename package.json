@@ -13,7 +13,8 @@
     "./commands": "./src/commands/index.ts",
     "./config": "./src/config/index.ts",
     "./discovery": "./src/discovery/index.ts",
-    "./harness": "./src/harness/index.ts"
+    "./harness": "./src/harness/index.ts",
+    "./output": "./src/output/index.ts"
   },
   "scripts": {
     "test": "node --experimental-strip-types --test tests/*.test.mjs",

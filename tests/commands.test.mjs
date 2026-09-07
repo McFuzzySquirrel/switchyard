@@ -16,6 +16,10 @@ import {
   explain,
   formatExplainJson,
   formatExplainHuman,
+  parseCommandJson,
+  parseDecisionJson,
+  serializeCommandJson,
+  DECISION_SCHEMA_VERSION,
   runCli,
 } from "../src/index.ts";
 
@@ -279,6 +283,56 @@ test("explain produces complete, stable all-required ranking data without mutati
     now: () => new Date(observedAt),
   });
   assert.equal(formatExplainJson(result), formatExplainJson(repeated));
+});
+
+test("explain JSON uses the shared versioned decision contract", async (t) => {
+  const directory = await mkdtemp(join(tmpdir(), "switchyard-decision-schema-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const registryPath = join(directory, "registry.json");
+  await discover({
+    registryPath,
+    adapters: [{ id: "fixture", discover: async () => profile("fixture") }],
+    now: () => new Date(observedAt),
+  });
+
+  const result = await explain({
+    registryPath,
+    requirements: { requires: ["headless"] },
+    now: () => new Date(observedAt),
+  });
+  const payload = JSON.parse(formatExplainJson(result));
+  assert.equal(payload.schemaVersion, DECISION_SCHEMA_VERSION);
+  assert.equal(payload.command, "explain");
+  assert.equal(payload.status, "success");
+  assert.equal(parseCommandJson(formatExplainJson(result)).status, "success");
+  assert.deepEqual(parseDecisionJson(formatExplainJson(result)), {
+    schemaVersion: DECISION_SCHEMA_VERSION,
+    command: "explain",
+    status: "success",
+  });
+  assert.deepEqual(
+    Object.keys(payload).slice(0, 4),
+    ["schemaVersion", "command", "status", "registryPath"],
+  );
+
+  assert.equal(
+    serializeCommandJson({
+      schemaVersion: 1,
+      command: "fixture",
+      status: "success",
+      value: "additive fields remain command-owned",
+    }),
+    JSON.stringify({
+      schemaVersion: 1,
+      command: "fixture",
+      status: "success",
+      value: "additive fields remain command-owned",
+    }, null, 2),
+  );
+  assert.throws(
+    () => parseCommandJson(JSON.stringify({ schemaVersion: 1, command: "explain" })),
+    /status must be a non-empty string/,
+  );
 });
 
 test("explain has distinct invalid-input and no-match CLI outcomes", async (t) => {

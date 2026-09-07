@@ -52,7 +52,11 @@ that harness only when it qualifies; fallback is disabled unless
 `--allow-fallback` is supplied. A successful explanation exits `0`; a
 non-qualifying request exits `4`; malformed requirements use the usage exit
 `2`. Human and JSON output carry the same decision data, and JSON uses the
-versioned command schema (`schemaVersion: 1`).
+versioned command schema (`schemaVersion: 1`). The shared output contract
+requires the stable `schemaVersion`, `command`, and `status` envelope; the
+explain-specific fields remain command-owned and additive for compatibility.
+Library consumers can use `parseDecisionJson` to validate the explain
+discriminator and status before reading candidate details.
 
 ## 5. Implementation Tasks
 

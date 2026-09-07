@@ -1,12 +1,12 @@
 {
   "runId": "faef066b-e967-49ae-ba56-4dbe4255f89d",
   "startedAt": "2026-09-07T19:10:17.558Z",
-  "lastUpdatedAt": "2026-09-07T20:53:16.537Z",
+  "lastUpdatedAt": "2026-09-07T20:56:29.178Z",
   "manifestPath": "/home/mcfuzzysquirrel/Projects/switchyard/docs/EXECUTION-MANIFEST.json",
   "manifestVersion": "1.0",
   "harness": "copilot",
   "status": "running",
-  "currentPhase": "ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-2",
+  "currentPhase": "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-2",
   "tasks": {
     "DISCOVERY-AND-REGISTRY-1.1": {
       "taskId": "DISCOVERY-AND-REGISTRY-1.1",
@@ -275,10 +275,32 @@
     },
     "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-2.2": {
       "taskId": "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-2.2",
-      "status": "pending",
+      "status": "complete",
       "ownerAgent": "switchyard-architect",
-      "attempt": 0,
-      "outputFiles": []
+      "attempt": 1,
+      "outputFiles": [
+        "CHANGELOG.md",
+        "README.md",
+        "docs/features/deterministic-routing-and-explainability.md",
+        "package.json",
+        "src/cli.ts",
+        "src/commands/capabilities.ts",
+        "src/commands/discover.ts",
+        "src/commands/explain.ts",
+        "src/index.ts",
+        "tests/commands.test.mjs",
+        "docs/adr/0003-versioned-command-json-contracts.md",
+        "src/output/decision.ts",
+        "src/output/index.ts",
+        "src/output/json.ts"
+      ],
+      "startedAt": "2026-09-07T20:53:16.561Z",
+      "completedAt": "2026-09-07T20:56:29.178Z",
+      "agentOutput": "● skill(versioned-cli-contracts)\n\n● Switchyard-architect (model: gpt-5.6-luna) Implement stable JSON schema                     2m 49s\n  │ Implemented the stable, versioned JSON decision contract for deterministic ro...\n  │ Summarize final tracked and untracked changes (shell)\n  │   │ git --no-pager diff --stat; git status --short\n  │   └ 28 lines…\n  └ update_todo todos: \"- [x] Inspect existing CLI, decision, routing, tests, docs, …\"\n      └ TODO list updated\n\n● Review implemented schema changes (shell)\n  │ git status --short && git diff --stat\n  └ 28 lines…\n\nImplemented the stable, versioned JSON decision schema.\n\n**Key changes**\n- Added shared JSON contract infrastructure under `src/output/`.\n- Added versioned decision envelopes with schema/status validation.\n- Centralized JSON serialization for `discover`, `capabilities`, `explain`, and CLI errors.\n- Preserved existing fields, exit codes, and compatibility behavior.\n- Added contract and explain-command coverage.\n- Updated `README.md`, `CHANGELOG.md`, feature documentation, and added ADR `docs/adr/0003-versioned-command-json-contracts.md`.\n\n**Validation:** 73 tests passed, typecheck passed, documentation checks passed, and `git diff --check` passed. Existing workflow audit/state modifications were preserved.\n\n",
+      "artifactId": "work-deterministic-routing-and-explainability-2-2-001",
+      "inputArtifactIds": [
+        "work-deterministic-routing-and-explainability-2-1-001"
+      ]
     },
     "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-2.3": {
       "taskId": "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-2.3",

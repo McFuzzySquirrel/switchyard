@@ -1,0 +1,35 @@
+{
+  "type": "work.deterministic-routing-and-explainability-2.2",
+  "category": "work",
+  "taskId": "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-2.2",
+  "producedBy": "switchyard-architect",
+  "status": "complete",
+  "summary": "[ ] Implement stable JSON decision schema: [ ] Implement stable JSON decision schema.",
+  "confidence": 0.9,
+  "inputs": [
+    "work-deterministic-routing-and-explainability-2-1-001"
+  ],
+  "filesChanged": [
+    "CHANGELOG.md",
+    "README.md",
+    "docs/features/deterministic-routing-and-explainability.md",
+    "package.json",
+    "src/cli.ts",
+    "src/commands/capabilities.ts",
+    "src/commands/discover.ts",
+    "src/commands/explain.ts",
+    "src/index.ts",
+    "tests/commands.test.mjs",
+    "docs/adr/0003-versioned-command-json-contracts.md",
+    "src/output/decision.ts",
+    "src/output/index.ts",
+    "src/output/json.ts"
+  ],
+  "payload": {
+    "agentOutputExcerpt": "● skill(versioned-cli-contracts)\n\n● Switchyard-architect (model: gpt-5.6-luna) Implement stable JSON schema                     2m 49s\n  │ Implemented the stable, versioned JSON decision contract for deterministic ro...\n  │ Summarize final tracked and untracked changes (shell)\n  │   │ git --no-pager diff --stat; git status --short\n  │   └ 28 lines…\n  └ update_todo todos: \"- [x] Inspect existing CLI, decision, routing, tests, docs, …\"\n      └ TODO list updated\n\n● Review implemented schema changes",
+    "taskDescription": "[ ] Implement stable JSON decision schema."
+  },
+  "nextActions": [],
+  "artifactId": "work-deterministic-routing-and-explainability-2-2-001",
+  "createdAt": "2026-09-07T20:56:29.178Z"
+}

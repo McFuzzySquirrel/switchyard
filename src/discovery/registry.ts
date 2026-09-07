@@ -11,10 +11,12 @@ import { dirname, resolve } from "node:path";
 
 import {
   assertLocalRegistry,
+  assertHarnessProfile,
   DISCOVERY_SCHEMA_VERSION,
   REGISTRY_SCHEMA_VERSION,
   SchemaValidationError,
 } from "./schema.ts";
+import { CAPABILITY_VOCABULARY_VERSION } from "../capabilities/vocabulary.ts";
 
 import type {
   CapabilityEvidence,
@@ -38,6 +40,7 @@ import type {
   VerificationObservation,
   VerificationStatus,
 } from "./schema.ts";
+import type { HarnessDiscoveryAdapter, HarnessDiscoveryOptions } from "../harness/discovery-adapter.ts";
 
 export {
   DISCOVERY_SCHEMA_VERSION,
@@ -98,6 +101,28 @@ export interface RegistryWriteOptions {
   readonly directoryMode?: number;
 }
 
+/** Options controlling cached-profile freshness and an on-demand refresh. */
+export interface RegistryRefreshOptions extends HarnessDiscoveryOptions {
+  /** Age in milliseconds after which a cached profile is marked stale. */
+  readonly staleAfterMs?: number;
+  /** Timestamp used for freshness decisions and persisted registry metadata. */
+  readonly now?: () => Date;
+  /** Refresh only this harness; omit it to refresh every supplied adapter. */
+  readonly harnessId?: string;
+}
+
+export interface RegistryRefreshResult {
+  readonly registry: LocalRegistry;
+  readonly refreshed: readonly string[];
+  readonly stale: readonly string[];
+  readonly failures: readonly RegistryRefreshFailure[];
+}
+
+export interface RegistryRefreshFailure {
+  readonly harnessId: string;
+  readonly message: string;
+}
+
 export type RegistryPersistenceErrorCode =
   | "invalid-path"
   | "not-found"
@@ -138,6 +163,7 @@ const DEFAULT_FILE_MODE = 0o600;
 const DEFAULT_DIRECTORY_MODE = 0o700;
 const WINDOWS_REPLACEMENT_RETRIES = 4;
 const WINDOWS_REPLACEMENT_DELAY_MS = 25;
+export const DEFAULT_STALE_AFTER_MS = 24 * 60 * 60 * 1000;
 
 function pathString(registryPath: RegistryPath): string {
   if (registryPath instanceof URL) {
@@ -443,6 +469,117 @@ export async function loadRegistry(registryPath: RegistryPath): Promise<LocalReg
   }
   return registry;
 }
+
+function staleProfile(profile: HarnessProfile, checkedAt: string): HarnessProfile {
+  if (profile.status === "stale") return profile;
+  const reason = `Cached discovery is stale; last checked at ${profile.availability.checkedAt}`;
+  const diagnostic: HarnessDiagnostic = {
+    code: "registry-entry-stale",
+    message: reason,
+    at: checkedAt,
+  };
+  return assertHarnessProfile({
+    ...profile,
+    status: "stale",
+    availability: { status: "stale", checkedAt, reason },
+    updatedAt: checkedAt,
+    diagnostics: [...(profile.diagnostics ?? []), diagnostic],
+  });
+}
+
+  /**
+   * Marks cached profiles older than the supplied age as stale without probing
+   * or removing them. This is deliberately pure so callers can present stale
+   * data when a harness is temporarily unavailable.
+   */
+export function markStaleEntries(
+    registry: LocalRegistry,
+    options: { readonly staleAfterMs?: number; readonly now?: () => Date } = {},
+  ): LocalRegistry {
+    const now = options.now ?? (() => new Date());
+    const checkedAt = now().toISOString();
+    const staleAfterMs = options.staleAfterMs ?? DEFAULT_STALE_AFTER_MS;
+    if (!Number.isFinite(staleAfterMs) || staleAfterMs < 0) {
+      throw new RangeError("staleAfterMs must be a finite non-negative number");
+    }
+    const cutoff = Date.parse(checkedAt) - staleAfterMs;
+    let changed = false;
+    const harnesses = registry.harnesses.map((profile) => {
+      const lastChecked = Date.parse(profile.availability.checkedAt);
+      if (profile.status === "stale" || !Number.isFinite(lastChecked) || lastChecked > cutoff) {
+        return profile;
+      }
+      changed = true;
+      return staleProfile(profile, checkedAt);
+    });
+    if (!changed) return registry;
+    return assertLocalRegistry({ ...registry, harnesses, updatedAt: checkedAt });
+  }
+
+  /**
+   * Refreshes one or all adapter profiles and atomically persists the resulting
+   * snapshot. A failing adapter never prevents other adapters or cached
+   * profiles from being retained.
+   */
+export async function refreshRegistry(
+    registryPath: RegistryPath,
+    adapters: readonly HarnessDiscoveryAdapter[],
+    options: RegistryRefreshOptions = {},
+  ): Promise<RegistryRefreshResult> {
+    const now = options.now ?? (() => new Date());
+    const refreshedAt = now().toISOString();
+    const existing = (await readRegistry(registryPath)) ?? assertLocalRegistry({
+      schemaVersion: REGISTRY_SCHEMA_VERSION,
+      vocabularyVersion: CAPABILITY_VOCABULARY_VERSION,
+      generatedAt: refreshedAt,
+      updatedAt: refreshedAt,
+      harnesses: [],
+    });
+    const fresh = markStaleEntries(existing, {
+      staleAfterMs: options.staleAfterMs,
+      now: options.now,
+    });
+    const byId = new Map(fresh.harnesses.map((profile) => [profile.id, profile]));
+    const refreshed: string[] = [];
+    const failures: RegistryRefreshFailure[] = [];
+    const selected = options.harnessId === undefined
+      ? adapters
+      : adapters.filter((adapter) => adapter.id === options.harnessId);
+
+    for (const adapter of selected) {
+      try {
+        const profile = assertHarnessProfile(await adapter.discover(options));
+        byId.set(profile.id, profile);
+        refreshed.push(profile.id);
+      } catch (error: unknown) {
+        failures.push({
+          harnessId: adapter.id,
+          message: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
+
+    if (options.harnessId !== undefined && selected.length === 0) {
+      failures.push({ harnessId: options.harnessId, message: "No discovery adapter is registered" });
+    }
+
+    const resultRegistry = assertLocalRegistry({
+      ...fresh,
+      harnesses: [...byId.values()],
+      updatedAt: refreshedAt,
+    });
+    await writeRegistry(registryPath, resultRegistry);
+    return {
+      registry: resultRegistry,
+      refreshed,
+      stale: resultRegistry.harnesses
+        .filter((profile) => profile.status === "stale")
+        .map((profile) => profile.id),
+      failures,
+    };
+  }
+
+export const refreshLocalRegistry = refreshRegistry;
 
 export const readLocalRegistry = readRegistry;
 export const writeLocalRegistry = writeRegistry;

@@ -63,7 +63,7 @@
 
 ### Phase 2: Persistence and Commands
 - [ ] Implement atomic registry reads/writes.
-- [ ] Implement refresh and stale-entry handling.
+- [x] Implement refresh and stale-entry handling.
 - [ ] Implement `discover` and `capabilities`.
 - [ ] Add human and JSON output.
 

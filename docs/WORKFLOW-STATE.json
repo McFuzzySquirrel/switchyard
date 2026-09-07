@@ -1,7 +1,7 @@
 {
   "runId": "faef066b-e967-49ae-ba56-4dbe4255f89d",
   "startedAt": "2026-09-07T19:10:17.558Z",
-  "lastUpdatedAt": "2026-09-07T20:01:52.211Z",
+  "lastUpdatedAt": "2026-09-07T20:04:32.702Z",
   "manifestPath": "/home/mcfuzzysquirrel/Projects/switchyard/docs/EXECUTION-MANIFEST.json",
   "manifestVersion": "1.0",
   "harness": "copilot",
@@ -128,10 +128,23 @@
     },
     "DISCOVERY-AND-REGISTRY-2.2": {
       "taskId": "DISCOVERY-AND-REGISTRY-2.2",
-      "status": "pending",
+      "status": "complete",
       "ownerAgent": "discovery-registry-engineer",
-      "attempt": 0,
-      "outputFiles": []
+      "attempt": 1,
+      "outputFiles": [
+        "CHANGELOG.md",
+        "README.md",
+        "docs/features/discovery-and-registry.md",
+        "src/discovery/registry.ts",
+        "tests/discovery-registry.test.mjs"
+      ],
+      "startedAt": "2026-09-07T20:01:52.240Z",
+      "completedAt": "2026-09-07T20:04:32.702Z",
+      "agentOutput": "✗ Discovery-registry-engineer Executing task\n  └ \"description\": Required\n\n● Discovery-registry-engineer (model: gpt-5.6-luna) Implement registry refresh                1m 59s\n  │ Implemented refresh and stale-entry handling for the discovery registry.\n  │ Review changed files and worktree status (shell)\n  │   │ git --no-pager diff --stat && git --no-pager status --short\n  │   └ 16 lines…\n  └ update_todo todos: \"- [x] Inspect discovery registry implementation, tests, docs…\"\n      └ TODO list updated\n\n● Read registry.ts\n  │ src/discovery/registry.ts\n  └ 586 lines read\n\n● Read discovery-registry.test.mjs\n  │ tests/discovery-registry.test.mjs\n  └ 178 lines read\n\n● Review registry refresh changes (shell)\n  │ git status --short && git diff --stat && git diff -- src/discovery/registry.ts\n  │ tests/discovery-registry.test.mjs README.md CHANGELOG.md docs/features/discovery-and-registry.md\n  └ 314 lines…\n\n● Read discovery-adapter.ts\n  │ src/harness/discovery-adapter.ts\n  └ 304 lines read\n\n● Read index.ts\n  │ src/index.ts\n  └ 3 lines read\n\n● codegraph_explore (MCP: codegraph) · HarnessDiscoveryAdapter discovery-adapter.ts src/index.ts Ha…\n  └ The project at /home/mcfuzzysquirrel/Projects/switchyard isn't indexed with c...\n\n/ Search (grep)\n  │ \"status: \"stale\"|registry-entry-stale|refreshRegistry|markStaleEntries\" (src, tests)\n  └ 14 lines found\n\n● Run documentation checks (shell)\n  │ npm run test:docs\n  └ 26 lines…\n\n● Run TypeScript typecheck (shell)\n  │ npm run typecheck\n  └ 3 lines…\n\n● Run project test suite (shell)\n  │ npm test\n  └ 236 lines…\n\nImplemented refresh and stale-entry handling for the discovery registry.\n\n**Changed files**\n- `src/discovery/registry.ts`\n  - Added configurable stale-entry marking with a 24-hour default.\n  - Added resilient single/all-adapter refresh support.\n  - Preserves cached profiles and evidence when adapters fail.\n  - Persists refreshed results atomically.\n- `tests/discovery-registry.test.mjs`\n  - Added coverage for stale marking, adapter refresh, failure handling, and profile retention.\n- `README.md`\n- `CHANGELOG.md`\n- `docs/features/discovery-and-registry.md`\n\nValidation passed with `npm test`, `npm run typecheck`, and `npm run test:docs`. Unrelated existing changes in `docs/EXECUTION-AUDIT.jsonl` and `docs/WORKFLOW-STATE.json` were left untouched.\n\n",
+      "artifactId": "work-discovery-and-registry-2-2-001",
+      "inputArtifactIds": [
+        "work-discovery-and-registry-2-1-001"
+      ]
     },
     "DISCOVERY-AND-REGISTRY-2.3": {
       "taskId": "DISCOVERY-AND-REGISTRY-2.3",

@@ -6,8 +6,10 @@ import test from "node:test";
 
 import {
   RegistryPersistenceError,
+  markStaleEntries,
   loadRegistry,
   readRegistry,
+  refreshRegistry,
   writeRegistry,
 } from "../src/index.ts";
 
@@ -112,4 +114,65 @@ test("ignores orphaned temporary files left by an interrupted writer", async (t)
   await chmod(`${path}.123.orphan.tmp`, 0o600);
 
   assert.deepEqual(await readRegistry(path), expected);
+});
+
+test("marks old cached profiles stale without discarding their evidence", () => {
+  const cached = registry();
+  const stale = markStaleEntries(cached, {
+    staleAfterMs: 60 * 60 * 1000,
+    now: () => new Date("2026-09-07T21:00:00.000Z"),
+  });
+
+  assert.equal(stale.harnesses[0].status, "stale");
+  assert.equal(stale.harnesses[0].availability.status, "stale");
+  assert.equal(stale.harnesses[0].capabilities.length, cached.harnesses[0].capabilities.length);
+  assert.equal(stale.harnesses[0].diagnostics?.[0].code, "registry-entry-stale");
+});
+
+test("refreshes selected adapters and retains unrelated profiles when one adapter fails", async (t) => {
+  const directory = await mkdtemp(join(tmpdir(), "switchyard-registry-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const path = join(directory, "registry.json");
+  await writeRegistry(path, registry("existing"));
+  const refreshed = {
+    ...registry("new-harness").harnesses[0],
+    displayName: "Refreshed Harness",
+    updatedAt: "2026-09-07T21:00:00.000Z",
+    discoveredAt: "2026-09-07T21:00:00.000Z",
+    availability: { status: "available", checkedAt: "2026-09-07T21:00:00.000Z" },
+  };
+  const adapters = [
+    { id: "new-harness", discover: async () => refreshed },
+    { id: "broken", discover: async () => { throw new Error("probe failed"); } },
+  ];
+
+  const result = await refreshRegistry(path, adapters, {
+    staleAfterMs: 24 * 60 * 60 * 1000,
+    now: () => new Date("2026-09-07T21:00:00.000Z"),
+  });
+
+  assert.deepEqual(result.refreshed, ["new-harness"]);
+  assert.deepEqual(result.failures, [{ harnessId: "broken", message: "probe failed" }]);
+  assert.deepEqual(
+    (await readRegistry(path)).harnesses.map((profile) => profile.id),
+    ["existing", "new-harness"],
+  );
+});
+
+test("reports thrown adapter failures while preserving the prior snapshot", async (t) => {
+  const directory = await mkdtemp(join(tmpdir(), "switchyard-registry-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const path = join(directory, "registry.json");
+  const expected = registry();
+  await writeRegistry(path, expected);
+
+  const result = await refreshRegistry(path, [
+    { id: "fixture", discover: async () => { throw new Error("temporary failure"); } },
+  ]);
+
+  assert.deepEqual(result.refreshed, []);
+  assert.deepEqual(result.failures, [{ harnessId: "fixture", message: "temporary failure" }]);
+  const persisted = await readRegistry(path);
+  assert.deepEqual(persisted.harnesses, expected.harnesses);
+  assert.notEqual(persisted.updatedAt, expected.updatedAt);
 });

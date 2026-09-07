@@ -3,7 +3,7 @@
 ## Current State
 **Phase**: DISCOVERY-AND-REGISTRY-2
 **Status**: In Progress
-**Last Updated**: 2026-09-07T20:01:52.212Z
+**Last Updated**: 2026-09-07T20:04:32.702Z
 **Run ID**: faef066b-e967-49ae-ba56-4dbe4255f89d
 **Harness**: copilot
 **Execution Mode**: auto
@@ -21,6 +21,8 @@
   - Files: tests/builtin-discovery-adapters.test.mjs, tests/fixtures/discovery/copilot-help.txt, tests/fixtures/discovery/opencode-help.txt
 - [x] Phase DISCOVERY-AND-REGISTRY-2, Task DISCOVERY-AND-REGISTRY-2.1: [ ] Implement atomic registry reads/writes (@discovery-registry-engineer)
   - Files: README.md, src/discovery/registry.ts, tests/discovery-registry.test.mjs
+- [x] Phase DISCOVERY-AND-REGISTRY-2, Task DISCOVERY-AND-REGISTRY-2.2: [ ] Implement refresh and stale-entry handling (@discovery-registry-engineer)
+  - Files: CHANGELOG.md, README.md, docs/features/discovery-and-registry.md, src/discovery/registry.ts, tests/discovery-registry.test.mjs
 
 ## Current Task
 - None currently running

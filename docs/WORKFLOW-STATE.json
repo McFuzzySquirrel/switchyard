@@ -1,12 +1,12 @@
 {
   "runId": "faef066b-e967-49ae-ba56-4dbe4255f89d",
   "startedAt": "2026-09-07T19:10:17.558Z",
-  "lastUpdatedAt": "2026-09-07T21:07:08.725Z",
+  "lastUpdatedAt": "2026-09-07T21:10:20.405Z",
   "manifestPath": "/home/mcfuzzysquirrel/Projects/switchyard/docs/EXECUTION-MANIFEST.json",
   "manifestVersion": "1.0",
   "harness": "copilot",
   "status": "running",
-  "currentPhase": "ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-2",
+  "currentPhase": "HARNESS-EXECUTION-RUNTIME-1",
   "tasks": {
     "DISCOVERY-AND-REGISTRY-1.1": {
       "taskId": "DISCOVERY-AND-REGISTRY-1.1",
@@ -325,10 +325,23 @@
     },
     "HARNESS-EXECUTION-RUNTIME-1.1": {
       "taskId": "HARNESS-EXECUTION-RUNTIME-1.1",
-      "status": "pending",
+      "status": "complete",
       "ownerAgent": "execution-runtime-engineer",
-      "attempt": 0,
-      "outputFiles": []
+      "attempt": 1,
+      "outputFiles": [
+        "CHANGELOG.md",
+        "README.md",
+        "docs/adapter-development.md",
+        "docs/features/harness-execution-runtime.md",
+        "src/harness/adapter.ts",
+        "src/harness/stub.ts",
+        "tests/adapter-conformance.test.mjs",
+        "docs/adr/0004-execution-request-result-contract.md"
+      ],
+      "startedAt": "2026-09-07T21:07:08.747Z",
+      "completedAt": "2026-09-07T21:10:20.405Z",
+      "agentOutput": "● Execution-runtime-engineer (model: gpt-5.6-luna) Implement adapter execution types          2m 47s\n  │ Implemented the adapter execution request/result contract.\n  │ Check whitespace and final changed-file list (shell)\n  │   │ git diff --check && git status --short\n  │   └ 11 lines…\n  └ update_todo todos: \"- [x] Inspect architecture, requirements, tests, and scripts…\"\n      └ TODO list updated\n\n● Review implementation changes (shell)\n  │ git status --short && git diff --stat\n  └ 21 lines…\n\n● Read 0004-execution-request-result-contract.md\n  │ docs/adr/0004-execution-request-result-contract.md\n  └ 55 lines read\n\n● Inspect adapter type changes (shell)\n  │ git diff -- src/harness/adapter.ts src/harness/stub.ts tests/adapter-conformance.test.mjs\n  └ 152 lines…\n\nImplemented adapter execution request/result types.\n\n**Changed:**\n- `src/harness/adapter.ts`\n- `src/harness/stub.ts`\n- `tests/adapter-conformance.test.mjs`\n- `README.md`\n- `CHANGELOG.md`\n- `docs/adapter-development.md`\n- `docs/features/harness-execution-runtime.md`\n\n**Created:**\n- `docs/adr/0004-execution-request-result-contract.md`\n\nThe contract now includes environment policy, stdin, cancellation, output limits, non-interactive execution, lifecycle status, failure categories, exit metadata, truncation flags, and diagnostics. Existing modifications to `docs/EXECUTION-AUDIT.jsonl` and `docs/WORKFLOW-STATE.json` were preserved.\n\n",
+      "artifactId": "work-harness-execution-runtime-1-1-001"
     },
     "HARNESS-EXECUTION-RUNTIME-1.2": {
       "taskId": "HARNESS-EXECUTION-RUNTIME-1.2",

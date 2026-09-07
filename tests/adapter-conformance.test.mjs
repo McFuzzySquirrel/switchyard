@@ -140,10 +140,18 @@ test("stub adapter exercises discover, verify, execute, and resume with one cons
 
   const execution = await stub.execute({ task: "run tests" });
   assert.equal(execution.succeeded, true);
+  assert.equal(execution.status, "succeeded");
+  assert.equal(execution.failureCategory, "none");
+  assert.equal(execution.exitCode, 0);
   assert.equal(execution.stdout, "stub executed: run tests");
+  assert.equal(execution.stdoutTruncated, false);
+  assert.equal(execution.stderrTruncated, false);
 
   const dryRun = await stub.execute({ task: "run tests", dryRun: true });
   assert.equal(dryRun.succeeded, false);
+  assert.equal(dryRun.status, "dry-run");
+  assert.equal(dryRun.failureCategory, "none");
+  assert.equal(dryRun.exitCode, null);
   assert.equal(dryRun.stdout, "");
 
   const resumed = await stub.resume({ sessionId: "session-1" });

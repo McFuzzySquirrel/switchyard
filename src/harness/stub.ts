@@ -123,9 +123,13 @@ export function createStubHarnessAdapter(
       record("execute");
       return {
         succeeded: request.dryRun !== true,
-        exitCode: request.dryRun === true ? undefined : 0,
+        status: request.dryRun === true ? "dry-run" : "succeeded",
+        failureCategory: "none",
+        exitCode: request.dryRun === true ? null : 0,
         stdout: request.dryRun === true ? "" : `stub executed: ${request.task}`,
         stderr: "",
+        stdoutTruncated: false,
+        stderrTruncated: false,
         durationMs: 0,
       };
     },
@@ -134,9 +138,13 @@ export function createStubHarnessAdapter(
       record("resume");
       return {
         succeeded: true,
+        status: "succeeded",
+        failureCategory: "none",
         exitCode: 0,
         stdout: `stub resumed: ${request.sessionId}`,
         stderr: "",
+        stdoutTruncated: false,
+        stderrTruncated: false,
         durationMs: 0,
       };
     },

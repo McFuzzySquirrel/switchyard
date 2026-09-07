@@ -22,6 +22,10 @@ All notable user-facing changes to Switchyard are documented here. The format fo
 
 ### Added
 
+- Added the vendor-neutral execution request/result contract with controlled
+  working-directory and environment-policy fields, safe stdin/cancellation
+  inputs, bounded output metadata, lifecycle status, and stable failure
+  categories.
 - Added all-required capability matching with deterministic matched/missing
   diagnostics and boolean convenience predicates.
 - Added deterministic capability ranking and selection: fully verified

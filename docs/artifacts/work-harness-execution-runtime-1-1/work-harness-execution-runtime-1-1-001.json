@@ -1,0 +1,27 @@
+{
+  "type": "work.harness-execution-runtime-1.1",
+  "category": "work",
+  "taskId": "HARNESS-EXECUTION-RUNTIME-1.1",
+  "producedBy": "execution-runtime-engineer",
+  "status": "complete",
+  "summary": "[ ] Implement adapter execution request/result types: [ ] Implement adapter execution request/result types.",
+  "confidence": 0.9,
+  "inputs": [],
+  "filesChanged": [
+    "CHANGELOG.md",
+    "README.md",
+    "docs/adapter-development.md",
+    "docs/features/harness-execution-runtime.md",
+    "src/harness/adapter.ts",
+    "src/harness/stub.ts",
+    "tests/adapter-conformance.test.mjs",
+    "docs/adr/0004-execution-request-result-contract.md"
+  ],
+  "payload": {
+    "agentOutputExcerpt": "● Execution-runtime-engineer (model: gpt-5.6-luna) Implement adapter execution types          2m 47s\n  │ Implemented the adapter execution request/result contract.\n  │ Check whitespace and final changed-file list (shell)\n  │   │ git diff --check && git status --short\n  │   └ 11 lines…\n  └ update_todo todos: \"- [x] Inspect architecture, requirements, tests, and scripts…\"\n      └ TODO list updated\n\n● Review implementation changes (shell)\n  │ git status --short && git diff --stat\n  └ 21 lines…\n\n● R",
+    "taskDescription": "[ ] Implement adapter execution request/result types."
+  },
+  "nextActions": [],
+  "artifactId": "work-harness-execution-runtime-1-1-001",
+  "createdAt": "2026-09-07T21:10:20.405Z"
+}

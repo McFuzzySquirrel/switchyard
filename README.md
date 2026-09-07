@@ -104,7 +104,11 @@ discovery, verification, execution, resume, and fork. Built-in `opencode` and
 and every other operation rejects with `UnsupportedOperationError` before any
 process is launched. A reusable `createStubHarnessAdapter` fixture
 (`src/harness/stub.ts`) implements the full contract for conformance and
-integration testing without a real vendor binary.
+integration testing without a real vendor binary. The exported
+`ExecutionRequest` and `ExecutionResult` types define controlled working
+directory/environment policy, safe stdin and cancellation inputs, bounded
+output metadata, lifecycle status, and stable failure categories for the
+execution runtime.
 
 Executable location, probe timeout, maximum probe output length, the
 mutating-probe policy flag, and the registry path all resolve through the same

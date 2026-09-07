@@ -52,6 +52,18 @@ unsupported. Implement them as fail-fast methods (Section 4), rather than
 omitting them, so callers can rely on a single failure shape regardless of
 which operation they invoke.
 
+`ExecutionRequest` is the process-boundary input: it includes controlled
+`cwd`, explicit `env` values plus an `environmentPolicy` allow/deny
+declaration, optional controlled `stdin`, timeout and output bounds,
+`AbortSignal` cancellation, non-interactive mode, and `dryRun`. The runner
+must apply the environment policy before launching and must never interpolate
+the task, paths, help text, or output into shell code. `ExecutionResult`
+always reports a lifecycle `status`, a stable `failureCategory`, nullable
+`exitCode`, bounded stdout/stderr with truncation flags, duration, and an
+optional redacted diagnostic. See the type definitions in
+`src/harness/adapter.ts`; process launching is implemented separately from
+vendor-specific argument translation.
+
 **Discovery-only adapters.** A harness whose discovery integration ships before its execution counterpart should implement `HarnessDiscoveryAdapter` from `src/harness/discovery-adapter.ts` (a narrower, read-only contract) and reuse `DISCOVERY_ONLY_OPERATIONS` from `src/harness/adapter.ts` for `supportedOperations`. This is how `opencode` and `copilot` ship today.
 
 **Full adapters.** A full `HarnessAdapter` is constructed once with its resolved runtime configuration (executable location, environment, timeouts, probe policy) bound by closure. See `src/harness/opencode.ts`'s `createOpenCodeAdapter` for the pattern: `discover`, `verify`, `execute`, `resume`, and `fork` on one instance must all observe the same resolved executable. Do not accept a fresh executable/config argument per method call — that reopens the exact inconsistency the contract exists to prevent.

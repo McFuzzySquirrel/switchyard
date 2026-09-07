@@ -131,19 +131,89 @@ export interface VerificationResult {
   readonly message?: string;
 }
 
+/**
+ * Explicit environment inheritance controls for an execution request.
+ *
+ * `inherit` controls whether the runner starts with the parent environment.
+ * `allow` and `deny` are applied to inherited names before `env` overrides
+ * individual values. Implementations must use an allow-list when credentials
+ * or other sensitive parent variables should not cross the process boundary;
+ * these fields describe policy and must not be serialized as secret values.
+ */
+export interface ExecutionEnvironmentPolicy {
+  readonly inherit?: boolean;
+  readonly allow?: readonly string[];
+  readonly deny?: readonly string[];
+}
+
+/**
+ * Stable categories used by execution consumers. Routing/input categories are
+ * included because a command can return an execution-shaped result without
+ * launching a process (for example, a dry-run or a rejected selection).
+ */
+export type ExecutionFailureCategory =
+  | "none"
+  | "invalid-input"
+  | "no-match"
+  | "unavailable"
+  | "execution-failure"
+  | "timeout"
+  | "cancelled";
+
+/** Lifecycle status for an adapter execution result. */
+export type ExecutionResultStatus =
+  | "succeeded"
+  | "failed"
+  | "timed-out"
+  | "cancelled"
+  | "unavailable"
+  | "dry-run";
+
 export interface ExecutionRequest {
+  /** User task passed to the selected adapter through its safe transport. */
   readonly task: string;
+  /** Controlled working directory for the adapter process. */
   readonly cwd?: string;
+  /**
+   * Explicit environment values. Values are merged only after the runner
+   * applies `environmentPolicy`; credentials must never be copied here.
+   */
+  readonly env?: Readonly<Record<string, string | undefined>>;
+  /** Allow/deny policy for inherited environment names. */
+  readonly environmentPolicy?: ExecutionEnvironmentPolicy;
+  /** Controlled stdin payload when the adapter supports stdin transport. */
+  readonly stdin?: string;
+  /** Maximum time allowed for the process and its descendants. */
   readonly timeoutMs?: number;
+  /** Maximum captured characters for each output stream. */
+  readonly maxOutputLength?: number;
+  /** Cancellation signal for the process tree. */
+  readonly signal?: AbortSignal;
+  /** Force non-interactive behavior; adapters must not prompt when enabled. */
+  readonly nonInteractive?: boolean;
+  /** Describe the request without launching the selected task. */
   readonly dryRun?: boolean;
 }
 
 export interface ExecutionResult {
+  /** True only when the task completed successfully. */
   readonly succeeded: boolean;
-  readonly exitCode?: number;
+  /** Stable lifecycle status, including timeout/cancellation distinctions. */
+  readonly status: ExecutionResultStatus;
+  /** Stable category for a failure, or `none` when no failure occurred. */
+  readonly failureCategory: ExecutionFailureCategory;
+  /** Null when no process exit code exists (spawn failure, timeout, cancellation, or dry-run). */
+  readonly exitCode: number | null;
+  /** Signal that terminated the process, when the platform reports one. */
+  readonly signal?: string;
   readonly stdout: string;
   readonly stderr: string;
+  /** Whether each bounded stream was truncated before returning. */
+  readonly stdoutTruncated: boolean;
+  readonly stderrTruncated: boolean;
   readonly durationMs: number;
+  /** Redacted, actionable process diagnostic; never raw credentials. */
+  readonly error?: string;
 }
 
 export interface ResumeRequest {

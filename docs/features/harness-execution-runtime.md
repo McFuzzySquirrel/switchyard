@@ -55,10 +55,21 @@
 ## 5. Implementation Tasks
 
 ### Phase 1: Process Runner
-- [ ] Implement adapter execution request/result types.
+- [x] Implement adapter execution request/result types.
 - [ ] Implement bounded asynchronous process execution.
 - [ ] Implement timeout, cancellation, and descendant cleanup.
 - [ ] Implement environment filtering and output capture.
+
+The vendor-neutral execution contract is defined in
+`src/harness/adapter.ts`. `ExecutionRequest` carries the task, controlled
+working directory, explicit environment values and inheritance policy, safe
+stdin transport, timeout/output bounds, cancellation signal, non-interactive
+mode, and dry-run intent. `ExecutionResult` reports lifecycle status, stable
+failure category, nullable exit code, termination signal, bounded stdout and
+stderr with per-stream truncation flags, duration, and an optional redacted
+diagnostic. These types describe the process boundary; adapter modules remain
+responsible for translating a normalized task into vendor-specific arguments
+or stdin without shell interpolation.
 
 ### Phase 2: CLI Integration
 - [ ] Connect routing to adapter execution.

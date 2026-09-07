@@ -1,3 +1,6 @@
 export * from "./capabilities/index.ts";
+export * from "./cli.ts";
+export * from "./commands/index.ts";
+export * from "./config/index.ts";
 export * from "./discovery/index.ts";
 export * from "./harness/index.ts";

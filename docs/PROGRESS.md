@@ -3,7 +3,7 @@
 ## Current State
 **Phase**: DISCOVERY-AND-REGISTRY-2
 **Status**: In Progress
-**Last Updated**: 2026-09-07T20:04:32.702Z
+**Last Updated**: 2026-09-07T20:09:35.420Z
 **Run ID**: faef066b-e967-49ae-ba56-4dbe4255f89d
 **Harness**: copilot
 **Execution Mode**: auto
@@ -23,6 +23,8 @@
   - Files: README.md, src/discovery/registry.ts, tests/discovery-registry.test.mjs
 - [x] Phase DISCOVERY-AND-REGISTRY-2, Task DISCOVERY-AND-REGISTRY-2.2: [ ] Implement refresh and stale-entry handling (@discovery-registry-engineer)
   - Files: CHANGELOG.md, README.md, docs/features/discovery-and-registry.md, src/discovery/registry.ts, tests/discovery-registry.test.mjs
+- [x] Phase DISCOVERY-AND-REGISTRY-2, Task DISCOVERY-AND-REGISTRY-2.3: [ ] Implement `discover` and `capabilities` (@discovery-registry-engineer)
+  - Files: CHANGELOG.md, README.md, docs/features/discovery-and-registry.md, package.json, src/discovery/probe.ts, src/harness/discovery-adapter.ts, src/index.ts, tests/builtin-discovery-adapters.test.mjs, src/cli.ts, src/commands/capabilities.ts, src/commands/discover.ts, src/commands/index.ts, src/config/index.ts, src/config/registry.ts, tests/commands.test.mjs
 
 ## Current Task
 - None currently running

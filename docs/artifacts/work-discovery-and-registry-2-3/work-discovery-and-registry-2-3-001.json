@@ -1,0 +1,36 @@
+{
+  "type": "work.discovery-and-registry-2.3",
+  "category": "work",
+  "taskId": "DISCOVERY-AND-REGISTRY-2.3",
+  "producedBy": "discovery-registry-engineer",
+  "status": "complete",
+  "summary": "[ ] Implement `discover` and `capabilities`: [ ] Implement `discover` and `capabilities`.",
+  "confidence": 0.9,
+  "inputs": [
+    "work-discovery-and-registry-2-2-001"
+  ],
+  "filesChanged": [
+    "CHANGELOG.md",
+    "README.md",
+    "docs/features/discovery-and-registry.md",
+    "package.json",
+    "src/discovery/probe.ts",
+    "src/harness/discovery-adapter.ts",
+    "src/index.ts",
+    "tests/builtin-discovery-adapters.test.mjs",
+    "src/cli.ts",
+    "src/commands/capabilities.ts",
+    "src/commands/discover.ts",
+    "src/commands/index.ts",
+    "src/config/index.ts",
+    "src/config/registry.ts",
+    "tests/commands.test.mjs"
+  ],
+  "payload": {
+    "agentOutputExcerpt": "● Discovery-registry-engineer (model: gpt-5.6-luna) Implement discover capabilities           4m 26s\n  │ Implemented complete `discover` and `capabilities` functionality.\n  │ Final typecheck after path validation (shell)\n  │   │ npm run typecheck\n  │   └ 3 lines…\n  └ Final whitespace and status check (shell)\n      │ git diff --check && git status --short\n      └ 15 lines…\n\nThe discovery implementation is in place; I’m reviewing the resulting diff and repository state, then I’ll run the required ",
+    "taskDescription": "[ ] Implement `discover` and `capabilities`."
+  },
+  "nextActions": [],
+  "artifactId": "work-discovery-and-registry-2-3-001",
+  "createdAt": "2026-09-07T20:09:35.419Z"
+}

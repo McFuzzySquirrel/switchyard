@@ -111,6 +111,7 @@ function unavailableProfile(
   checkedAt: string,
   code: string,
   reason: string,
+  status: "unavailable" | "malformed" = "unavailable",
 ): HarnessProfile {
   const diagnostic: HarnessDiagnostic = {
     code,
@@ -125,10 +126,10 @@ function unavailableProfile(
     executable,
     executableSource,
     capabilities: [],
-    status: "unavailable",
-    lifecycle: "unavailable",
+    status,
+    lifecycle: status === "unavailable" ? "unavailable" : "discovered",
     availability: {
-      status: "unavailable",
+      status,
       checkedAt,
       reason: diagnostic.message,
     },
@@ -247,10 +248,27 @@ export function createHarnessDiscoveryAdapter(
           located.executable,
           located.source,
           checkedAt,
-          "probe-unavailable",
-          `${definition.displayName} metadata probe was unavailable: ${
+          metadata.status === "malformed" ? "probe-malformed" : "probe-unavailable",
+          `${definition.displayName} metadata probe was ${metadata.status}: ${
             metadata.diagnostic ?? "no version or help output was obtained"
           }`,
+          metadata.status,
+        );
+      }
+
+      let capabilities: readonly CapabilityName[];
+      try {
+        capabilities = definition.parseCapabilities(metadata.helpText ?? "");
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        return unavailableProfile(
+          definition,
+          located.executable,
+          located.source,
+          checkedAt,
+          "capability-parse-failed",
+          `${definition.displayName} capability parsing failed: ${message}`,
+          "malformed",
         );
       }
 
@@ -262,7 +280,7 @@ export function createHarnessDiscoveryAdapter(
         executableSource: located.source,
         ...(metadata.version === undefined ? {} : { version: metadata.version }),
         capabilities: observedCapabilities(
-          definition.parseCapabilities(metadata.helpText ?? ""),
+          capabilities,
           metadata.helpText ?? "",
           checkedAt,
           options.maxOutputLength,

@@ -467,6 +467,22 @@ export async function probeHarnessMetadata(
     };
   }
 
+  // A successful process is not sufficient evidence that its output is
+  // harness metadata. Keep malformed output distinct so callers do not
+  // mistake an unrelated wrapper/banner for advertised capabilities.
+  const helpOutput =
+    helpResult.probeResult.stdout.trim() || helpResult.probeResult.stderr.trim();
+  if (helpOutput.length > 0 && !isHelpOutput(helpOutput)) {
+    return {
+      executable,
+      version: versionResult.version,
+      helpText: undefined,
+      evidences,
+      status: "malformed",
+      diagnostic: "Help probe returned output that was not recognized as CLI help",
+    };
+  }
+
   return {
     executable,
     version: versionResult.version,

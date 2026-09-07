@@ -3,9 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "bin": {
+    "switchyard": "./src/cli.ts"
+  },
   "exports": {
     ".": "./src/index.ts",
     "./capabilities": "./src/capabilities/index.ts",
+    "./cli": "./src/cli.ts",
+    "./commands": "./src/commands/index.ts",
+    "./config": "./src/config/index.ts",
     "./discovery": "./src/discovery/index.ts",
     "./harness": "./src/harness/index.ts"
   },

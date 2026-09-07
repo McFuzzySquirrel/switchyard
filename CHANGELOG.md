@@ -4,6 +4,10 @@ All notable user-facing changes to Switchyard are documented here. The format fo
 
 ## [Unreleased]
 
+- Implemented the `discover` and `capabilities` commands with versioned JSON
+  output, plain-text presentation, per-user registry path resolution, cached
+  discovery refreshes, verified-capability filtering, and redacted diagnostics.
+
 ### Added
 
 - Initial discovery schemas, executable lookup, bounded version/help probing, and built-in OpenCode and GitHub Copilot CLI discovery adapters.

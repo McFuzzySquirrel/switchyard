@@ -200,3 +200,28 @@ test("returns an explicit aborted diagnostic before launching a probe", async ()
   assert.match(profile.availability.reason, /discovery was aborted before probing/);
   assert.equal(validateHarnessProfile(profile).success, true);
 });
+
+test("classifies successful but malformed help output without claiming capabilities", async (t) => {
+  const directory = await mkdtemp(join(tmpdir(), "switchyard-malformed-adapter-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const executable = await makeScript(
+    directory,
+    "opencode",
+    `
+case "$1" in
+  --version) echo "opencode 2.0.0"; exit 0 ;;
+  --help) echo "this is a wrapper banner, not help"; exit 0 ;;
+  *) exit 32 ;;
+esac`,
+  );
+
+  const profile = await createOpenCodeDiscoveryAdapter().discover({
+    executable,
+    now: fixedClock,
+  });
+
+  assert.equal(profile.status, "malformed");
+  assert.equal(profile.capabilities.length, 0);
+  assert.equal(profile.diagnostics?.[0].code, "probe-malformed");
+  assert.equal(validateHarnessProfile(profile).success, true);
+});

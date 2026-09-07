@@ -50,7 +50,7 @@
 
 ## 4. UI / Interaction Design
 
-`switchyard discover [--refresh] [--json]` reports each configured harness, executable path, version, discovered capabilities, and status. `switchyard capabilities [--verified] [--json]` reads the registry without launching a task.
+`switchyard discover [--refresh] [--json]` reports each configured harness, executable path, version, discovered capabilities, and status. `switchyard capabilities [--verified] [--json]` reads the registry without launching a task. Both commands use a versioned JSON payload (`schemaVersion: 1`) and equivalent plain-text output; `--registry` and `SWITCHYARD_REGISTRY_PATH` select an explicit local registry.
 
 ## 5. Implementation Tasks
 
@@ -64,8 +64,8 @@
 ### Phase 2: Persistence and Commands
 - [ ] Implement atomic registry reads/writes.
 - [x] Implement refresh and stale-entry handling.
-- [ ] Implement `discover` and `capabilities`.
-- [ ] Add human and JSON output.
+- [x] Implement `discover` and `capabilities`.
+- [x] Add human and JSON output.
 
 ## 6. Testing Strategy
 
@@ -90,6 +90,7 @@ Key test scenarios:
 4. Registry writes are atomic and reloadable.
 5. Discovery results remain available when one harness fails.
 6. Human and JSON inspection commands work non-interactively.
+7. Command diagnostics are redacted and JSON output remains parseable with stable exit categories (`0` success, `1` partial discovery, `2` usage, `3` persistence/command failure).
 
 ## 8. Open Questions
 

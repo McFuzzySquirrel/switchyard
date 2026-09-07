@@ -32,3 +32,13 @@
 {"timestamp":"2026-09-07T19:41:11.271Z","action":"task.started","runId":"faef066b-e967-49ae-ba56-4dbe4255f89d","taskId":"DISCOVERY-AND-REGISTRY-1.5","phaseId":"DISCOVERY-AND-REGISTRY-1","attempt":1}
 {"timestamp":"2026-09-07T19:42:08.221Z","action":"artifact.created","runId":"faef066b-e967-49ae-ba56-4dbe4255f89d","taskId":"DISCOVERY-AND-REGISTRY-1.5","artifactId":"work-discovery-and-registry-1-5-001","artifactType":"work.discovery-and-registry-1.5","inputArtifacts":["work-discovery-and-registry-1-4-001"]}
 {"timestamp":"2026-09-07T19:42:08.222Z","action":"task.complete","runId":"faef066b-e967-49ae-ba56-4dbe4255f89d","taskId":"DISCOVERY-AND-REGISTRY-1.5","phaseId":"DISCOVERY-AND-REGISTRY-1","outputFiles":["tests/builtin-discovery-adapters.test.mjs","tests/fixtures/discovery/copilot-help.txt","tests/fixtures/discovery/opencode-help.txt"],"durationMs":56926}
+{"timestamp":"2026-09-07T19:42:08.247Z","action":"task.committed","runId":"faef066b-e967-49ae-ba56-4dbe4255f89d","taskId":"DISCOVERY-AND-REGISTRY-1.5","commitSha":"e273a6f1dc8af26ba77a481d9b033bdc1376fb26"}
+{"timestamp":"2026-09-07T19:42:08.247Z","action":"run.complete","runId":"faef066b-e967-49ae-ba56-4dbe4255f89d"}
+{"timestamp":"2026-09-07T19:51:40.225Z","action":"state.reconciled","runId":"faef066b-e967-49ae-ba56-4dbe4255f89d","note":"manifest=2026-09-07T19:04:12.536Z"}
+{"timestamp":"2026-09-07T19:52:00.298Z","action":"state.reconciled","runId":"faef066b-e967-49ae-ba56-4dbe4255f89d","note":"manifest=2026-09-07T19:04:12.536Z"}
+{"timestamp":"2026-09-07T19:56:48.790Z","action":"state.reconciled","runId":"faef066b-e967-49ae-ba56-4dbe4255f89d","note":"manifest=2026-09-07T19:04:12.536Z"}
+{"timestamp":"2026-09-07T19:56:48.797Z","action":"run.started","runId":"faef066b-e967-49ae-ba56-4dbe4255f89d","note":"harness=copilot"}
+{"timestamp":"2026-09-07T19:56:48.856Z","action":"phase.started","runId":"faef066b-e967-49ae-ba56-4dbe4255f89d","phaseId":"DISCOVERY-AND-REGISTRY-2"}
+{"timestamp":"2026-09-07T19:56:48.857Z","action":"task.started","runId":"faef066b-e967-49ae-ba56-4dbe4255f89d","taskId":"DISCOVERY-AND-REGISTRY-2.1","phaseId":"DISCOVERY-AND-REGISTRY-2","attempt":1}
+{"timestamp":"2026-09-07T20:01:52.210Z","action":"artifact.created","runId":"faef066b-e967-49ae-ba56-4dbe4255f89d","taskId":"DISCOVERY-AND-REGISTRY-2.1","artifactId":"work-discovery-and-registry-2-1-001","artifactType":"work.discovery-and-registry-2.1","inputArtifacts":[]}
+{"timestamp":"2026-09-07T20:01:52.211Z","action":"task.complete","runId":"faef066b-e967-49ae-ba56-4dbe4255f89d","taskId":"DISCOVERY-AND-REGISTRY-2.1","phaseId":"DISCOVERY-AND-REGISTRY-2","outputFiles":["README.md","src/discovery/registry.ts","tests/discovery-registry.test.mjs"],"durationMs":303331}

@@ -106,6 +106,22 @@ test("reconcileState preserves completed records and adds pending tasks", () => 
   assert.equal(next.tasks["1.2"]?.status, "pending");
 });
 
+test("reconcileState does not duplicate reconciliation notices", () => {
+  const message = "Manifest reconciliation changed 1 existing task(s): 1.1";
+  const old = { ...makeState({ "1.1": "complete" }), blockers: [message] };
+  const manifest = makeManifest([makePhase("1", [makeTask("1.1")])]);
+  manifest.reconciliation = {
+    preservedTaskIds: ["1.1"],
+    newTaskIds: [],
+    removedTaskIds: [],
+    changedTaskIds: ["1.1"],
+  };
+
+  const next = reconcileState(old, manifest);
+  assert.equal(next, old);
+  assert.deepEqual(next.blockers, [message]);
+});
+
 test("allDepsComplete accepts skipped dependencies", () => {
   const state = makeState({ "1.1": "complete", "1.2": "skipped" });
   assert.equal(allDepsComplete("1.3", ["1.1", "1.2"], state), true);

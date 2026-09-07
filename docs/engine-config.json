@@ -1,16 +1,13 @@
 {
   "harness": "copilot",
   "granularity": "",
-  "concurrency": "",
+  "concurrency": "2",
   "taskTimeoutMs": "900000",
   "maxRetries": "",
   "viz": false,
   "vizPort": "",
   "keepAlive": false,
   "attach": "",
-  "executionMode": "manual",
-  "selectionScope": "single",
-  "selectedTaskIds": [
-    "DISCOVERY-AND-REGISTRY-1.5"
-  ]
+  "executionMode": "auto",
+  "selectedTaskIds": []
 }

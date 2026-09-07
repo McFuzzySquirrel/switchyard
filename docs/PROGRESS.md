@@ -1,13 +1,12 @@
 # Project Progress
 
 ## Current State
-**Phase**: DISCOVERY-AND-REGISTRY-1
+**Phase**: DISCOVERY-AND-REGISTRY-2
 **Status**: In Progress
-**Last Updated**: 2026-09-07T19:42:08.223Z
+**Last Updated**: 2026-09-07T20:01:52.212Z
 **Run ID**: faef066b-e967-49ae-ba56-4dbe4255f89d
 **Harness**: copilot
-**Execution Mode**: manual
-**Selected Tasks**: DISCOVERY-AND-REGISTRY-1.1, DISCOVERY-AND-REGISTRY-1.2, DISCOVERY-AND-REGISTRY-1.3, DISCOVERY-AND-REGISTRY-1.4, DISCOVERY-AND-REGISTRY-1.5
+**Execution Mode**: auto
 
 ## Completed Tasks
 - [x] Phase DISCOVERY-AND-REGISTRY-1, Task DISCOVERY-AND-REGISTRY-1.1: [ ] Define registry and capability observation schemas (@adapter-platform-engineer)
@@ -20,15 +19,26 @@
   - Files: src/discovery/probe.ts, src/harness/index.ts, tests/version-help-probing.test.mjs, docs/engine-control.json, src/harness/copilot.ts, src/harness/discovery-adapter.ts, src/harness/opencode.ts, src/harness/registry.ts, tests/builtin-discovery-adapters.test.mjs
 - [x] Phase DISCOVERY-AND-REGISTRY-1, Task DISCOVERY-AND-REGISTRY-1.5: [ ] Implement parser fixtures for supported CLI output (@discovery-registry-engineer)
   - Files: tests/builtin-discovery-adapters.test.mjs, tests/fixtures/discovery/copilot-help.txt, tests/fixtures/discovery/opencode-help.txt
+- [x] Phase DISCOVERY-AND-REGISTRY-2, Task DISCOVERY-AND-REGISTRY-2.1: [ ] Implement atomic registry reads/writes (@discovery-registry-engineer)
+  - Files: README.md, src/discovery/registry.ts, tests/discovery-registry.test.mjs
 
 ## Current Task
 - None currently running
 
 ## Remaining
-- [x] No remaining phases
+- [ ] Phase DISCOVERY-AND-REGISTRY-2: Phase 2: Persistence and Commands
+- [ ] Phase DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-1: Phase 1: Matching
+- [ ] Phase DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-2: Phase 2: Explainability
+- [ ] Phase HARNESS-EXECUTION-RUNTIME-1: Phase 1: Process Runner
+- [ ] Phase HARNESS-EXECUTION-RUNTIME-2: Phase 2: CLI Integration
+- [ ] Phase VERIFICATION-AND-RESILIENCE-1: Phase 1: Probes
+- [ ] Phase VERIFICATION-AND-RESILIENCE-2: Phase 2: Routing Integration
+- [ ] Phase ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1: Phase 1: Contract
+- [ ] Phase ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-2: Phase 2: Configuration
+- [ ] Phase MULTI-HARNESS-COMPOSITION-1: Phase 1: Workflow Model
+- [ ] Phase MULTI-HARNESS-COMPOSITION-2: Phase 2: Execution and Demonstration
 
 ## Blockers
-- Manifest reconciliation changed 9 existing task(s): DISCOVERY-AND-REGISTRY-2.4, DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-2.1, HARNESS-EXECUTION-RUNTIME-1.2, HARNESS-EXECUTION-RUNTIME-2.1, HARNESS-EXECUTION-RUNTIME-2.3, VERIFICATION-AND-RESILIENCE-1.2, VERIFICATION-AND-RESILIENCE-1.3, MULTI-HARNESS-COMPOSITION-2.2, MULTI-HARNESS-COMPOSITION-2.4
 - Manifest reconciliation changed 9 existing task(s): DISCOVERY-AND-REGISTRY-2.4, DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-2.1, HARNESS-EXECUTION-RUNTIME-1.2, HARNESS-EXECUTION-RUNTIME-2.1, HARNESS-EXECUTION-RUNTIME-2.3, VERIFICATION-AND-RESILIENCE-1.2, VERIFICATION-AND-RESILIENCE-1.3, MULTI-HARNESS-COMPOSITION-2.2, MULTI-HARNESS-COMPOSITION-2.4
 
 ## Notes

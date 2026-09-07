@@ -7,7 +7,12 @@ All notable user-facing changes to Switchyard are documented here. The format fo
 ### Added
 
 - Initial discovery schemas, executable lookup, bounded version/help probing, and built-in OpenCode and GitHub Copilot CLI discovery adapters.
+- Added validated local registry reads and atomic, interruption-resilient JSON writes with user-only file permissions.
 - Repository documentation governance through `AGENTS.md`, canonical templates, and a focused documentation check.
+
+### Fixed
+
+- Prevented repeated manifest-reconciliation notices from accumulating in workflow state and obscuring progress reporting.
 
 ## [0.1.0] - 2026-09-07
 

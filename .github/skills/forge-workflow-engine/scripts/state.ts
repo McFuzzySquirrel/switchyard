@@ -73,15 +73,18 @@ export function reconcileState(state: WorkflowState, manifest: ExecutionManifest
   const added = Object.keys(nextTasks).filter((id) => !state.tasks[id]);
   const removed = Object.keys(state.tasks).filter((id) => !nextTasks[id]);
   const changed = new Set(manifest.reconciliation?.changedTaskIds ?? []);
-  if (added.length === 0 && removed.length === 0 && changed.size === 0 && state.manifestVersion === manifest.version) return state;
+  const reconciliationMessages = [
+    ...(added.length ? [`Manifest reconciliation added ${added.length} pending task(s): ${added.join(", ")}`] : []),
+    ...(removed.length ? [`Manifest reconciliation removed ${removed.length} task(s): ${removed.join(", ")}`] : []),
+    ...(changed.size ? [`Manifest reconciliation changed ${changed.size} existing task(s): ${[...changed].join(", ")}`] : []),
+  ];
+  const newMessages = reconciliationMessages.filter((message) => !state.blockers.includes(message));
+  if (added.length === 0 && removed.length === 0 && newMessages.length === 0 && state.manifestVersion === manifest.version) return state;
   return {
     ...state,
     manifestVersion: manifest.version,
     tasks: nextTasks,
-    blockers: [...state.blockers,
-      ...(added.length ? [`Manifest reconciliation added ${added.length} pending task(s): ${added.join(", ")}`] : []),
-      ...(removed.length ? [`Manifest reconciliation removed ${removed.length} task(s): ${removed.join(", ")}`] : []),
-      ...(changed.size ? [`Manifest reconciliation changed ${changed.size} existing task(s): ${[...changed].join(", ")}`] : [])],
+    blockers: [...state.blockers, ...newMessages],
     lastUpdatedAt: new Date().toISOString(),
   };
 }

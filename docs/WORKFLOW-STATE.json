@@ -1,12 +1,12 @@
 {
   "runId": "faef066b-e967-49ae-ba56-4dbe4255f89d",
   "startedAt": "2026-09-07T19:10:17.558Z",
-  "lastUpdatedAt": "2026-09-07T19:42:08.222Z",
+  "lastUpdatedAt": "2026-09-07T20:01:52.211Z",
   "manifestPath": "/home/mcfuzzysquirrel/Projects/switchyard/docs/EXECUTION-MANIFEST.json",
   "manifestVersion": "1.0",
   "harness": "copilot",
   "status": "running",
-  "currentPhase": "DISCOVERY-AND-REGISTRY-1",
+  "currentPhase": "DISCOVERY-AND-REGISTRY-2",
   "tasks": {
     "DISCOVERY-AND-REGISTRY-1.1": {
       "taskId": "DISCOVERY-AND-REGISTRY-1.1",
@@ -113,10 +113,18 @@
     },
     "DISCOVERY-AND-REGISTRY-2.1": {
       "taskId": "DISCOVERY-AND-REGISTRY-2.1",
-      "status": "pending",
+      "status": "complete",
       "ownerAgent": "discovery-registry-engineer",
-      "attempt": 0,
-      "outputFiles": []
+      "attempt": 1,
+      "outputFiles": [
+        "README.md",
+        "src/discovery/registry.ts",
+        "tests/discovery-registry.test.mjs"
+      ],
+      "startedAt": "2026-09-07T19:56:48.857Z",
+      "completedAt": "2026-09-07T20:01:52.211Z",
+      "agentOutput": "I’m handing this to the discovery/registry specialist to implement and validate the atomic persistence changes end to end.\n\n● Discovery-registry-engineer (model: gpt-5.6-luna) Implement atomic registry IO              4m 21s\n  │ Implemented atomic discovery registry persistence.\n  │ Run final full test suite (shell)\n  │   │ npm test\n  │   └ 218 lines…\n  └ Confirm final worktree status (shell)\n      │ git status --short\n      └ 12 lines…\n\n● Confirm registry changes (shell)\n  │ git status --short && git diff --stat\n  └ 23 lines…\n\n● Review implemented registry changes (shell)\n  │ git diff -- src/discovery/registry.ts README.md CHANGELOG.md && git diff --no-index /dev/null\n  │ tests/discovery-registry.test.mjs | sed -n '1,80p'\n  └ 537 lines…\n\nImplemented atomic registry reads and writes.\n\n**Changed files:**\n- `src/discovery/registry.ts` — Added validated registry loading, atomic temp-file writes with `fsync` and rename, interruption recovery, permissions, and structured persistence errors.\n- `tests/discovery-registry.test.mjs` — Added coverage for atomic persistence, validation failures, missing files, permissions, and temporary-file cleanup.\n- `README.md` — Updated current implementation status.\n- `CHANGELOG.md` — Documented atomic registry persistence under Unreleased.\n\nUnrelated existing worktree changes were preserved.\n\n",
+      "artifactId": "work-discovery-and-registry-2-1-001"
     },
     "DISCOVERY-AND-REGISTRY-2.2": {
       "taskId": "DISCOVERY-AND-REGISTRY-2.2",
@@ -372,19 +380,7 @@
     }
   },
   "blockers": [
-    "Manifest reconciliation changed 9 existing task(s): DISCOVERY-AND-REGISTRY-2.4, DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-2.1, HARNESS-EXECUTION-RUNTIME-1.2, HARNESS-EXECUTION-RUNTIME-2.1, HARNESS-EXECUTION-RUNTIME-2.3, VERIFICATION-AND-RESILIENCE-1.2, VERIFICATION-AND-RESILIENCE-1.3, MULTI-HARNESS-COMPOSITION-2.2, MULTI-HARNESS-COMPOSITION-2.4",
     "Manifest reconciliation changed 9 existing task(s): DISCOVERY-AND-REGISTRY-2.4, DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-2.1, HARNESS-EXECUTION-RUNTIME-1.2, HARNESS-EXECUTION-RUNTIME-2.1, HARNESS-EXECUTION-RUNTIME-2.3, VERIFICATION-AND-RESILIENCE-1.2, VERIFICATION-AND-RESILIENCE-1.3, MULTI-HARNESS-COMPOSITION-2.2, MULTI-HARNESS-COMPOSITION-2.4"
   ],
-  "auditLog": [],
-  "selection": {
-    "mode": "manual",
-    "scope": "single",
-    "taskIds": [
-      "DISCOVERY-AND-REGISTRY-1.1",
-      "DISCOVERY-AND-REGISTRY-1.2",
-      "DISCOVERY-AND-REGISTRY-1.3",
-      "DISCOVERY-AND-REGISTRY-1.4",
-      "DISCOVERY-AND-REGISTRY-1.5"
-    ]
-  }
+  "auditLog": []
 }

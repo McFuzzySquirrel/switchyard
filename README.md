@@ -6,7 +6,7 @@ The product direction and planned CLI are described in [`docs/PRD.md`](docs/PRD.
 
 ## Current status
 
-The repository is under active implementation. The current completed slice covers discovery schemas, executable lookup, bounded version/help probing, and built-in discovery adapters. Planned commands and later execution/composition features should be treated as roadmap items until implemented and tested.
+The repository is under active implementation. The current completed slice covers discovery schemas, executable lookup, bounded version/help probing, built-in discovery adapters, and atomic local registry persistence. Planned commands and later execution/composition features should be treated as roadmap items until implemented and tested.
 
 ## Development
 

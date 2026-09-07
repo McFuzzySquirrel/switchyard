@@ -13,6 +13,7 @@ All notable user-facing changes to Switchyard are documented here. The format fo
 ### Added
 
 - Initial discovery schemas, executable lookup, bounded version/help probing, and built-in OpenCode and GitHub Copilot CLI discovery adapters.
+- Added the versioned `TaskRequirements` schema with normalized capability, preferred harness, fallback, and validation contracts.
 - Added validated local registry reads and atomic, interruption-resilient JSON writes with user-only file permissions.
 - Added configurable stale-entry marking and resilient single/all-adapter registry refresh APIs that retain unrelated cached profiles when a probe fails.
 - Repository documentation governance through `AGENTS.md`, canonical templates, and a focused documentation check.

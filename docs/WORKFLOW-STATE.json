@@ -1,12 +1,12 @@
 {
   "runId": "faef066b-e967-49ae-ba56-4dbe4255f89d",
   "startedAt": "2026-09-07T19:10:17.558Z",
-  "lastUpdatedAt": "2026-09-07T20:10:42.149Z",
+  "lastUpdatedAt": "2026-09-07T20:11:53.955Z",
   "manifestPath": "/home/mcfuzzysquirrel/Projects/switchyard/docs/EXECUTION-MANIFEST.json",
   "manifestVersion": "1.0",
   "harness": "copilot",
   "status": "running",
-  "currentPhase": "DISCOVERY-AND-REGISTRY-2",
+  "currentPhase": "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-1",
   "tasks": {
     "DISCOVERY-AND-REGISTRY-1.1": {
       "taskId": "DISCOVERY-AND-REGISTRY-1.1",
@@ -198,10 +198,20 @@
     },
     "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-1.1": {
       "taskId": "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-1.1",
-      "status": "pending",
+      "status": "complete",
       "ownerAgent": "switchyard-qa-engineer",
-      "attempt": 0,
-      "outputFiles": []
+      "attempt": 1,
+      "outputFiles": [
+        "CHANGELOG.md",
+        "README.md",
+        "src/discovery/registry.ts",
+        "src/discovery/schema.ts",
+        "tests/discovery-schema.test.mjs"
+      ],
+      "startedAt": "2026-09-07T20:10:42.170Z",
+      "completedAt": "2026-09-07T20:11:53.955Z",
+      "agentOutput": "I’m locating the existing requirement model, validation boundaries, and test conventions so the schema fits the current architecture rather than introducing a parallel contract.\n\n/ Search (glob)\n  │ \"**/*.{ts,tsx,js,json}\"\n  └ 114 files found\n\n/ Search (grep)\n  │ \"Requirement|requirement|schema|validate\" in *.ts (src, test, tests)\n  └ 13 files found\n\n● codegraph_explore (MCP: codegraph) · requirement schema validation requirement types validators t…\n  └ The project at /home/mcfuzzysquirrel/Projects/switchyard isn't indexed with c...\n\n● Read schema.ts\n  │ src/discovery/schema.ts\n  └ 1 line read\n\n● Read index.ts\n  │ src/discovery/index.ts\n  └ 4 lines read\n\n● Read package.json\n  └ 31 lines read\n\n● Read vocabulary.ts\n  │ src/capabilities/vocabulary.ts\n  └ 79 lines read\n\n● Read EXECUTION-MANIFEST.json\n  │ docs/EXECUTION-MANIFEST.json\n  └ L1:100 (100 lines read)\n\n/ Search (grep)\n  │ \"requirements?|Requirement|acceptance criteria|schema\" in *.md\n  └ 78 lines found\n\n● Read schema.ts\n  │ src/discovery/schema.ts\n  └ L1:220 (220 lines read)\n\n● Read index.ts\n  │ src/index.ts\n  └ 6 lines read\n\n● Read deterministic-routing-and-explainability.md\n  │ docs/features/deterministic-routing-and-explainability.md\n  └ L1:110 (85 lines read)\n\n● Read schema.ts\n  │ src/discovery/schema.ts\n  └ L221:520 (300 lines read)\n\n● Read tsconfig.json\n  └ 13 lines read\n\n/ Search (glob)\n  │ \"tests/**/*.test.mjs\"\n  └ 7 files found\n\n● Read discovery-schema.test.mjs\n  │ tests/discovery-schema.test.mjs\n  └ 201 lines read\n\n● Read capabilities.ts\n  │ src/commands/capabilities.ts\n  └ 151 lines read\n\n● Read index.ts\n  │ src/commands/index.ts\n  └ 2 lines read\n\n/ Search (grep)\n  │ \"TaskRequirements|validate.*Requirements|assert.*Requirements|isTask\" (src/discovery/schema.ts)\n  └ 43 lines found\n\n● Read schema.ts\n  │ src/discovery/schema.ts\n  └ L520:910 (374 lines read)\n\n● Read discover.ts\n  │ src/commands/discover.ts\n  └ L1:180 (180 lines read)\n\n● Read CHANGELOG.md\n  └ L1:60 (28 lines read)\n\n● Read README.md\n  └ L1:100 (62 lines read)\n\nThe requirement contract is already present in `src/discovery/schema.ts` with public validators and baseline tests; I’m checking whether it fully satisfies the routing feature’s input forms and edge cases, then I’ll tighten any gaps rather than duplicating it.\n\n/ Search (grep)\n  │ \"validateTaskRequirements|TaskRequirements\" in *.{ts,mjs,md}\n  └ 19 lines found\n\n● Inspect current changes and requirement history (shell)\n  │ git status --short && git log -5 --oneline -- src/discovery/schema.ts\n  │ tests/discovery-schema.test.mjs\n  └ 4 lines…\n\n● Run focused requirement tests and typecheck (shell)\n  │ npm test -- --test-name-pattern='task requirements|schema' && npm run typecheck\n  └ 263 lines…\n\n✗ Read 0001-discovery-registry-boundary.md\n  │ docs/adr/0001-discovery-registry-boundary.md\n  └ Path does not exist\n\n● Read PRD.md\n  │ docs/PRD.md\n  └ L205:250 (46 lines read)\n\n● Read registry.ts\n  │ src/discovery/registry.ts\n  └ L1:100 (100 lines read)\n\n● Inspect prior schema implementation commit (shell)\n  │ git show --stat --oneline abe9eb2 && git show --format=fuller --no-ext-diff abe9eb2 --\n  │ src/discovery/schema.ts tests/discovery-schema.test.mjs | sed -n '1,220p'\n  └ 246 lines…\n\n/ Search (glob)\n  │ \"docs/adr/*.md\"\n  └ 1 file found\n\n/ Search (grep)\n  │ \"schemaVersion|allowFallback|preferredHarness\" in *.md (docs)\n  └ 3 lines found\n\n● Confirm task-scoped worktree state (shell)\n  │ git status --short src tests README.md CHANGELOG.md docs/adr && git diff --\n  │ src/discovery/schema.ts tests/discovery-schema.test.mjs\n  └ 1 line…\n\nThe current implementation validates the right fields, but it incorrectly reuses the discovery schema version for task requirements. I’m separating the requirement contract’s version constant, preserving the existing wire value and compatibility behavior, and expanding focused coverage/documentation for malformed inputs and public exports.\n\n● Edit\n  │ Edit src/discovery/schema.ts\n  │ Edit src/discovery/registry.ts\n  │ Edit tests/discovery-schema.test.mjs\n  │ Edit README.md\n  └ Edit CHANGELOG.md\n\n● Run full project validation after schema changes (shell)\n  │ npm test && npm run typecheck && npm run test:docs\n  └ 290 lines…\n\n● List changed files (shell)\n  │ git status --short\n  └ 8 lines…\n\n● Review final requirement schema diff (shell)\n  │ git diff --stat && git diff -- src/discovery/schema.ts src/discovery/registry.ts\n  │ tests/discovery-schema.test.mjs README.md CHANGELOG.md\n  └ 175 lines…\n\nImplemented the requirement schema and validation contract.\n\n**Changed files**\n- `src/discovery/schema.ts`\n  - Added `REQUIREMENTS_SCHEMA_VERSION`.\n  - Added version-aware validation for `TaskRequirements`.\n  - Preserved optional schema-version compatibility.\n- `src/discovery/registry.ts`\n  - Re-exported `REQUIREMENTS_SCHEMA_VERSION` and requirement validators.\n- `tests/discovery-schema.test.mjs`\n  - Added coverage for invalid harness identifiers and non-boolean fallback values.\n- `README.md`\n  - Documented the `TaskRequirements` JSON schema and validation APIs.\n- `CHANGELOG.md`\n  - Added the requirement schema to the unreleased changes.\n\nAll existing tests, type checking, and documentation checks pass.\n\n",
+      "artifactId": "work-deterministic-routing-and-explainability-1-1-001"
     },
     "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-1.2": {
       "taskId": "DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-1.2",

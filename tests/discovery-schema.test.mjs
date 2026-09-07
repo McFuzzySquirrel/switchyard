@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   CAPABILITY_NAMES,
   CAPABILITY_VOCABULARY_VERSION,
+  REQUIREMENTS_SCHEMA_VERSION,
   assertLocalRegistry,
   isCapabilityObservation,
   isJsonValue,
@@ -176,6 +177,7 @@ test("validates versioned local registries and preserves unavailable profiles", 
 });
 
 test("validates task requirements with optional schema version and rejects duplicates", () => {
+  assert.equal(REQUIREMENTS_SCHEMA_VERSION, 1);
   assert.equal(
     validateTaskRequirements({
       requires: ["headless", "repository-access"],
@@ -195,6 +197,21 @@ test("validates task requirements with optional schema version and rejects dupli
     validateTaskRequirements({
       schemaVersion: 2,
       requires: [],
+    }).success,
+    false,
+  );
+  assert.equal(
+    validateTaskRequirements({
+      schemaVersion: REQUIREMENTS_SCHEMA_VERSION,
+      requires: ["headless"],
+      preferredHarness: "Fixture",
+    }).success,
+    false,
+  );
+  assert.equal(
+    validateTaskRequirements({
+      requires: ["headless"],
+      allowFallback: "yes",
     }).success,
     false,
   );

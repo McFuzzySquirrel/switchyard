@@ -8,6 +8,7 @@ export type { CapabilityName } from "../capabilities/vocabulary.ts";
 
 export const DISCOVERY_SCHEMA_VERSION = 1 as const;
 export const REGISTRY_SCHEMA_VERSION = 1 as const;
+export const REQUIREMENTS_SCHEMA_VERSION = 1 as const;
 
 export type EvidenceSource =
   | "version"
@@ -123,7 +124,7 @@ export type Registry = LocalRegistry;
 
 export interface TaskRequirements {
   /** Optional for compatibility with the PRD's initial interface shape. */
-  readonly schemaVersion?: typeof DISCOVERY_SCHEMA_VERSION;
+  readonly schemaVersion?: typeof REQUIREMENTS_SCHEMA_VERSION;
   readonly requires: readonly CapabilityName[];
   readonly preferredHarness?: string;
   readonly allowFallback?: boolean;
@@ -335,6 +336,21 @@ function schemaVersion(
     return undefined;
   }
   return DISCOVERY_SCHEMA_VERSION;
+}
+
+function requirementsSchemaVersion(
+  value: unknown,
+  path: string,
+  issues: SchemaIssue[],
+): typeof REQUIREMENTS_SCHEMA_VERSION | undefined {
+  if (value !== REQUIREMENTS_SCHEMA_VERSION) {
+    issues.push({
+      path,
+      message: `must be schema version ${REQUIREMENTS_SCHEMA_VERSION}`,
+    });
+    return undefined;
+  }
+  return REQUIREMENTS_SCHEMA_VERSION;
 }
 
 function validResult<T>(value: T): ValidationResult<T> {
@@ -825,7 +841,7 @@ export function validateTaskRequirements(
   }
   hasOnlyKeys(input, ["schemaVersion", "requires", "preferredHarness", "allowFallback"], "$", issues);
   if (input.schemaVersion !== undefined) {
-    schemaVersion(input.schemaVersion, "$.schemaVersion", issues);
+    requirementsSchemaVersion(input.schemaVersion, "$.schemaVersion", issues);
   }
   const requires: CapabilityName[] = [];
   if (!Array.isArray(input.requires)) {
@@ -873,7 +889,9 @@ export function validateTaskRequirements(
     return invalidResult(issues);
   }
   return validResult({
-    ...(input.schemaVersion === undefined ? {} : { schemaVersion: 1 as const }),
+    ...(input.schemaVersion === undefined
+      ? {}
+      : { schemaVersion: REQUIREMENTS_SCHEMA_VERSION }),
     requires,
     ...(preferredHarness === undefined ? {} : { preferredHarness }),
     ...(allowFallback === undefined ? {} : { allowFallback }),

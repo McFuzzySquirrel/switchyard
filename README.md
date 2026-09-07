@@ -46,6 +46,26 @@ JSON output is versioned with `schemaVersion: 1`. Human output is plain text
 with the same statuses and profile data, and diagnostics are redacted before
 either output format is emitted.
 
+## Requirement schema
+
+Routing requests use the exported `TaskRequirements` contract:
+
+```json
+{
+  "schemaVersion": 1,
+  "requires": ["headless", "repository-access"],
+  "preferredHarness": "opencode",
+  "allowFallback": true
+}
+```
+
+`requires` accepts only normalized capability names and cannot contain
+duplicates. `preferredHarness` must be a lowercase harness identifier, and
+`allowFallback` must be boolean. The runtime exports
+`validateTaskRequirements`, `isTaskRequirements`, and
+`assertTaskRequirements`; the schema version is optional for compatibility with
+the original PRD interface.
+
 ## Repository layout
 
 | Path | Purpose |

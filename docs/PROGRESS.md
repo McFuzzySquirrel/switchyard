@@ -1,9 +1,9 @@
 # Project Progress
 
 ## Current State
-**Phase**: DISCOVERY-AND-REGISTRY-2
+**Phase**: DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-1
 **Status**: In Progress
-**Last Updated**: 2026-09-07T20:10:42.150Z
+**Last Updated**: 2026-09-07T20:11:53.955Z
 **Run ID**: faef066b-e967-49ae-ba56-4dbe4255f89d
 **Harness**: copilot
 **Execution Mode**: auto
@@ -27,6 +27,8 @@
   - Files: CHANGELOG.md, README.md, docs/features/discovery-and-registry.md, package.json, src/discovery/probe.ts, src/harness/discovery-adapter.ts, src/index.ts, tests/builtin-discovery-adapters.test.mjs, src/cli.ts, src/commands/capabilities.ts, src/commands/discover.ts, src/commands/index.ts, src/config/index.ts, src/config/registry.ts, tests/commands.test.mjs
 - [x] Phase DISCOVERY-AND-REGISTRY-2, Task DISCOVERY-AND-REGISTRY-2.4: [ ] Add human and JSON output (@discovery-registry-engineer)
   - Files: CHANGELOG.md, src/cli.ts, src/commands/capabilities.ts, src/commands/discover.ts, tests/commands.test.mjs
+- [x] Phase DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-1, Task DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-1.1: [ ] Define requirement schema and validation (@switchyard-qa-engineer)
+  - Files: CHANGELOG.md, README.md, src/discovery/registry.ts, src/discovery/schema.ts, tests/discovery-schema.test.mjs
 
 ## Current Task
 - None currently running

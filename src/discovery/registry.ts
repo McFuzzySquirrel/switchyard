@@ -13,6 +13,7 @@ import {
   assertLocalRegistry,
   assertHarnessProfile,
   DISCOVERY_SCHEMA_VERSION,
+  REQUIREMENTS_SCHEMA_VERSION,
   REGISTRY_SCHEMA_VERSION,
   SchemaValidationError,
 } from "./schema.ts";
@@ -44,6 +45,7 @@ import type { HarnessDiscoveryAdapter, HarnessDiscoveryOptions } from "../harnes
 
 export {
   DISCOVERY_SCHEMA_VERSION,
+  REQUIREMENTS_SCHEMA_VERSION,
   REGISTRY_SCHEMA_VERSION,
   SchemaValidationError,
   assertCapabilityObservation,

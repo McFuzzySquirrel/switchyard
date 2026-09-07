@@ -23,6 +23,7 @@ import {
 } from "./schema.ts";
 
 export type CompositionStageStatus = "pending" | "running" | "succeeded" | "failed" | "skipped";
+export const COMPOSITION_STATE_SCHEMA_VERSION = 1 as const;
 export interface CompositionArtifact {
   readonly name: string;
   readonly path?: string;
@@ -49,6 +50,13 @@ export interface CompositionResult {
   readonly status: "succeeded" | "failed" | "invalid-input";
   readonly stages: readonly CompositionStageResult[];
   readonly statePath: string;
+}
+
+export interface CompositionState {
+  readonly schemaVersion: typeof COMPOSITION_STATE_SCHEMA_VERSION;
+  readonly workflowId: string;
+  readonly status: "running" | "failed" | "succeeded";
+  readonly stages: readonly CompositionStageResult[];
 }
 
 export interface CompositionOptions {
@@ -235,13 +243,15 @@ export async function executeWorkflow(options: CompositionOptions): Promise<Comp
       dirname(absoluteStatePath),
       `.${basename(absoluteStatePath)}.tmp-${process.pid}-${Date.now()}`,
     );
+    const state: CompositionState = {
+      schemaVersion: COMPOSITION_STATE_SCHEMA_VERSION,
+      workflowId: workflow.id,
+      status,
+      stages: results.map(persistableStageResult),
+    };
     await writeFile(
       temporaryStatePath,
-      JSON.stringify({
-        workflowId: workflow.id,
-        status,
-        stages: results.map(persistableStageResult),
-      }, null, 2),
+      JSON.stringify(state, null, 2),
       { mode: 0o600 },
     );
     await rename(temporaryStatePath, absoluteStatePath);

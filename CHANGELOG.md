@@ -7,6 +7,9 @@ All notable user-facing changes to Switchyard are documented here. The format fo
 - Added versioned workflow and stage composition schemas with dependency-cycle
   validation, workspace-contained artifact declarations, explicit stage input
   handoffs, sequential execution, and durable per-stage results.
+- Versioned the durable `switchyard-workflow-state.json` format with
+  `schemaVersion: 1` so persisted per-stage snapshots have an explicit,
+  inspectable contract.
 - Hardened composition handoff boundaries: input/output declarations are
   unique and validated before launch, only whitelisted context and requested
   artifact metadata are forwarded, receiving stages re-check artifact

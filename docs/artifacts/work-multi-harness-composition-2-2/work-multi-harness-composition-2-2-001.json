@@ -1,0 +1,26 @@
+{
+  "type": "work.multi-harness-composition-2.2",
+  "category": "work",
+  "taskId": "MULTI-HARNESS-COMPOSITION-2.2",
+  "producedBy": "workflow-composition-engineer",
+  "status": "complete",
+  "summary": "[ ] Persist per-stage results: [ ] Persist per-stage results.",
+  "confidence": 0.9,
+  "inputs": [
+    "work-multi-harness-composition-2-1-001"
+  ],
+  "filesChanged": [
+    "CHANGELOG.md",
+    "README.md",
+    "docs/features/multi-harness-composition.md",
+    "src/composition/workflow.ts",
+    "tests/composition.test.mjs"
+  ],
+  "payload": {
+    "agentOutputExcerpt": "● codegraph_explore (MCP: codegraph) · Persist per-stage results in composition workflow sequential…\n  └ The project at /home/mcfuzzysquirrel/Projects/switchyard isn't indexed with c...\n\nI’m tracing the existing composition state model and its tests first, then I’ll extend persistence at the narrowest stage-boundary point and run the focused suite plus required project checks.\n\n/ Search (glob)\n  │ \"src/composition/**/*\"\n  └ 3 files found\n\n/ Search (grep)\n  │ \"stage|result|workflow|composition\" (",
+    "taskDescription": "[ ] Persist per-stage results."
+  },
+  "nextActions": [],
+  "artifactId": "work-multi-harness-composition-2-2-001",
+  "createdAt": "2026-09-07T22:53:39.607Z"
+}

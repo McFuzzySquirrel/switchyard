@@ -110,7 +110,8 @@ workspace-contained artifact declarations, and explicit stage-to-stage inputs.
 Use `validateWorkflow` for structured validation or `assertWorkflow` when
 invalid definitions should raise `WorkflowValidationError`. The
 `executeWorkflow` helper runs validated stages sequentially and persists
-per-stage results without transferring undeclared conversation state or
+per-stage results in an atomic `switchyard-workflow-state.json` snapshot
+(`schemaVersion: 1`) without transferring undeclared conversation state or
 artifacts. Every path-bearing file or directory handoff is checked at the
 receiving stage: the path must still resolve inside the workflow workspace and
 must have the declared kind. A missing or escaped artifact fails only the receiving stage;

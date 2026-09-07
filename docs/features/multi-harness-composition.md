@@ -109,7 +109,9 @@ The public composition API is exported from `src/composition/index.ts`:
   prior results. Dependent stages are recorded as skipped rather than losing
   their stage-level status.
 - `switchyard-workflow-state.json` is updated after each stage and retains
-  successful stage results and diagnostics when a later stage fails. Captured
+  successful stage results and diagnostics when a later stage fails. Its
+  `schemaVersion` is `1`, and each atomic snapshot contains the complete
+  persisted result for every stage reached so far. Captured
   execution streams are redacted before they are persisted; raw streams never
   enter a declared handoff. Checkpoints are written with restrictive
   permissions through atomic replacement so an interrupted write does not

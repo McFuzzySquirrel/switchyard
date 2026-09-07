@@ -1,7 +1,7 @@
 {
   "runId": "faef066b-e967-49ae-ba56-4dbe4255f89d",
   "startedAt": "2026-09-07T19:10:17.558Z",
-  "lastUpdatedAt": "2026-09-07T22:52:15.274Z",
+  "lastUpdatedAt": "2026-09-07T22:53:39.607Z",
   "manifestPath": "/home/mcfuzzysquirrel/Projects/switchyard/docs/EXECUTION-MANIFEST.json",
   "manifestVersion": "1.0",
   "harness": "copilot",
@@ -830,10 +830,23 @@
     },
     "MULTI-HARNESS-COMPOSITION-2.2": {
       "taskId": "MULTI-HARNESS-COMPOSITION-2.2",
-      "status": "pending",
+      "status": "complete",
       "ownerAgent": "workflow-composition-engineer",
-      "attempt": 0,
-      "outputFiles": []
+      "attempt": 1,
+      "outputFiles": [
+        "CHANGELOG.md",
+        "README.md",
+        "docs/features/multi-harness-composition.md",
+        "src/composition/workflow.ts",
+        "tests/composition.test.mjs"
+      ],
+      "startedAt": "2026-09-07T22:52:15.303Z",
+      "completedAt": "2026-09-07T22:53:39.607Z",
+      "agentOutput": "● codegraph_explore (MCP: codegraph) · Persist per-stage results in composition workflow sequential…\n  └ The project at /home/mcfuzzysquirrel/Projects/switchyard isn't indexed with c...\n\nI’m tracing the existing composition state model and its tests first, then I’ll extend persistence at the narrowest stage-boundary point and run the focused suite plus required project checks.\n\n/ Search (glob)\n  │ \"src/composition/**/*\"\n  └ 3 files found\n\n/ Search (grep)\n  │ \"stage|result|workflow|composition\" (src/composition, tests)\n  └ 17 files found\n\n/ Search (glob)\n  │ \"tests/*compose*\"\n  └ 1 file found\n\n/ Search (glob)\n  │ \"tests/*composition*\"\n  └ 2 files found\n\n● Inspect current worktree changes (shell)\n  │ git status --short\n  └ 3 lines…\n\n● Read schema.ts\n  │ src/composition/schema.ts\n  └ 278 lines read\n\n● Read workflow.ts\n  │ src/composition/workflow.ts\n  └ 416 lines read\n\n● Read index.ts\n  │ src/composition/index.ts\n  └ 2 lines read\n\n● Read composition.test.mjs\n  │ tests/composition.test.mjs\n  └ 383 lines read\n\n● Read compose-command.test.mjs\n  │ tests/compose-command.test.mjs\n  └ 275 lines read\n\n● Read composition-demo.test.mjs\n  │ tests/composition-demo.test.mjs\n  └ 316 lines read\n\n● Read compose.ts\n  │ src/commands/compose.ts\n  └ 287 lines read\n\n● Read multi-harness-composition.md\n  │ docs/features/multi-harness-composition.md\n  └ 154 lines read\n\n● Read package.json\n  └ 34 lines read\n\n/ Search (grep)\n  │ \"CompositionStageResult|CompositionResult|stages\" in *.ts (src)\n  └ 66 lines found\n\n/ Search (grep)\n  │ \"switchyard-workflow-state|statePath|persistableStageResult|WORKFLOW-STATE\"\n  └ 48 lines found\n\n● Inspect recent composition history (shell)\n  │ git log --oneline -8 -- src/composition/workflow.ts src/composition/schema.ts\n  │ tests/composition.test.mjs\n  └ 5 lines…\n\n/ Search (grep)\n  │ \"Persist per-stage results|MULTI-HARNESS-COMPOSITION-2.2|stage results\"\n  └ 31 lines found\n\n● Review prior orchestration change (shell)\n  │ git show --stat --oneline 1c998bd && git show --format=fuller --no-ext-diff 1c998bd --\n  │ src/composition/workflow.ts tests/composition.test.mjs | sed -n '1,240p'\n  └ 256 lines…\n\n● Read EXECUTION-MANIFEST.json\n  │ docs/EXECUTION-MANIFEST.json\n  └ L1045:1105 (61 lines read)\n\n● Read README.md\n  └ L95:125 (31 lines read)\n\n/ Search (grep)\n  │ \"statePath|updatedAt|checkpoint|atomic\" in *.ts (src)\n  └ 48 lines found\n\n● Run composition tests (shell)\n  │ node --experimental-strip-types --test tests/composition.test.mjs tests/compose-command.test.mjs\n  │ tests/composition-demo.test.mjs\n  └ 120 lines…\n\n● Read CHANGELOG.md\n  └ L1:35 (35 lines read)\n\nThe execution path already writes atomic snapshots after each stage, but the persisted file has no explicit state contract. I’m making that durable format versioned and typed, then adding an assertion that the per-stage snapshot is the inspectable state produced by composition.\n\n● Edit\n  │ Edit src/composition/workflow.ts\n  │ Edit tests/composition.test.mjs\n  └ Edit docs/features/multi-harness-composition.md\n\n● Edit\n  └ Edit CHANGELOG.md\n\n● Check patch formatting (shell)\n  │ git diff --check\n  └ 1 line…\n\n● Run documentation governance tests (shell)\n  │ npm run test:docs\n  └ 26 lines…\n\n● Run TypeScript checks (shell)\n  │ npm run typecheck\n  └ 3 lines…\n\n● Run full test suite (shell)\n  │ npm test\n  └ 23 lines…\n\n● Review persistence change diff (shell)\n  │ git diff -- src/composition/workflow.ts tests/composition.test.mjs CHANGELOG.md\n  │ docs/features/multi-harness-composition.md\n  └ 97 lines…\n\n● Review final changed files (shell)\n  │ git status --short && git diff --stat && git diff --check\n  └ 14 lines…\n\n● Edit\n  └ Edit README.md\n\n● Check final patch and worktree (shell)\n  │ git diff --check && git status --short\n  └ 8 lines…\n\n● Recheck documentation governance (shell)\n  │ npm run test:docs\n  └ 26 lines…\n\nImplemented durable per-stage result persistence with an explicit state contract.\n\n**Changed**\n- `src/composition/workflow.ts`\n  - Added `COMPOSITION_STATE_SCHEMA_VERSION`.\n  - Added the typed `CompositionState` persisted-state contract.\n  - Persisted `schemaVersion: 1` in every atomic workflow snapshot.\n- `tests/composition.test.mjs`\n  - Verifies persisted state snapshots include the schema version.\n- `README.md`\n- `CHANGELOG.md`\n- `docs/features/multi-harness-composition.md`\n\nExisting unrelated changes in `docs/EXECUTION-AUDIT.jsonl` and `docs/WORKFLOW-STATE.json` were preserved.\n\n",
+      "artifactId": "work-multi-harness-composition-2-2-001",
+      "inputArtifactIds": [
+        "work-multi-harness-composition-2-1-001"
+      ]
     },
     "MULTI-HARNESS-COMPOSITION-2.3": {
       "taskId": "MULTI-HARNESS-COMPOSITION-2.3",

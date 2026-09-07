@@ -129,6 +129,7 @@ test("executes sequential stages with only declared handoff and preserves prior 
   assert.match(tasks[1], /"status":"succeeded"/);
   assert.equal(reviewCanSeeUndeclared, false);
   const state = JSON.parse(await readFile(outcome.statePath, "utf8"));
+  assert.equal(state.schemaVersion, 1);
   assert.deepEqual(state.stages.map((x) => x.status), ["succeeded", "failed"]);
 });
 
@@ -378,6 +379,7 @@ test("preserves completed stages when selection or execution fails and skips dep
   assert.deepEqual(calls, ["implementation", "review"]);
   assert.deepEqual(outcome.stages.map((stage) => stage.status), ["succeeded", "failed", "skipped"]);
   const state = JSON.parse(await readFile(outcome.statePath, "utf8"));
+  assert.equal(state.schemaVersion, 1);
   assert.deepEqual(state.stages.map((stage) => stage.status), ["succeeded", "failed", "skipped"]);
   assert.match(outcome.stages[1].diagnostic, /review adapter failed/);
 });

@@ -23,9 +23,27 @@
       "completedAt": "2026-09-07T18:50:44.256Z"
     },
     "skills": {
-      "status": "pending",
+      "status": "complete",
       "inputFingerprint": "fab19c079c3555e6489887829d856bb1ddb756cf1460b6b85482404f73df042a",
-      "outputs": []
+      "outputs": [
+        ".github/skills/safe-subprocess-fixtures/SKILL.md",
+        ".github/skills/adapter-conformance/SKILL.md",
+        ".github/skills/versioned-cli-contracts/SKILL.md"
+      ],
+      "startedAt": "2026-09-07T18:52:35.484Z",
+      "invocation": {
+        "runner": "copilot",
+        "source": "inherit",
+        "argv": [
+          "-p",
+          "/forge-build-project-skills Consume docs/SKILL-CANDIDATES.json. Use .github/skills/ and .github/agents/. Create or extend only planned skills, reuse unchanged packages, honor omit decisions, and run structural and per-axis review gates. Do not regenerate the team, modify its ownership or handoff, compile a manifest, or start the build. Headless: proceed with authorized defaults.",
+          "--yolo"
+        ],
+        "skill": "forge-build-project-skills"
+      },
+      "outputFingerprint": "a61f4fb955687953a040d59dc5f4ac1b12a610ebeede71b0a66282caa66006d3",
+      "completedAt": "2026-09-07T18:56:26.224Z",
+      "noSkillsRequired": false
     }
   }
 }

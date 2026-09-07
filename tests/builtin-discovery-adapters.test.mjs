@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { chmod, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { chmod, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -48,26 +48,41 @@ test("registers the explicit built-in discovery adapters with no execution claim
   );
 });
 
-test("keeps vendor help parsing local while returning normalized vocabulary", () => {
-  assert.deepEqual(
-    parseOpenCodeCapabilities(`
-      Usage: opencode [command]
-      Commands: run, mcp, fork
-      Options: --model <model> --continue
-      Providers: Ollama local models
-      vendor-secret-feature
-    `),
-    ["headless", "model-selection", "continue", "fork", "mcp", "local-models"],
-  );
-  assert.deepEqual(
-    parseGitHubCopilotCapabilities(`
-      Usage: copilot --prompt <task>
-      Options: --model <model> --resume
-      Commands: mcp, issues, pull requests
-      vendor-secret-feature
-    `),
-    ["headless", "model-selection", "continue", "mcp", "github-context"],
-  );
+test("parses supported CLI-help fixtures into the normalized capability vocabulary", async () => {
+  const fixtures = [
+    {
+      file: "opencode-help.txt",
+      parse: parseOpenCodeCapabilities,
+      expected: [
+        "headless",
+        "model-selection",
+        "continue",
+        "fork",
+        "mcp",
+        "local-models",
+      ],
+    },
+    {
+      file: "copilot-help.txt",
+      parse: parseGitHubCopilotCapabilities,
+      expected: [
+        "headless",
+        "model-selection",
+        "continue",
+        "mcp",
+        "github-context",
+      ],
+    },
+  ];
+
+  for (const fixture of fixtures) {
+    const helpText = await readFile(
+      new URL(`./fixtures/discovery/${fixture.file}`, import.meta.url),
+      "utf8",
+    );
+    assert.deepEqual(fixture.parse(helpText), fixture.expected, fixture.file);
+  }
+
   assert.deepEqual(
     parseGitHubCopilotCapabilities("GitHub Copilot CLI\nOptions: --silent"),
     [],

@@ -1,0 +1,15 @@
+Usage: opencode [command]
+
+OpenCode is an AI coding agent.
+
+Commands:
+  run <prompt>             Run a prompt non-interactively
+  fork                     Fork the current session
+  mcp                      Manage Model Context Protocol servers
+
+Options:
+  --model <provider/model> Select the model to use
+  --continue               Continue the most recent session
+
+Providers:
+  Ollama                   Run local models

@@ -1,0 +1,14 @@
+Usage: copilot [options] [command]
+
+GitHub Copilot CLI - An AI-powered coding assistant.
+
+Options:
+  -p, --prompt <text>       Execute a prompt in non-interactive mode
+  --model <model>           Set the AI model to use
+  --continue                Resume the most recent session
+  --additional-mcp-config   Additional MCP servers configuration
+
+Commands:
+  mcp                       Manage Model Context Protocol servers
+  pr                        Work with pull requests
+  issue                     Work with GitHub issues

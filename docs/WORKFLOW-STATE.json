@@ -1,7 +1,7 @@
 {
   "runId": "faef066b-e967-49ae-ba56-4dbe4255f89d",
   "startedAt": "2026-09-07T19:10:17.558Z",
-  "lastUpdatedAt": "2026-09-07T19:22:48.415Z",
+  "lastUpdatedAt": "2026-09-07T19:24:05.269Z",
   "manifestPath": "/home/mcfuzzysquirrel/Projects/switchyard/docs/EXECUTION-MANIFEST.json",
   "manifestVersion": "1.0",
   "harness": "copilot",
@@ -33,10 +33,23 @@
     },
     "DISCOVERY-AND-REGISTRY-1.2": {
       "taskId": "DISCOVERY-AND-REGISTRY-1.2",
-      "status": "pending",
+      "status": "complete",
       "ownerAgent": "discovery-registry-engineer",
-      "attempt": 0,
-      "outputFiles": []
+      "attempt": 1,
+      "outputFiles": [
+        "package.json",
+        "src/discovery/index.ts",
+        "package-lock.json",
+        "src/discovery/executable.ts",
+        "tests/executable-lookup.test.mjs"
+      ],
+      "startedAt": "2026-09-07T19:22:48.447Z",
+      "completedAt": "2026-09-07T19:24:05.269Z",
+      "agentOutput": "I’m locating the discovery boundary and its existing registry/schema conventions before adding portable executable resolution.\n\n● codegraph_explore (MCP: codegraph) · cross-platform executable lookup discovery registry harness …\n  └ The project at /home/mcfuzzysquirrel/Projects/switchyard isn't indexed with c...\n\n● Read package.json\n  └ 23 lines read\n\n✗ Search (grep)\n  │ \"executable|PATH|which|where|lookup|discover\" in *.ts\n  │ (/home/mcfuzzquirrel/Projects/switchyard/src)\n  └ Search paths do not exist: /home/mcfuzzquirrel/Projects/switchyard/src\n\n/ Search (glob)\n  │ \"tests/**/*\"\n  └ 1 file found\n\n/ Search (glob)\n  │ \"src/**/*\"\n  └ 8 files found\n\n/ Search (grep)\n  │ \"executable|PATH|which|where|lookup|discover\" in *.mjs (tests)\n  └ 10 lines found\n\n● Read schema.ts\n  │ src/discovery/schema.ts\n  └ 1 line read\n\n● Read registry.ts\n  │ src/discovery/registry.ts\n  └ 46 lines read\n\n● Read index.ts\n  │ src/discovery/index.ts\n  └ 2 lines read\n\n● Read adapter.ts\n  │ src/harness/adapter.ts\n  └ 74 lines read\n\n● Read discovery-schema.test.mjs\n  │ tests/discovery-schema.test.mjs\n  └ 201 lines read\n\n/ Search (grep)\n  │ \"executable|PATH|which|where|lookup|discover\" in *.ts (src)\n  └ 38 lines found\n\n● Read schema.ts\n  │ src/discovery/schema.ts\n  └ L1:125 (125 lines read)\n\n● Read schema.ts\n  │ src/discovery/schema.ts\n  └ L175:225 (51 lines read)\n\n● Read schema.ts\n  │ src/discovery/schema.ts\n  └ L520:730 (211 lines read)\n\n● Read tsconfig.json\n  └ 13 lines read\n\n● Read index.ts\n  │ src/index.ts\n  └ 3 lines read\n\n● Inspect worktree and files (shell)\n  │ git --no-pager status --short && find . -maxdepth 2 -type f -not -path './.git/*' | sort\n  └ 26 lines…\n\n● Read registry.ts\n  │ src/discovery/registry.ts\n  └ 46 lines read\n\n● Read index.ts\n  │ src/harness/index.ts\n  └ 1 line read\n\n/ Search (grep)\n  │ \"discover|registry\" (docs/PRD.md)\n  └ 53 lines found\n\n/ Search (grep)\n  │ \"cross-platform executable|executable lookup|Executable lookup|PATH|where\\.exe|which\" in *.md\n  │ (docs)\n  └ 16 lines found\n\n● Read discovery-and-registry.md\n  │ docs/features/discovery-and-registry.md\n  └ 99 lines read\n\nThe schema already models `override`, `configured`, and `path` sources; I’m adding a filesystem-based resolver that preserves those sources and never invokes a shell.\n\n● Edit\n  │ Create src/discovery/executable.ts\n  │ Edit src/discovery/index.ts\n  └ Create tests/executable-lookup.test.mjs\n\n● Run lookup tests and typecheck (shell)\n  │ npm test && npm run typecheck\n  └ 92 lines…\n\nThe resolver behavior is covered; type checking identified the project’s missing Node type declarations, which are required for this filesystem API.\n\n● Edit\n  └ Edit src/discovery/executable.ts\n\n● Install Node types and validate (shell)\n  │ npm install --save-dev @types/node && npm test && npm run typecheck && git --no-pager diff\n  │ --check && git --no-pager status --short\n  └ 101 lines…\n\n● Read adapter-extensibility-and-configuration.md\n  │ docs/features/adapter-extensibility-and-configuration.md\n  └ L35:80 (45 lines read)\n\n● Read package.json\n  └ 24 lines read\n\n● Review implementation diff (shell)\n  │ git --no-pager diff -- package.json src/discovery/index.ts src/discovery/executable.ts\n  │ tests/executable-lookup.test.mjs && git --no-pager diff --check\n  └ 21 lines…\n\nImplemented cross-platform executable lookup with shell-free, filesystem-based resolution.\n\n- Added `src/discovery/executable.ts`: resolves override, configured, and `PATH` executables in precedence order; validates Unix execute permissions; supports Windows `PATHEXT`, semicolon-delimited `PATH`, and case-insensitive environment variable names.\n- Exported the lookup API from `src/discovery/index.ts`.\n- Added lookup coverage in `tests/executable-lookup.test.mjs`.\n- Added `@types/node` and generated `package-lock.json` for Node filesystem/path type safety.\n\nChanged files: `package.json`, `package-lock.json`, `src/discovery/executable.ts`, `src/discovery/index.ts`, and `tests/executable-lookup.test.mjs`.\n\n",
+      "artifactId": "work-discovery-and-registry-1-2-001",
+      "inputArtifactIds": [
+        "work-discovery-and-registry-1-1-001"
+      ]
     },
     "DISCOVERY-AND-REGISTRY-1.3": {
       "taskId": "DISCOVERY-AND-REGISTRY-1.3",

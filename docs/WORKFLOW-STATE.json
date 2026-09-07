@@ -1,7 +1,7 @@
 {
   "runId": "faef066b-e967-49ae-ba56-4dbe4255f89d",
   "startedAt": "2026-09-07T19:10:17.558Z",
-  "lastUpdatedAt": "2026-09-07T22:53:39.607Z",
+  "lastUpdatedAt": "2026-09-07T22:55:00.807Z",
   "manifestPath": "/home/mcfuzzysquirrel/Projects/switchyard/docs/EXECUTION-MANIFEST.json",
   "manifestVersion": "1.0",
   "harness": "copilot",
@@ -850,10 +850,22 @@
     },
     "MULTI-HARNESS-COMPOSITION-2.3": {
       "taskId": "MULTI-HARNESS-COMPOSITION-2.3",
-      "status": "pending",
+      "status": "complete",
       "ownerAgent": "workflow-composition-engineer",
-      "attempt": 0,
-      "outputFiles": []
+      "attempt": 1,
+      "outputFiles": [
+        "CHANGELOG.md",
+        "README.md",
+        "tests/composition-demo.test.mjs",
+        "examples/opencode-to-copilot.workflow.json"
+      ],
+      "startedAt": "2026-09-07T22:53:39.635Z",
+      "completedAt": "2026-09-07T22:55:00.807Z",
+      "agentOutput": "● codegraph_explore (MCP: codegraph) · OpenCode-to-Copilot implementation review example workflow c…\n  └ The project at /home/mcfuzzysquirrel/Projects/switchyard isn't indexed with c...\n\n● Read README.md\n  └ 282 lines read\n\n● Read CHANGELOG.md\n  └ 148 lines read\n\n/ Search (glob)\n  │ \"tests/**/*composition*\"\n  └ 2 files found\n\n/ Search (glob)\n  │ \"src/composition/**/*\"\n  └ 3 files found\n\n/ Search (glob)\n  │ \"docs/**/*multi-harness*\"\n  └ 6 files found\n\n● Read multi-harness-composition.md\n  │ docs/features/multi-harness-composition.md\n  └ 156 lines read\n\n● Read composition-demo.test.mjs\n  │ tests/composition-demo.test.mjs\n  └ 316 lines read\n\n● Read composition.test.mjs\n  │ tests/composition.test.mjs\n  └ 385 lines read\n\n● Read workflow.ts\n  │ src/composition/workflow.ts\n  └ 426 lines read\n\n● Read schema.ts\n  │ src/composition/schema.ts\n  └ 278 lines read\n\n● Read stub.ts\n  │ src/harness/stub.ts\n  └ 165 lines read\n\n● Read package.json\n  └ 34 lines read\n\n● Read compose.ts\n  │ src/commands/compose.ts\n  └ 287 lines read\n\n● Read index.ts\n  │ src/index.ts\n  └ 9 lines read\n\n/ Search (grep)\n  │ \"composition-demo|OpenCode-to-Copilot|reproducible\" in *.{ts,mjs,md}\n  └ 18 lines found\n\n● Inspect worktree and latest commit (shell)\n  │ git status --short && git log -1 --oneline\n  └ 4 lines…\n\n● Run composition-focused tests (shell)\n  │ npm test -- --test-name-pattern='composition-demo|composition'\n  └ 23 lines…\n\n/ Search (glob)\n  │ \"tests/*compose*\"\n  └ 1 file found\n\n● Inspect latest commit contents (shell)\n  │ git --no-pager show --stat --oneline HEAD\n  └ 12 lines…\n\n● Inspect recent implementation history (shell)\n  │ git --no-pager log --oneline --all --decorate -8\n  └ 9 lines…\n\n● Trace demonstration history (shell)\n  │ git --no-pager log --all --oneline -- tests/composition-demo.test.mjs\n  │ docs/features/multi-harness-composition.md\n  └ 6 lines…\n\n● Check tracked demonstration files (shell)\n  │ git ls-files tests/composition-demo.test.mjs docs/features/multi-harness-composition.md && git\n  │ log --all --format='%h %s' -- tests/composition-demo.test.mjs\n  └ 4 lines…\n\n● Inspect prior composition implementation files (shell)\n  │ git --no-pager show --stat 1c998bd && git --no-pager show --format= --name-only 1c998bd\n  └ 34 lines…\n\n● Read cli.ts\n  │ src/cli.ts\n  └ L1:220 (220 lines read)\n\n● Read compose-command.test.mjs\n  │ tests/compose-command.test.mjs\n  └ L1:180 (180 lines read)\n\n● Read PRD.md\n  │ docs/PRD.md\n  └ L380:425 (46 lines read)\n\n/ Search (glob)\n  │ \"examples/**/*\"\n  └ No matches found\n\nThe composition engine already has the execution path and a test-only demonstration, so I’m making the example a reusable workflow artifact rather than leaving it embedded in test code. I’ll wire the reproducible test to that artifact and document how it maps to the OpenCode → Copilot stages.\n\n● Edit\n  │ Create examples/opencode-to-copilot.workflow.json\n  │ Edit tests/composition-demo.test.mjs\n  │ Edit README.md\n  └ Edit CHANGELOG.md\n\n● Run documentation governance tests (shell)\n  │ npm run test:docs\n  └ 26 lines…\n\n● Run TypeScript typecheck (shell)\n  │ npm run typecheck\n  └ 3 lines…\n\n● Run full test suite (shell)\n  │ npm test\n  └ 23 lines…\n\n● Review final implementation diff (shell)\n  │ git diff --stat && git diff -- examples/opencode-to-copilot.workflow.json\n  │ tests/composition-demo.test.mjs README.md CHANGELOG.md\n  └ 97 lines…\n\n● Check changed files and whitespace (shell)\n  │ git diff --check && git status --short\n  └ 7 lines…\n\nImplemented a reusable OpenCode-to-Copilot implementation/review workflow example.\n\n**Created**\n- `examples/opencode-to-copilot.workflow.json`\n\n**Updated**\n- `tests/composition-demo.test.mjs` now executes the shared workflow artifact.\n- `README.md` documents the example and fixture-backed execution.\n- `CHANGELOG.md` records the new example.\n\nExisting changes in `docs/EXECUTION-AUDIT.jsonl` and `docs/WORKFLOW-STATE.json` were left untouched.\n\n",
+      "artifactId": "work-multi-harness-composition-2-3-001",
+      "inputArtifactIds": [
+        "work-multi-harness-composition-2-2-001"
+      ]
     },
     "MULTI-HARNESS-COMPOSITION-2.4": {
       "taskId": "MULTI-HARNESS-COMPOSITION-2.4",

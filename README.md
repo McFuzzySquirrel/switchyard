@@ -162,6 +162,13 @@ const workflow = {
 const result = await executeWorkflow({ workflow, adapters });
 ```
 
+The complete OpenCode-to-Copilot implementation/review workflow is also
+available as [`examples/opencode-to-copilot.workflow.json`](examples/opencode-to-copilot.workflow.json).
+It routes the implementation stage to OpenCode, routes the review stage to
+Copilot, and passes only the declared patch plus status/harness context.
+`tests/composition-demo.test.mjs` runs this same workflow with execution-capable
+fixture adapters when the built-in adapters are discovery-only or unavailable.
+
 JSON output is versioned with `schemaVersion: 1`. All command JSON payloads use
 the shared `serializeCommandJson` contract exported from `src/output/index.ts`;
 the serializer preserves command-owned fields while enforcing the common

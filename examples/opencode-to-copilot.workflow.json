@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "id": "opencode-copilot-implementation-review",
+  "workspace": "./.switchyard-workspace",
+  "stages": [
+    {
+      "id": "implementation",
+      "requirements": {
+        "schemaVersion": 1,
+        "requires": ["headless"],
+        "preferredHarness": "opencode"
+      },
+      "task": "Implement the requested change and publish it as a reviewable patch.",
+      "outputs": [
+        {
+          "name": "patch",
+          "kind": "file",
+          "path": "patch.diff",
+          "description": "Implementation diff"
+        }
+      ]
+    },
+    {
+      "id": "review",
+      "dependsOn": ["implementation"],
+      "requirements": {
+        "schemaVersion": 1,
+        "requires": ["github-context"],
+        "preferredHarness": "copilot"
+      },
+      "task": "Review the implementation patch for correctness before merge.",
+      "inputs": [
+        {
+          "name": "patch-input",
+          "fromStage": "implementation",
+          "artifact": "patch",
+          "context": ["status", "selectedHarness"]
+        }
+      ]
+    }
+  ]
+}

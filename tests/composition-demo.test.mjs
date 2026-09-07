@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import test from "node:test";
 
 import {
@@ -14,6 +15,12 @@ import {
 
 const observedAt = "2026-09-07T19:00:00.000Z";
 const operations = { discover: true, verify: true, execute: true, resume: false, fork: false };
+const exampleWorkflowPath = join(
+  dirname(fileURLToPath(import.meta.url)),
+  "..",
+  "examples",
+  "opencode-to-copilot.workflow.json",
+);
 
 function observation(capability) {
   return {
@@ -159,30 +166,8 @@ test("reproducible OpenCode-to-Copilot implementation/review workflow completes 
   );
 
   const workflow = {
-    id: "opencode-copilot-demo",
+    ...JSON.parse(await readFile(exampleWorkflowPath, "utf8")),
     workspace,
-    stages: [
-      {
-        id: "implementation",
-        requirements: { schemaVersion: 1, requires: ["headless"], preferredHarness: "opencode" },
-        task: "Implement the requested change and publish it as a reviewable patch.",
-        outputs: [{ name: "patch", kind: "file", path: "patch.diff", description: "Implementation diff" }],
-      },
-      {
-        id: "review",
-        dependsOn: ["implementation"],
-        requirements: { schemaVersion: 1, requires: ["github-context"], preferredHarness: "copilot" },
-        task: "Review the implementation patch for correctness before merge.",
-        inputs: [
-          {
-            name: "patch-input",
-            fromStage: "implementation",
-            artifact: "patch",
-            context: ["status", "selectedHarness"],
-          },
-        ],
-      },
-    ],
   };
 
   const result = await compose({

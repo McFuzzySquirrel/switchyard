@@ -30,8 +30,9 @@ test("stripAnsi, redactSecrets, boundExcerpt, extractVersion, and isHelpOutput h
     "Bearer [REDACTED] [REDACTED] [REDACTED]",
   );
 
-  const truncated = boundExcerpt("A".repeat(100), 10);
+  const truncated = boundExcerpt("A".repeat(100), 20);
   assert.ok(truncated.includes("[truncated]"));
+  assert.ok(truncated.length <= 20);
 
   assert.equal(extractVersion("opencode version 1.18.28"), "1.18.28");
   assert.equal(extractVersion("github copilot cli v1.0.83 (2026-09-01)"), "1.0.83");
@@ -63,6 +64,20 @@ test("probeExecutable handles missing or non-executable files gracefully", async
   assert.equal(result.exitCode, null);
   assert.equal(result.timedOut, false);
   assert.ok(result.error !== undefined);
+});
+
+test("probeExecutable reports an already-aborted probe without spawning", async () => {
+  const controller = new AbortController();
+  controller.abort();
+
+  const result = await probeExecutable("/nonexistent/binary/path", {
+    signal: controller.signal,
+  });
+
+  assert.equal(result.success, false);
+  assert.equal(result.exitCode, null);
+  assert.equal(result.timedOut, false);
+  assert.equal(result.error, "Probe execution was aborted");
 });
 
 test("probeExecutable handles timeouts safely and sets timedOut", async (t) => {

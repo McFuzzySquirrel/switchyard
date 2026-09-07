@@ -3,7 +3,7 @@
 ## Current State
 **Phase**: DISCOVERY-AND-REGISTRY-1
 **Status**: In Progress
-**Last Updated**: 2026-09-07T19:28:08.512Z
+**Last Updated**: 2026-09-07T19:35:58.437Z
 **Run ID**: faef066b-e967-49ae-ba56-4dbe4255f89d
 **Harness**: copilot
 **Execution Mode**: manual
@@ -16,6 +16,8 @@
   - Files: package.json, src/discovery/index.ts, package-lock.json, src/discovery/executable.ts, tests/executable-lookup.test.mjs
 - [x] Phase DISCOVERY-AND-REGISTRY-1, Task DISCOVERY-AND-REGISTRY-1.3: [ ] Implement bounded version/help probing (@discovery-registry-engineer)
   - Files: src/discovery/index.ts, src/discovery/probe.ts, tests/version-help-probing.test.mjs
+- [x] Phase DISCOVERY-AND-REGISTRY-1, Task DISCOVERY-AND-REGISTRY-1.4: [ ] Add OpenCode and Copilot discovery adapters (@adapter-platform-engineer)
+  - Files: src/discovery/probe.ts, src/harness/index.ts, tests/version-help-probing.test.mjs, docs/engine-control.json, src/harness/copilot.ts, src/harness/discovery-adapter.ts, src/harness/opencode.ts, src/harness/registry.ts, tests/builtin-discovery-adapters.test.mjs
 
 ## Current Task
 - None currently running

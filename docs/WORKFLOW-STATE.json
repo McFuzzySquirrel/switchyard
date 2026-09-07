@@ -1,7 +1,7 @@
 {
   "runId": "faef066b-e967-49ae-ba56-4dbe4255f89d",
   "startedAt": "2026-09-07T19:10:17.558Z",
-  "lastUpdatedAt": "2026-09-07T19:28:08.511Z",
+  "lastUpdatedAt": "2026-09-07T19:35:58.437Z",
   "manifestPath": "/home/mcfuzzysquirrel/Projects/switchyard/docs/EXECUTION-MANIFEST.json",
   "manifestVersion": "1.0",
   "harness": "copilot",
@@ -71,10 +71,27 @@
     },
     "DISCOVERY-AND-REGISTRY-1.4": {
       "taskId": "DISCOVERY-AND-REGISTRY-1.4",
-      "status": "pending",
+      "status": "complete",
       "ownerAgent": "adapter-platform-engineer",
-      "attempt": 0,
-      "outputFiles": []
+      "attempt": 1,
+      "outputFiles": [
+        "src/discovery/probe.ts",
+        "src/harness/index.ts",
+        "tests/version-help-probing.test.mjs",
+        "docs/engine-control.json",
+        "src/harness/copilot.ts",
+        "src/harness/discovery-adapter.ts",
+        "src/harness/opencode.ts",
+        "src/harness/registry.ts",
+        "tests/builtin-discovery-adapters.test.mjs"
+      ],
+      "startedAt": "2026-09-07T19:28:08.535Z",
+      "completedAt": "2026-09-07T19:35:58.437Z",
+      "agentOutput": "● Adapter-platform-engineer (model: gpt-5.6-terra) Implement discovery adapters               7m 24s\n  │ Implemented OpenCode and GitHub Copilot built-in discovery adapters without c...\n  │ Check diff whitespace and worktree (shell)\n  │   │ git --no-pager diff --check && git --no-pager status --short\n  │   └ 12 lines…\n  └ Todo completed test-discovery-adapters\n\nThe adapters and their coverage are implemented; I’m checking the resulting worktree and validation state before delivering.\n\n● Verify worktree and project tests (shell)\n  │ git --no-pager status --short && git --no-pager diff --check && npm test && npm run typecheck\n  └ 191 lines…\n\nImplemented OpenCode and GitHub Copilot discovery adapters with explicit built-in registration, shared bounded probing, normalized capabilities, and schema-valid unavailable diagnostics.\n\nChanged/created:\n- `src/harness/discovery-adapter.ts`\n- `src/harness/opencode.ts`\n- `src/harness/copilot.ts`\n- `src/harness/registry.ts`\n- `src/harness/index.ts`\n- `src/discovery/probe.ts`\n- `tests/builtin-discovery-adapters.test.mjs`\n- `tests/version-help-probing.test.mjs`\n\n`npm test` passes (**27/27**) and `npm run typecheck` passes. Unrelated existing documentation/workflow changes were left untouched.\n\n",
+      "artifactId": "work-discovery-and-registry-1-4-001",
+      "inputArtifactIds": [
+        "work-discovery-and-registry-1-3-001"
+      ]
     },
     "DISCOVERY-AND-REGISTRY-1.5": {
       "taskId": "DISCOVERY-AND-REGISTRY-1.5",

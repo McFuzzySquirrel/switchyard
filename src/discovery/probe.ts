@@ -97,10 +97,15 @@ export function boundExcerpt(
 ): string {
   if (!text) return "";
   const cleaned = redactSecrets(stripAnsi(text)).replace(/\r\n/g, "\n").trim();
-  if (cleaned.length <= maxLength) {
+  const limit = Math.max(0, Math.floor(maxLength));
+  if (cleaned.length <= limit) {
     return cleaned;
   }
-  return `${cleaned.slice(0, maxLength)}\n[truncated]`;
+  const marker = "\n[truncated]";
+  if (limit <= marker.length) {
+    return marker.slice(0, limit);
+  }
+  return `${cleaned.slice(0, limit - marker.length)}${marker}`;
 }
 
 /** Extracts a semantic version string from text output. */
@@ -151,10 +156,12 @@ export async function probeExecutable(
     let stderrTruncated = false;
     let timedOut = false;
     let settled = false;
+    let child: ReturnType<typeof spawn> | undefined;
+    let timer: NodeJS.Timeout | undefined;
     let killTimer: NodeJS.Timeout | undefined;
 
     const cleanup = () => {
-      clearTimeout(timer);
+      if (timer) clearTimeout(timer);
       if (killTimer) clearTimeout(killTimer);
       if (options.signal) {
         options.signal.removeEventListener("abort", onAbort);
@@ -196,7 +203,6 @@ export async function probeExecutable(
       options.signal.addEventListener("abort", onAbort, { once: true });
     }
 
-    let child: ReturnType<typeof spawn>;
     try {
       child = spawn(executable, args, {
         cwd,
@@ -219,7 +225,7 @@ export async function probeExecutable(
       });
     }
 
-    const timer = setTimeout(() => {
+    timer = setTimeout(() => {
       timedOut = true;
       if (child && !child.killed) {
         try {

@@ -1,0 +1,30 @@
+{
+  "type": "work.discovery-and-registry-1.4",
+  "category": "work",
+  "taskId": "DISCOVERY-AND-REGISTRY-1.4",
+  "producedBy": "adapter-platform-engineer",
+  "status": "complete",
+  "summary": "[ ] Add OpenCode and Copilot discovery adapters: [ ] Add OpenCode and Copilot discovery adapters.",
+  "confidence": 0.9,
+  "inputs": [
+    "work-discovery-and-registry-1-3-001"
+  ],
+  "filesChanged": [
+    "src/discovery/probe.ts",
+    "src/harness/index.ts",
+    "tests/version-help-probing.test.mjs",
+    "docs/engine-control.json",
+    "src/harness/copilot.ts",
+    "src/harness/discovery-adapter.ts",
+    "src/harness/opencode.ts",
+    "src/harness/registry.ts",
+    "tests/builtin-discovery-adapters.test.mjs"
+  ],
+  "payload": {
+    "agentOutputExcerpt": "● Adapter-platform-engineer (model: gpt-5.6-terra) Implement discovery adapters               7m 24s\n  │ Implemented OpenCode and GitHub Copilot built-in discovery adapters without c...\n  │ Check diff whitespace and worktree (shell)\n  │   │ git --no-pager diff --check && git --no-pager status --short\n  │   └ 12 lines…\n  └ Todo completed test-discovery-adapters\n\nThe adapters and their coverage are implemented; I’m checking the resulting worktree and validation state before delivering.\n\n● Verify w",
+    "taskDescription": "[ ] Add OpenCode and Copilot discovery adapters."
+  },
+  "nextActions": [],
+  "artifactId": "work-discovery-and-registry-1-4-001",
+  "createdAt": "2026-09-07T19:35:58.436Z"
+}

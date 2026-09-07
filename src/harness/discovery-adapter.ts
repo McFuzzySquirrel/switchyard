@@ -20,6 +20,7 @@ import {
 } from "../discovery/schema.ts";
 import {
   DISCOVERY_ONLY_OPERATIONS,
+  assertOperationSupport,
   type AdapterOperationSupport,
 } from "./adapter.ts";
 
@@ -155,7 +156,9 @@ function unavailableLocation(
 export function createHarnessDiscoveryAdapter(
   definition: HarnessDiscoveryAdapterDefinition,
 ): HarnessDiscoveryAdapter {
-  const supportedOperations = definition.supportedOperations ?? DISCOVERY_ONLY_OPERATIONS;
+  const supportedOperations = assertOperationSupport(
+    definition.supportedOperations ?? DISCOVERY_ONLY_OPERATIONS,
+  );
 
   return Object.freeze({
     id: definition.id,
@@ -304,6 +307,7 @@ export class HarnessDiscoveryAdapterRegistry {
     if (this.#adapters.has(adapter.id)) {
       throw new Error(`Discovery adapter '${adapter.id}' is already registered`);
     }
+    assertOperationSupport(adapter.supportedOperations);
     this.#adapters.set(adapter.id, adapter);
   }
 

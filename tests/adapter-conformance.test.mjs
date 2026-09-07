@@ -7,6 +7,9 @@ import test from "node:test";
 import {
   HarnessAdapterRegistry,
   UnsupportedOperationError,
+  assertOperationSupport,
+  isOperationSupport,
+  validateOperationSupport,
   createBuiltInHarnessAdapterRegistry,
   createBuiltInHarnessAdapters,
   createGitHubCopilotAdapter,
@@ -16,6 +19,51 @@ import {
 
 const observedAt = "2026-09-07T19:00:00.000Z";
 const fixedClock = () => new Date(observedAt);
+
+test("validates the closed operation-support schema", () => {
+  const support = {
+    discover: true,
+    verify: false,
+    execute: true,
+    resume: false,
+    fork: false,
+  };
+
+  const result = validateOperationSupport(support);
+  assert.equal(result.success, true);
+  assert.equal(isOperationSupport(support), true);
+  if (result.success) {
+    assert.deepEqual(result.value, support);
+    assert.notEqual(result.value, support);
+  }
+
+  for (const invalid of [
+    { ...support, launch: true },
+    { ...support, execute: "yes" },
+    { discover: true },
+    null,
+  ]) {
+    assert.equal(validateOperationSupport(invalid).success, false);
+    assert.equal(isOperationSupport(invalid), false);
+  }
+
+  assert.deepEqual(assertOperationSupport(support), support);
+  assert.throws(
+    () => assertOperationSupport({ ...support, verify: 1 }),
+    /\$\.verify must be a boolean/,
+  );
+});
+
+test("registry rejects adapters with malformed operation support", () => {
+  const adapter = createStubHarnessAdapter({ id: "invalid-support" });
+  const invalid = { ...adapter, supportedOperations: { discover: true } };
+  const registry = new HarnessAdapterRegistry();
+
+  assert.throws(
+    () => registry.register(invalid),
+    /\$\.verify is required/,
+  );
+});
 
 async function makeScript(directory, name, content) {
   const path = join(directory, name);

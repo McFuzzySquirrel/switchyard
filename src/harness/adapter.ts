@@ -8,10 +8,115 @@ export type AdapterOperation =
   | "resume"
   | "fork";
 
-export type SupportedOperations = Readonly<
-  Record<AdapterOperation, boolean>
->;
+/** Stable, vendor-neutral operation vocabulary shared by every adapter. */
+export const ADAPTER_OPERATION_NAMES = Object.freeze([
+  "discover",
+  "verify",
+  "execute",
+  "resume",
+  "fork",
+] as const satisfies readonly AdapterOperation[]);
+
+export type SupportedOperations = Readonly<Record<AdapterOperation, boolean>>;
 export type AdapterOperationSupport = SupportedOperations;
+/** Compatibility name for consumers that call the declaration an operation schema. */
+export type OperationSupport = SupportedOperations;
+
+export interface OperationSupportIssue {
+  readonly path: string;
+  readonly message: string;
+}
+
+export type OperationSupportValidationResult =
+  | {
+      readonly success: true;
+      readonly value: SupportedOperations;
+      readonly issues: readonly [];
+    }
+  | {
+      readonly success: false;
+      readonly issues: readonly OperationSupportIssue[];
+    };
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+/**
+ * Runtime schema for the operation-support declaration carried by an adapter.
+ * Keeping this check at the boundary prevents misspelled operations or
+ * truthy non-boolean values from silently changing routing behaviour.
+ */
+export function validateOperationSupport(
+  input: unknown,
+): OperationSupportValidationResult {
+  if (!isRecord(input)) {
+    return {
+      success: false,
+      issues: [{ path: "$", message: "must be an object" }],
+    };
+  }
+
+  const issues: OperationSupportIssue[] = [];
+  for (const key of Object.keys(input)) {
+    if (!(ADAPTER_OPERATION_NAMES as readonly string[]).includes(key)) {
+      issues.push({
+        path: `$.${key}`,
+        message: "is not a supported adapter operation",
+      });
+    }
+  }
+  for (const operation of ADAPTER_OPERATION_NAMES) {
+    if (!(operation in input)) {
+      issues.push({
+        path: `$.${operation}`,
+        message: "is required",
+      });
+    } else if (typeof input[operation] !== "boolean") {
+      issues.push({
+        path: `$.${operation}`,
+        message: "must be a boolean",
+      });
+    }
+  }
+
+  if (issues.length > 0) {
+    return { success: false, issues };
+  }
+
+  return {
+    success: true,
+    value: Object.freeze({
+      discover: input.discover as boolean,
+      verify: input.verify as boolean,
+      execute: input.execute as boolean,
+      resume: input.resume as boolean,
+      fork: input.fork as boolean,
+    }),
+    issues: [],
+  };
+}
+
+export function isOperationSupport(input: unknown): input is SupportedOperations {
+  return validateOperationSupport(input).success;
+}
+
+export function assertOperationSupport(input: unknown): SupportedOperations {
+  const result = validateOperationSupport(input);
+  if (!result.success) {
+    throw new Error(
+      `OperationSupport validation failed: ${result.issues
+        .map((issue) => `${issue.path} ${issue.message}`)
+        .join("; ")}`,
+    );
+  }
+  return result.value;
+}
+
+/** Explicit aliases for callers that use the plural schema terminology. */
+export const validateSupportedOperations = validateOperationSupport;
+export const isSupportedOperations = isOperationSupport;
+export const assertSupportedOperations = assertOperationSupport;
 
 export interface ProbeContext {
   readonly cwd?: string;

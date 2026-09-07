@@ -7,6 +7,7 @@ import {
   createOpenCodeAdapter,
   type OpenCodeAdapterOptions,
 } from "./opencode.ts";
+import { assertOperationSupport } from "./adapter.ts";
 
 /**
  * Explicit in-memory registration for the full, execute-capable
@@ -28,6 +29,7 @@ export class HarnessAdapterRegistry {
     if (this.#adapters.has(adapter.id)) {
       throw new Error(`Harness adapter '${adapter.id}' is already registered`);
     }
+    assertOperationSupport(adapter.supportedOperations);
     this.#adapters.set(adapter.id, adapter);
   }
 

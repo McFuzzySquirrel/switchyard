@@ -18,6 +18,28 @@ interface HarnessAdapter {
 }
 ```
 
+### Capability observations and operation support
+
+Discovery returns a `HarnessProfile` whose `capabilities` entries are
+`CapabilityObservation` records from `src/discovery/schema.ts`. Each record
+contains a normalized vocabulary name plus independent `discovery` and
+`verification` observations. Discovery evidence (for example, a bounded
+`--help` excerpt) may establish that a capability was advertised, but it does
+not imply that a runtime probe passed. Use
+`validateCapabilityObservation`/`assertCapabilityObservation` when accepting
+observations from an adapter or persistence boundary; unknown capability labels,
+missing evidence, invalid timestamps, and extra fields are rejected.
+
+The `supportedOperations` field is the closed `SupportedOperations` schema,
+with exactly one boolean for each operation in
+`ADAPTER_OPERATION_NAMES`: `discover`, `verify`, `execute`, `resume`, and
+`fork`. Validate external or fixture declarations with
+`validateOperationSupport` (or `assertOperationSupport`). Registries validate
+this declaration before registration, so a misspelled operation or a
+non-boolean value cannot silently affect routing. The schema describes support
+only; an adapter must still call `assertOperationSupported` at the beginning
+of each operation to guarantee fail-before-launch behavior.
+
 The contract is composed from five narrow operation interfaces exported by
 `src/harness/adapter.ts`: `DiscoveryAdapter`, `VerificationAdapter`,
 `ExecutionAdapter`, `ResumeAdapter`, and `ForkAdapter`. Subsystems may depend

@@ -12,6 +12,8 @@ All notable user-facing changes to Switchyard are documented here. The format fo
 
 ### Added
 
+- Added all-required capability matching with deterministic matched/missing
+  diagnostics and boolean convenience predicates.
 - Added the full, execute-capable `HarnessAdapter` contract with a shared
   `UnsupportedOperationError`/`assertOperationSupported`/
   `throwUnsupportedOperation` mechanism so every adapter fails an

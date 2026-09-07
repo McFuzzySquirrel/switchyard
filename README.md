@@ -6,7 +6,7 @@ The product direction is described in [`docs/PRD.md`](docs/PRD.md). The library 
 
 ## Current status
 
-The current completed slice covers discovery schemas, executable lookup, bounded version/help probing, built-in discovery adapters, atomic local registry persistence, refreshable registry profiles, the `discover` and `capabilities` commands, the full vendor-neutral `HarnessAdapter` contract with explicit registration, and typed local configuration with environment/executable/registry/probe-policy precedence. Routing, real harness execution/verification, and composition remain roadmap items — built-in adapters currently support `discover` only and fail fast on other operations.
+The current completed slice covers discovery schemas, executable lookup, bounded version/help probing, built-in discovery adapters, atomic local registry persistence, refreshable registry profiles, the `discover` and `capabilities` commands, normalized all-required capability matching, the full vendor-neutral `HarnessAdapter` contract with explicit registration, and typed local configuration with environment/executable/registry/probe-policy precedence. Deterministic ranking, real harness execution/verification, and composition remain roadmap items — built-in adapters currently support `discover` only and fail fast on other operations.
 
 ## Development
 
@@ -64,7 +64,11 @@ duplicates. `preferredHarness` must be a lowercase harness identifier, and
 `allowFallback` must be boolean. The runtime exports
 `validateTaskRequirements`, `isTaskRequirements`, and
 `assertTaskRequirements`; the schema version is optional for compatibility with
-the original PRD interface.
+the original PRD interface. `matchRequiredCapabilities` (also exported as
+`matchCapabilities`) reports matched and missing capabilities in requirement
+order and qualifies a profile only when every required capability was
+positively observed during discovery. Verification state is not treated as
+discovery evidence.
 
 ## Adapters and configuration
 

@@ -109,19 +109,19 @@ async function terminateProcessTree(
       // The process may have exited between the close check and termination.
     }
   }
+  await new Promise<void>((resolve) => setTimeout(resolve, 250));
+  try {
+    process.kill(-child.pid, "SIGKILL");
+  } catch {
+    try {
+      child.kill("SIGKILL");
+    } catch {
+      // The process may already be gone.
+    }
+  }
+  if (child.exitCode !== null || child.signalCode !== null) return;
   await new Promise<void>((resolve) => {
-    const timer = setTimeout(() => {
-      try {
-        process.kill(-child.pid!, "SIGKILL");
-      } catch {
-        try {
-          child.kill("SIGKILL");
-        } catch {
-          // The process may already be gone.
-        }
-      }
-      resolve();
-    }, 250);
+    const timer = setTimeout(resolve, 250);
     child.once("close", () => {
       clearTimeout(timer);
       resolve();
@@ -179,6 +179,7 @@ export async function executeProcess(
     let timer: NodeJS.Timeout | undefined;
     let finished = false;
     let termination: "timeout" | "cancelled" | undefined;
+    let cleanupPromise: Promise<void> | undefined;
 
     const finish = (
       status: "succeeded" | "failed" | "timed-out" | "cancelled" | "unavailable",
@@ -230,7 +231,7 @@ export async function executeProcess(
         );
         return;
       }
-      void terminateProcessTree(child);
+      cleanupPromise = terminateProcessTree(child);
     };
     const onAbort = () => stop("cancelled");
     request.signal?.addEventListener("abort", onAbort, { once: true });
@@ -274,9 +275,13 @@ export async function executeProcess(
     });
     launchedChild.once("close", (code: number | null, signal: string | null) => {
       if (termination === "timeout") {
-        finish("timed-out", null, signal, `Process timed out after ${timeoutMs}ms`);
+        void (cleanupPromise ?? Promise.resolve()).then(() =>
+          finish("timed-out", null, signal, `Process timed out after ${timeoutMs}ms`),
+        );
       } else if (termination === "cancelled") {
-        finish("cancelled", null, signal, "Process execution was cancelled");
+        void (cleanupPromise ?? Promise.resolve()).then(() =>
+          finish("cancelled", null, signal, "Process execution was cancelled"),
+        );
       } else if (code === 0) {
         finish("succeeded", 0, signal);
       } else {

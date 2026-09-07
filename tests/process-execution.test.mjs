@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { chmod, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { chmod, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -74,6 +74,29 @@ test("executeProcess distinguishes nonzero exit, timeout, cancellation, and dry 
   });
   assert.equal(dryRun.status, "dry-run");
   assert.equal(dryRun.exitCode, null);
+});
+
+test("executeProcess cleans up descendants before resolving timeout", async (t) => {
+  const directory = await mkdtemp(join(tmpdir(), "switchyard-execution-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const pidFile = join(directory, "grandchild.pid");
+  const childScript = [
+    "const { spawn } = require('node:child_process');",
+    "const { writeFileSync } = require('node:fs');",
+    "const grandchild = spawn(process.execPath, ['-e', 'setInterval(() => {}, 1000)'], { stdio: 'ignore' });",
+    "writeFileSync(process.argv[1], String(grandchild.pid));",
+    "setInterval(() => {}, 1000);",
+  ].join("\n");
+
+  const result = await executeProcess(process.execPath, ["-e", childScript, pidFile], {
+    task: "descendant-timeout",
+    timeoutMs: 50,
+  });
+
+  assert.equal(result.status, "timed-out");
+  const grandchildPid = Number(await readFile(pidFile, "utf8"));
+  await new Promise((resolve) => setTimeout(resolve, 50));
+  assert.throws(() => process.kill(grandchildPid, 0), { code: "ESRCH" });
 });
 
 test("executeProcess reports a missing executable without throwing", async () => {

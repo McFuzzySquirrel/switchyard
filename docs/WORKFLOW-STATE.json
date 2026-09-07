@@ -1,12 +1,12 @@
 {
   "runId": "faef066b-e967-49ae-ba56-4dbe4255f89d",
   "startedAt": "2026-09-07T19:10:17.558Z",
-  "lastUpdatedAt": "2026-09-07T21:17:42.874Z",
+  "lastUpdatedAt": "2026-09-07T21:19:11.661Z",
   "manifestPath": "/home/mcfuzzysquirrel/Projects/switchyard/docs/EXECUTION-MANIFEST.json",
   "manifestVersion": "1.0",
   "harness": "copilot",
   "status": "running",
-  "currentPhase": "VERIFICATION-AND-RESILIENCE-1",
+  "currentPhase": "HARNESS-EXECUTION-RUNTIME-1",
   "tasks": {
     "DISCOVERY-AND-REGISTRY-1.1": {
       "taskId": "DISCOVERY-AND-REGISTRY-1.1",
@@ -367,10 +367,20 @@
     },
     "HARNESS-EXECUTION-RUNTIME-1.3": {
       "taskId": "HARNESS-EXECUTION-RUNTIME-1.3",
-      "status": "pending",
+      "status": "complete",
       "ownerAgent": "execution-runtime-engineer",
-      "attempt": 0,
-      "outputFiles": []
+      "attempt": 1,
+      "outputFiles": [
+        "src/harness/process.ts",
+        "tests/process-execution.test.mjs"
+      ],
+      "startedAt": "2026-09-07T21:17:42.900Z",
+      "completedAt": "2026-09-07T21:19:11.661Z",
+      "agentOutput": "● skill(safe-subprocess-fixtures)\n\nI’m checking the current runtime and fixture contract first, then I’ll implement the timeout/cancellation tree cleanup and run the focused subprocess tests.\n\n● Read process-fixture-playbook.md\n  │ .github/skills/safe-subprocess-fixtures/references/process-fixture-playbook.md\n  └ 67 lines read\n\n● codegraph_explore (MCP: codegraph) · src/harness/process.ts process execution timeout cancellatio…\n  └ The project at /home/mcfuzzysquirrel/Projects/switchyard isn't indexed with c...\n\n● Inspect worktree and test scripts (shell)\n  │ git status --short && printf '\\n--- package ---\\n' && sed -n '1,220p' package.json\n  └ 38 lines…\n\n● Read process.ts\n  │ src/harness/process.ts\n  └ 302 lines read\n\n● Read index.ts\n  │ src/harness/index.ts\n  └ 8 lines read\n\n● Read process-execution.test.mjs\n  │ tests/process-execution.test.mjs\n  └ 87 lines read\n\n● Read adapter.ts\n  │ src/harness/adapter.ts\n  └ 369 lines read\n\n/ Search (glob)\n  │ \"src/harness/*\"\n  └ 9 files found\n\n● Read CHANGELOG.md\n  └ L1:60 (60 lines read)\n\n● Read README.md\n  └ L1:100 (100 lines read)\n\n● Inspect existing runtime changes (shell)\n  │ git diff -- src/harness/process.ts tests/process-execution.test.mjs CHANGELOG.md README.md\n  │ docs/adr/0005-bounded-process-execution.md\n  └ 1 line…\n\nThe existing runner classifies timeout/cancel correctly, but completion is tied to the parent’s `close` event and can return before descendant cleanup finishes. I’m tightening that lifecycle so tree termination completes before the result resolves, then adding a parent/grandchild regression fixture.\n\n● Edit\n  │ Edit src/harness/process.ts\n  └ Edit tests/process-execution.test.mjs\n\n● Type-check runtime changes (shell)\n  │ npm run typecheck\n  └ 3 lines…\n\n● Run process execution tests (shell)\n  │ node --experimental-strip-types --test tests/process-execution.test.mjs\n  └ 35 lines…\n\nThe focused tests pass, including a real descendant process. I’m making the cleanup wait bounded without adding an unnecessary second grace period when the parent has already exited, then I’ll run the repository checks and inspect the final diff.\n\n● Edit\n  └ Edit src/harness/process.ts\n\n● Check final diff and worktree (shell)\n  │ git diff --check && git diff --stat && git status --short\n  └ 10 lines…\n\n● Run documentation governance tests (shell)\n  │ npm run test:docs\n  └ 26 lines…\n\n● Run TypeScript checks (shell)\n  │ npm run typecheck\n  └ 3 lines…\n\n● Run full test suite (shell)\n  │ npm test\n  └ 560 lines…\n\n● Confirm final worktree status (shell)\n  │ git status --short\n  └ 5 lines…\n\n● Review runtime cleanup diff (shell)\n  │ git diff -- src/harness/process.ts tests/process-execution.test.mjs\n  └ 111 lines…\n\nImplemented timeout, cancellation, and descendant cleanup.\n\n**Changed files**\n- `src/harness/process.ts`\n  - Ensures process-tree termination completes before resolving timeout/cancellation results.\n  - Sends `SIGTERM`, waits for graceful shutdown, then escalates to `SIGKILL`.\n  - Avoids unnecessary additional waits when the parent has already exited.\n- `tests/process-execution.test.mjs`\n  - Added a parent/grandchild timeout fixture verifying descendants are terminated before completion.\n\nExisting worktree modifications in `docs/EXECUTION-AUDIT.jsonl` and `docs/WORKFLOW-STATE.json` were left untouched.\n\n",
+      "artifactId": "work-harness-execution-runtime-1-3-001",
+      "inputArtifactIds": [
+        "work-harness-execution-runtime-1-2-001"
+      ]
     },
     "HARNESS-EXECUTION-RUNTIME-1.4": {
       "taskId": "HARNESS-EXECUTION-RUNTIME-1.4",

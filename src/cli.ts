@@ -35,6 +35,14 @@ import {
   formatVerifyHuman,
   type VerifyCommandOptions,
 } from "./commands/verify.ts";
+import {
+  compose,
+  composeInvalidInput,
+  formatComposeJson,
+  formatComposeHuman,
+  ComposeInputError,
+  type ComposeCommandOptions,
+} from "./commands/compose.ts";
 import type { HarnessDiscoveryAdapter } from "./harness/discovery-adapter.ts";
 import type { HarnessAdapter, HarnessAdapterRegistry } from "./harness/index.ts";
 import { normalizeCapabilityName, type CapabilityName } from "./capabilities/vocabulary.ts";
@@ -52,12 +60,13 @@ export interface CliIo {
 }
 
 interface ParsedArguments {
-  readonly command: "discover" | "capabilities" | "explain" | "run" | "verify" | "help";
+  readonly command: "discover" | "capabilities" | "explain" | "run" | "verify" | "compose" | "help";
   readonly json: boolean;
   readonly refresh: boolean;
   readonly verified: boolean;
   readonly requires?: string;
   readonly preferredHarness?: string;
+  readonly workflowPath?: string;
   readonly allowFallback: boolean;
   readonly registryPath?: string;
   readonly configPath?: string;
@@ -77,7 +86,7 @@ interface ParsedArguments {
 }
 
 function usageError(message: string): Error {
-  return new Error(`${message}\nUsage: switchyard <discover|capabilities|explain|run|verify> [options]`);
+  return new Error(`${message}\nUsage: switchyard <discover|capabilities|explain|run|verify|compose> [options]`);
 }
 
 function valueAfter(args: readonly string[], index: number, option: string): string {
@@ -109,7 +118,8 @@ function parseArguments(args: readonly string[]): ParsedArguments {
     command !== "capabilities" &&
     command !== "explain" &&
     command !== "run" &&
-    command !== "verify"
+    command !== "verify" &&
+    command !== "compose"
   ) {
     throw usageError(`Unknown command '${command}'`);
   }
@@ -124,6 +134,7 @@ function parseArguments(args: readonly string[]): ParsedArguments {
   let cwd: string | undefined;
   let timeoutMs: number | undefined;
   const taskParts: string[] = [];
+  let workflowPath: string | undefined;
   let registryPath: string | undefined;
   let configPath: string | undefined;
   let harnessId: string | undefined;
@@ -296,10 +307,15 @@ function parseArguments(args: readonly string[]): ParsedArguments {
           preferredHarness = argument.slice("--preferred-harness=".length);
         } else if (argument.startsWith("--")) {
           throw usageError(`Unknown option '${argument}'`);
-        } else if (command !== "run") {
-          throw usageError(`Unexpected argument '${argument}'`);
-        } else {
+        } else if (command === "run") {
           taskParts.push(argument);
+        } else if (command === "compose") {
+          if (workflowPath !== undefined) {
+            throw usageError("compose accepts exactly one workflow file argument");
+          }
+          workflowPath = argument;
+        } else {
+          throw usageError(`Unexpected argument '${argument}'`);
         }
     }
   }
@@ -313,6 +329,7 @@ function parseArguments(args: readonly string[]): ParsedArguments {
     ...(cwd === undefined ? {} : { cwd }),
     ...(timeoutMs === undefined ? {} : { timeoutMs }),
     ...(taskParts.length === 0 ? {} : { task: taskParts.join(" ") }),
+    ...(workflowPath === undefined ? {} : { workflowPath }),
     ...(requires === undefined ? {} : { requires }),
     ...(preferredHarness === undefined ? {} : { preferredHarness }),
     allowFallback,
@@ -332,7 +349,7 @@ function parseArguments(args: readonly string[]): ParsedArguments {
 
 function printHelp(): string {
   return [
-    "Usage: switchyard <discover|capabilities|explain|run|verify> [options]",
+    "Usage: switchyard <discover|capabilities|explain|run|verify|compose> [options]",
     "",
     "Commands:",
     "  discover       inspect configured harnesses and update the local registry",
@@ -340,6 +357,7 @@ function printHelp(): string {
     "  explain        explain deterministic selection without launching a harness",
     "  run            route a task and execute it through the selected harness",
     "  verify         run bounded capability probes and record verification state",
+    "  compose        run a declared multi-stage workflow across selected adapters",
     "",
     "Options:",
     "  --refresh                 probe adapters instead of using a cached registry",
@@ -366,12 +384,15 @@ function printHelp(): string {
     "",
     "run also accepts a positional task string, for example:",
     '  switchyard run --requires=headless "fix the failing test"',
+    "",
+    "compose accepts a positional workflow file path, for example:",
+    "  switchyard compose ./workflow.json --json",
   ].join("\n");
 }
 
 function commandOptions(
   parsed: ParsedArguments,
-): DiscoverCommandOptions | CapabilitiesCommandOptions | ExplainCommandOptions | RunCommandOptions | VerifyCommandOptions {
+): DiscoverCommandOptions | CapabilitiesCommandOptions | ExplainCommandOptions | RunCommandOptions | VerifyCommandOptions | ComposeCommandOptions {
   if (parsed.command === "discover") {
     const options: DiscoverCommandOptions = {
       ...(parsed.registryPath === undefined ? {} : { registryPath: parsed.registryPath }),
@@ -435,6 +456,15 @@ function commandOptions(
       },
     };
   }
+  if (parsed.command === "compose") {
+    const options: ComposeCommandOptions = {
+      ...(parsed.registryPath === undefined ? {} : { registryPath: parsed.registryPath }),
+      ...(parsed.configPath === undefined ? {} : { configPath: parsed.configPath }),
+      ...(parsed.workflowPath === undefined ? {} : { workflowPath: parsed.workflowPath }),
+      ...(parsed.staleAfterMs === undefined ? {} : { staleAfterMs: parsed.staleAfterMs }),
+    };
+    return options;
+  }
   return {
     ...(parsed.registryPath === undefined ? {} : { registryPath: parsed.registryPath }),
     ...(parsed.configPath === undefined ? {} : { configPath: parsed.configPath }),
@@ -452,9 +482,12 @@ function commandOptions(
 
 function jsonInvalidInputCommand(
   args: readonly string[],
-): "explain" | "run" | "verify" | undefined {
+): "explain" | "run" | "verify" | "compose" | undefined {
   const command = args[0];
-  if ((command === "explain" || command === "run" || command === "verify") && args.includes("--json")) {
+  if (
+    (command === "explain" || command === "run" || command === "verify" || command === "compose") &&
+    args.includes("--json")
+  ) {
     return command;
   }
   return undefined;
@@ -523,7 +556,12 @@ export async function runCli(
                 ...(options as VerifyCommandOptions),
                 ...(_executionAdapters === undefined ? {} : { adapters: _executionAdapters }),
               })
-            : await explain(options as ExplainCommandOptions);
+            : parsed.command === "compose"
+              ? await compose({
+                  ...(options as ComposeCommandOptions),
+                  ...(_executionAdapters === undefined ? {} : { adapters: _executionAdapters }),
+                })
+              : await explain(options as ExplainCommandOptions);
     if (parsed.json) {
       writeStdout(parsed.command === "discover"
         ? formatDiscoverJson(result as Awaited<ReturnType<typeof discover>>)
@@ -533,7 +571,9 @@ export async function runCli(
             ? formatRunJson(result as Awaited<ReturnType<typeof run>>)
             : parsed.command === "verify"
               ? formatVerifyJson(result as Awaited<ReturnType<typeof verify>>)
-              : formatExplainJson(result as Awaited<ReturnType<typeof explain>>));
+              : parsed.command === "compose"
+                ? formatComposeJson(result as Awaited<ReturnType<typeof compose>>)
+                : formatExplainJson(result as Awaited<ReturnType<typeof explain>>));
     } else {
       writeStdout(parsed.command === "discover"
         ? formatDiscoverHuman(result as Awaited<ReturnType<typeof discover>>)
@@ -543,7 +583,9 @@ export async function runCli(
             ? formatRunHuman(result as Awaited<ReturnType<typeof run>>)
               : parsed.command === "verify"
                 ? formatVerifyHuman(result as Awaited<ReturnType<typeof verify>>)
-                : formatExplainHuman(result as Awaited<ReturnType<typeof explain>>));
+                : parsed.command === "compose"
+                  ? formatComposeHuman(result as Awaited<ReturnType<typeof compose>>)
+                  : formatExplainHuman(result as Awaited<ReturnType<typeof explain>>));
     }
     return exitCodeForStatus(result.status);
   } catch (error: unknown) {
@@ -554,6 +596,15 @@ export async function runCli(
         writeStdout(formatRunJson(invalid));
       } else {
         writeStderr(formatRunHuman(invalid));
+      }
+      return CLI_EXIT_CODES.invalidInput;
+    }
+    if (error instanceof ComposeInputError) {
+      const invalid = composeInvalidInput(error);
+      if (parsed.json) {
+        writeStdout(formatComposeJson(invalid));
+      } else {
+        writeStderr(formatComposeHuman(invalid));
       }
       return CLI_EXIT_CODES.invalidInput;
     }

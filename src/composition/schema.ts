@@ -53,6 +53,10 @@ export interface ValidatedWorkflow extends WorkflowDefinition {
 const ID = /^[a-z0-9][a-z0-9._-]*$/;
 const MAX_TEXT = 32_768;
 const STAGE_CONTEXT_FIELDS: readonly StageContextField[] = ["status", "selectedHarness", "durationMs", "diagnostic"];
+const WORKFLOW_KEYS = ["schemaVersion", "id", "workspace", "stages"] as const;
+const STAGE_KEYS = ["id", "operation", "dependsOn", "requirements", "task", "outputs", "inputs"] as const;
+const ARTIFACT_KEYS = ["name", "path", "kind", "description"] as const;
+const INPUT_KEYS = ["name", "fromStage", "artifact", "context"] as const;
 
 function issue(path: string, message: string): SchemaIssue {
   return { path, message };
@@ -73,6 +77,26 @@ function isIdentifier(value: unknown): value is string {
   return typeof value === "string" && ID.test(value);
 }
 
+function hasOnlyKeys(
+  value: Record<string, unknown>,
+  allowed: readonly string[],
+  path: string,
+  issues: SchemaIssue[],
+): void {
+  for (const key of Object.keys(value)) {
+    if (!allowed.includes(key)) {
+      issues.push(issue(`${path}.${key}`, "is not a recognized field"));
+    }
+  }
+}
+
+function isBoundedText(value: unknown, maxLength = MAX_TEXT): value is string {
+  return typeof value === "string" &&
+    value.length > 0 &&
+    value.length <= maxLength &&
+    !value.includes("\u0000");
+}
+
 /** Validates the complete graph and all handoff declarations before execution. */
 export function validateWorkflow(input: unknown): ValidationResult<ValidatedWorkflow> {
   const issues: SchemaIssue[] = [];
@@ -80,8 +104,11 @@ export function validateWorkflow(input: unknown): ValidationResult<ValidatedWork
     return { success: false, issues: [issue("$", "must be an object")] };
   }
   const value = input as Record<string, unknown>;
+  hasOnlyKeys(value, WORKFLOW_KEYS, "$", issues);
   if (!isIdentifier(value.id)) issues.push(issue("$.id", "must be a valid identifier"));
-  if (typeof value.workspace !== "string" || value.workspace.trim() === "") issues.push(issue("$.workspace", "must be a non-empty path"));
+  if (!isBoundedText(value.workspace) || (value.workspace as string).trim() === "") {
+    issues.push(issue("$.workspace", "must be a non-empty path without NUL characters"));
+  }
   if (!Array.isArray(value.stages) || value.stages.length === 0) {
     issues.push(issue("$.stages", "must contain at least one stage"));
   }
@@ -93,9 +120,10 @@ export function validateWorkflow(input: unknown): ValidationResult<ValidatedWork
       issues.push(issue(p, "must be an object")); return;
     }
     const stage = raw as Record<string, unknown>;
+    hasOnlyKeys(stage, STAGE_KEYS, p, issues);
     if (typeof stage.id !== "string" || !ID.test(stage.id)) issues.push(issue(`${p}.id`, "must be a valid identifier"));
     else if (byId.has(stage.id)) issues.push(issue(`${p}.id`, "must be unique"));
-    if (typeof stage.task !== "string" || stage.task.trim() === "" || stage.task.length > MAX_TEXT) issues.push(issue(`${p}.task`, "must be a non-empty bounded string"));
+    if (!isBoundedText(stage.task) || (stage.task as string).trim() === "") issues.push(issue(`${p}.task`, "must be a non-empty bounded string without NUL characters"));
     if (!isTaskRequirements(stage.requirements) && !(
       Array.isArray(stage.requirements) &&
       stage.requirements.every((x) => typeof x === "string" && isCapabilityName(x)) &&
@@ -140,16 +168,23 @@ export function validateWorkflow(input: unknown): ValidationResult<ValidatedWork
         continue;
       }
       const candidate = artifact as Partial<WorkflowArtifact>;
+      hasOnlyKeys(candidate as Record<string, unknown>, ARTIFACT_KEYS, `$.stages.${stage.id}.outputs`, issues);
       if (typeof candidate.name !== "string" || !ID.test(candidate.name) || names.has(candidate.name)) issues.push(issue(`$.stages.${stage.id}.outputs`, "artifact names must be unique valid identifiers"));
       if (typeof candidate.name === "string") names.add(candidate.name);
       if (!["file", "directory", "metadata"].includes(candidate.kind ?? "")) issues.push(issue(`$.stages.${stage.id}.outputs`, "has invalid kind"));
-      if (candidate.path !== undefined && (
-        typeof candidate.path !== "string" ||
-        candidate.path.trim() === "" ||
-        !pathInside(workspace, candidate.path) ||
-        isAbsolute(candidate.path)
-      )) issues.push(issue(`$.stages.${stage.id}.outputs.${candidate.name ?? "?"}.path`, "must remain inside the workflow workspace"));
-      if (candidate.description !== undefined && (typeof candidate.description !== "string" || candidate.description.length > MAX_TEXT)) {
+      const artifactPath = candidate.path;
+      if (candidate.kind === "metadata" && artifactPath !== undefined) {
+        issues.push(issue(`$.stages.${stage.id}.outputs.${candidate.name ?? "?"}.path`, "metadata artifacts must not declare a path"));
+      } else if (candidate.kind !== "metadata" && (
+        typeof artifactPath !== "string" ||
+        artifactPath.trim() === "" ||
+        !pathInside(workspace, artifactPath) ||
+        resolve(workspace, artifactPath) === resolve(workspace) ||
+        isAbsolute(artifactPath)
+      )) {
+        issues.push(issue(`$.stages.${stage.id}.outputs.${candidate.name ?? "?"}.path`, "file and directory artifacts must use a workspace-contained relative path inside the workflow workspace"));
+      }
+      if (candidate.description !== undefined && !isBoundedText(candidate.description)) {
         issues.push(issue(`$.stages.${stage.id}.outputs.${candidate.name ?? "?"}.description`, "must be a bounded string"));
       }
     }
@@ -160,6 +195,7 @@ export function validateWorkflow(input: unknown): ValidationResult<ValidatedWork
         continue;
       }
       const candidate = input as Partial<StageInput>;
+      hasOnlyKeys(candidate as Record<string, unknown>, INPUT_KEYS, `$.stages.${stage.id}.inputs`, issues);
       if (typeof candidate.name !== "string" || !ID.test(candidate.name) || inputNames.has(candidate.name)) issues.push(issue(`$.stages.${stage.id}.inputs`, "input names must be unique valid identifiers"));
       if (typeof candidate.name === "string") inputNames.add(candidate.name);
       if (typeof candidate.fromStage !== "string" || !ID.test(candidate.fromStage)) {
@@ -178,6 +214,7 @@ export function validateWorkflow(input: unknown): ValidationResult<ValidatedWork
       )) issues.push(issue(`$.stages.${stage.id}.inputs.${candidate.name ?? "?"}`, `artifact '${candidate.artifact}' is not declared by source stage`));
       if (candidate.context !== undefined && (
         !Array.isArray(candidate.context) ||
+        candidate.context.length === 0 ||
         candidate.context.some((x) => !(STAGE_CONTEXT_FIELDS as readonly string[]).includes(x)) ||
         new Set(candidate.context).size !== candidate.context.length
       )) issues.push(issue(`$.stages.${stage.id}.inputs.${candidate.name ?? "?"}.context`, "contains undeclared or duplicate context"));
@@ -207,7 +244,22 @@ export function validateWorkflow(input: unknown): ValidationResult<ValidatedWork
   }
   if (order.length !== byId.size) issues.push(issue("$.stages", "dependency graph contains a cycle"));
   if (issues.length) return { success: false, issues };
-  return { success: true, value: { ...(value as unknown as WorkflowDefinition), schemaVersion: COMPOSITION_SCHEMA_VERSION, stages: [...byId.values()], order }, issues: [] };
+  // `order` is an execution detail produced by validation, not a user-facing
+  // schema field. Keep it non-enumerable so a validated value can safely be
+  // passed back to `executeWorkflow` without widening the accepted input
+  // schema or allowing callers to smuggle an execution order.
+  const validated = {
+    ...(value as unknown as WorkflowDefinition),
+    schemaVersion: COMPOSITION_SCHEMA_VERSION,
+    stages: [...byId.values()],
+  } as unknown as ValidatedWorkflow;
+  Object.defineProperty(validated, "order", {
+    configurable: false,
+    enumerable: false,
+    value: Object.freeze(order),
+    writable: false,
+  });
+  return { success: true, value: validated, issues: [] };
 }
 
 export function assertWorkflow(input: unknown): ValidatedWorkflow {

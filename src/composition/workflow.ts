@@ -1,6 +1,18 @@
-import { mkdir, realpath, stat, writeFile } from "node:fs/promises";
-import { isAbsolute, join, relative, resolve, sep } from "node:path";
+import {
+  chmod,
+  cp,
+  mkdir,
+  mkdtemp,
+  realpath,
+  rename,
+  rm,
+  stat,
+  writeFile,
+} from "node:fs/promises";
+import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
+import { tmpdir } from "node:os";
 import type { ExecutionResult, HarnessAdapter } from "../harness/adapter.ts";
+import { redactSecrets } from "../discovery/probe.ts";
 import {
   assertWorkflow,
   type ArtifactKind,
@@ -72,10 +84,24 @@ function handoffEntries(stage: WorkflowStage, prior: Map<string, CompositionStag
   return (stage.inputs ?? []).map((input: StageInput) => {
     const result = prior.get(input.fromStage);
     const artifact = input.artifact ? result?.artifacts.find((x) => x.name === input.artifact) : undefined;
-    return { name: input.name, artifact: artifact ? { ...artifact } : null, context: (input.context ?? []).reduce<Record<string, unknown>>((out, key) => {
-      const value = key === "status" ? result?.status : key === "selectedHarness" ? result?.selectedHarness : key === "durationMs" ? result?.execution?.durationMs : result?.diagnostic;
-      out[key] = value ?? null; return out;
-    }, {}) };
+    return {
+      name: input.name,
+      artifact: artifact ? { ...artifact } : null,
+      context: (input.context ?? []).reduce<Record<string, unknown>>((out, key) => {
+        const value = key === "status"
+          ? result?.status
+          : key === "selectedHarness"
+            ? result?.selectedHarness
+            : key === "durationMs"
+              ? result?.execution?.durationMs
+              : result?.diagnostic;
+        // Diagnostics are an explicitly allowed context field, but they are
+        // still adapter output and must be sanitized before crossing a stage
+        // boundary.
+        out[key] = typeof value === "string" ? redactSecrets(value) : value ?? null;
+        return out;
+      }, {}),
+    };
   });
 }
 
@@ -84,6 +110,55 @@ function handoffTask(stage: WorkflowStage, prior: Map<string, CompositionStageRe
   return {
     task: entries.length ? `${stage.task}\n\nDeclared handoff:\n${JSON.stringify(entries)}` : stage.task,
     entries,
+  };
+}
+
+function persistableStageResult(result: CompositionStageResult): CompositionStageResult {
+  const persisted: CompositionStageResult = {
+    ...result,
+    ...(result.diagnostic === undefined
+      ? {}
+      : { diagnostic: redactSecrets(result.diagnostic) }),
+    ...(result.handoff === undefined
+      ? {}
+      : {
+          handoff: result.handoff.map((entry) => ({
+            ...entry,
+            context: Object.fromEntries(
+              Object.entries(entry.context).map(([key, value]) => [
+                key,
+                typeof value === "string" ? redactSecrets(value) : value,
+              ]),
+            ),
+          })),
+        }),
+  };
+  if (result.execution === null) return persisted;
+  return {
+    ...persisted,
+    execution: {
+      ...result.execution,
+      stdout: redactSecrets(result.execution.stdout),
+      stderr: redactSecrets(result.execution.stderr),
+      ...(result.execution.error === undefined
+        ? {}
+        : { error: redactSecrets(result.execution.error) }),
+    },
+  };
+}
+
+function safeDiagnostic(error: unknown, fallback: string): string {
+  return redactSecrets(error instanceof Error ? error.message : fallback);
+}
+
+function safeExecution(execution: ExecutionResult): ExecutionResult {
+  return {
+    ...execution,
+    stdout: redactSecrets(execution.stdout),
+    stderr: redactSecrets(execution.stderr),
+    ...(execution.error === undefined
+      ? {}
+      : { error: redactSecrets(execution.error) }),
   };
 }
 
@@ -114,11 +189,31 @@ async function artifactAvailability(
     if (declaration.kind === "file" && !information.isFile()) return `${declaration.name} is not a file`;
     if (declaration.kind === "directory" && !information.isDirectory()) return `${declaration.name} is not a directory`;
   } catch {
-    // A missing artifact is reported at the receiving stage. This preserves
-    // the successful producer result for inspection and durable replay.
+    // A missing artifact is reported at the stage boundary. The producer
+    // result remains inspectable even when its declared output is absent.
     return `${declaration.name} is missing`;
   }
   return undefined;
+}
+
+async function materializeArtifact(
+  sourceWorkspace: string,
+  targetWorkspace: string,
+  declaration: WorkflowArtifact,
+): Promise<void> {
+  if (declaration.kind === "metadata" || declaration.path === undefined) return;
+  const source = resolve(sourceWorkspace, declaration.path);
+  const target = resolve(targetWorkspace, declaration.path);
+  await mkdir(dirname(target), { recursive: true, mode: 0o700 });
+  await cp(source, target, {
+    recursive: declaration.kind === "directory",
+    dereference: true,
+    force: true,
+  });
+}
+
+async function stageWorkspace(): Promise<string> {
+  return mkdtemp(join(tmpdir(), "switchyard-stage-"));
 }
 
 export async function executeWorkflow(options: CompositionOptions): Promise<CompositionResult> {
@@ -128,18 +223,37 @@ export async function executeWorkflow(options: CompositionOptions): Promise<Comp
     const statePath = options.statePath ?? join(typeof (options.workflow as { workspace?: unknown })?.workspace === "string" ? (options.workflow as { workspace: string }).workspace : process.cwd(), "switchyard-workflow-state.json");
     return { workflowId: "invalid", status: "invalid-input", stages: [], statePath };
   }
-  await mkdir(workflow.workspace, { recursive: true });
+  const createdWorkspace = await mkdir(workflow.workspace, { recursive: true, mode: 0o700 });
+  if (createdWorkspace !== undefined) await chmod(createdWorkspace, 0o700);
   const statePath = options.statePath ?? join(workflow.workspace, "switchyard-workflow-state.json");
+  await mkdir(dirname(resolve(statePath)), { recursive: true, mode: 0o700 });
   const results: CompositionStageResult[] = [];
   const byId = new Map<string, CompositionStageResult>();
   const persist = async (status: "running" | "failed" | "succeeded") => {
-    await writeFile(statePath, JSON.stringify({ workflowId: workflow.id, status, stages: results }, null, 2));
+    const absoluteStatePath = resolve(statePath);
+    const temporaryStatePath = join(
+      dirname(absoluteStatePath),
+      `.${basename(absoluteStatePath)}.tmp-${process.pid}-${Date.now()}`,
+    );
+    await writeFile(
+      temporaryStatePath,
+      JSON.stringify({
+        workflowId: workflow.id,
+        status,
+        stages: results.map(persistableStageResult),
+      }, null, 2),
+      { mode: 0o600 },
+    );
+    await rename(temporaryStatePath, absoluteStatePath);
   };
   for (const id of workflow.order) {
     const stage = workflow.stages.find((x) => x.id === id)!;
     if ((stage.dependsOn ?? []).some((dep) => byId.get(dep)?.status !== "succeeded")) {
       const skipped: CompositionStageResult = { stageId: id, status: "skipped", selectedHarness: null, execution: null, artifacts: [], diagnostic: "dependency did not succeed" };
-      results.push(skipped); byId.set(id, skipped); continue;
+      results.push(skipped);
+      byId.set(id, skipped);
+      await persist("running");
+      continue;
     }
     const missingArtifact = await (async () => {
       for (const input of stage.inputs ?? []) {
@@ -153,44 +267,148 @@ export async function executeWorkflow(options: CompositionOptions): Promise<Comp
       return undefined;
     })();
     if (missingArtifact) {
-      const failed: CompositionStageResult = { stageId: id, status: "failed", selectedHarness: null, execution: null, artifacts: [], diagnostic: missingArtifact };
+      const failed: CompositionStageResult = {
+        stageId: id,
+        status: "failed",
+        selectedHarness: null,
+        execution: null,
+        artifacts: [],
+        diagnostic: redactSecrets(missingArtifact),
+      };
       results.push(failed); byId.set(id, failed);
       await persist("running");
       continue;
     }
-    const adapter = await adapterFor(options, stage);
+    let adapter: HarnessAdapter | undefined;
+    try {
+      adapter = await adapterFor(options, stage);
+    } catch (error) {
+      const failed: CompositionStageResult = {
+        stageId: id,
+        status: "failed",
+        selectedHarness: null,
+        execution: null,
+        artifacts: [],
+        diagnostic: safeDiagnostic(error, "adapter selection failed"),
+      };
+      results.push(failed);
+      byId.set(id, failed);
+      await persist("running");
+      continue;
+    }
     if (!adapter || !adapter.supportedOperations.execute) {
-      const failed: CompositionStageResult = { stageId: id, status: "failed", selectedHarness: adapter?.id ?? null, execution: null, artifacts: [], diagnostic: "no eligible adapter supports execute" };
+      const failed: CompositionStageResult = {
+        stageId: id,
+        status: "failed",
+        selectedHarness: adapter?.id ?? null,
+        execution: null,
+        artifacts: [],
+        diagnostic: "no eligible adapter supports execute",
+      };
       results.push(failed); byId.set(id, failed); await persist("running"); continue;
     }
     const handoff = handoffTask(stage, byId);
-    const running: CompositionStageResult = {
-      stageId: id,
-      status: "running",
-      selectedHarness: adapter.id,
-      execution: null,
-      artifacts: [],
-      ...(handoff.entries.length ? { handoff: handoff.entries } : {}),
-    };
-    results.push(running); byId.set(id, running);
-    await persist("running");
+    const cwd = await stageWorkspace();
+    let started = false;
     try {
-      const execution = await adapter.execute({ task: handoff.task, cwd: workflow.workspace, nonInteractive: true });
-      const completed: CompositionStageResult = {
+      for (const input of stage.inputs ?? []) {
+        if (!input.artifact) continue;
+        const source = workflow.stages.find((candidate) => candidate.id === input.fromStage)!;
+        const declaration = source.outputs!.find((artifact) => artifact.name === input.artifact)!;
+        await materializeArtifact(workflow.workspace, cwd, declaration);
+      }
+      const running: CompositionStageResult = {
         stageId: id,
-        status: execution.succeeded ? "succeeded" : "failed",
+        status: "running",
         selectedHarness: adapter.id,
-        execution,
-        artifacts: execution.succeeded ? (stage.outputs ?? []).map(copyArtifact) : [],
+        execution: null,
+        artifacts: [],
         ...(handoff.entries.length ? { handoff: handoff.entries } : {}),
-        ...(execution.error ? { diagnostic: execution.error } : {}),
       };
-      results[results.length - 1] = completed; byId.set(id, completed);
+      results.push(running);
+      byId.set(id, running);
+      started = true;
+      await persist("running");
+
+      let completed: CompositionStageResult;
+      try {
+        const execution = await adapter.execute({
+          task: handoff.task,
+          cwd,
+          environmentPolicy: { inherit: false },
+          nonInteractive: true,
+        });
+        const safeResult = safeExecution(execution);
+        let outputDiagnostic: string | undefined;
+        if (safeResult.succeeded) {
+          for (const declaration of stage.outputs ?? []) {
+            const diagnostic = await artifactAvailability(cwd, declaration);
+            if (diagnostic !== undefined) {
+              outputDiagnostic = `declared output ${diagnostic}`;
+              break;
+            }
+          }
+        }
+        if (safeResult.succeeded && outputDiagnostic === undefined) {
+          try {
+            for (const declaration of stage.outputs ?? []) {
+              await materializeArtifact(cwd, workflow.workspace, declaration);
+            }
+          } catch (error) {
+            outputDiagnostic = safeDiagnostic(error, "declared output could not be persisted");
+          }
+        }
+        completed = {
+          stageId: id,
+          status: safeResult.succeeded && outputDiagnostic === undefined ? "succeeded" : "failed",
+          selectedHarness: adapter.id,
+          execution: safeResult,
+          artifacts: safeResult.succeeded && outputDiagnostic === undefined
+            ? (stage.outputs ?? []).map(copyArtifact)
+            : [],
+          ...(handoff.entries.length ? { handoff: handoff.entries } : {}),
+          ...(!safeResult.succeeded || outputDiagnostic !== undefined
+            // `stderr` is captured for the stage result, but is not a safe
+            // cross-stage diagnostic because it may contain credentials or
+            // other sensitive harness output.
+            ? {
+                diagnostic: redactSecrets(
+                  outputDiagnostic ?? safeResult.error ?? `execution ${safeResult.failureCategory}`,
+                ),
+              }
+            : {}),
+        };
+      } catch (error) {
+        completed = {
+          stageId: id,
+          status: "failed",
+          selectedHarness: adapter.id,
+          execution: null,
+          artifacts: [],
+          ...(handoff.entries.length ? { handoff: handoff.entries } : {}),
+          diagnostic: safeDiagnostic(error, "adapter execution failed"),
+        };
+      }
+      results[results.length - 1] = completed;
+      byId.set(id, completed);
+      await persist("running");
     } catch (error) {
-      const failed: CompositionStageResult = { stageId: id, status: "failed", selectedHarness: adapter.id, execution: null, artifacts: [], diagnostic: error instanceof Error ? error.message : "adapter execution failed" };
-      results[results.length - 1] = failed; byId.set(id, failed);
+      if (started) throw error;
+      const setupFailed: CompositionStageResult = {
+        stageId: id,
+        status: "failed",
+        selectedHarness: adapter.id,
+        execution: null,
+        artifacts: [],
+        ...(handoff.entries.length ? { handoff: handoff.entries } : {}),
+        diagnostic: safeDiagnostic(error, "stage workspace setup failed"),
+      };
+      results.push(setupFailed);
+      byId.set(id, setupFailed);
+      await persist("running");
+    } finally {
+      await rm(cwd, { recursive: true, force: true });
     }
-    await persist("running");
   }
   const status = results.every((x) => x.status === "succeeded") ? "succeeded" : "failed";
   await persist(status);

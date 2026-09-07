@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, readFile } from "node:fs/promises";
+import { mkdtemp, readFile, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
@@ -90,13 +90,29 @@ test("executes stages in dependency order even when declarations are reversed", 
 test("executes sequential stages with only declared handoff and preserves prior result on failure", async () => {
   const workspace = await mkdtemp(join(tmpdir(), "switchyard-compose-"));
   const tasks = [];
+  let reviewCanSeeUndeclared = true;
   const implementation = {
     id: "opencode", supportedOperations: operations,
-    async execute(request) { tasks.push(request.task); if (request.task === "implement") await (await import("node:fs/promises")).writeFile(join(workspace, "patch.diff"), "diff"); return result(true, "implementation"); },
+    async execute(request) {
+      tasks.push(request.task);
+      if (request.task === "implement") {
+        const fs = await import("node:fs/promises");
+        await fs.writeFile(join(request.cwd, "patch.diff"), "diff");
+        await fs.writeFile(join(request.cwd, "undeclared-secret.txt"), "must not cross stage boundary");
+      }
+      return result(true, "implementation");
+    },
   };
   const review = {
     id: "copilot", supportedOperations: operations,
-    async execute(request) { tasks.push(request.task); return result(false); },
+    async execute(request) {
+      tasks.push(request.task);
+      reviewCanSeeUndeclared = await (await import("node:fs/promises"))
+        .access(join(request.cwd, "undeclared-secret.txt"))
+        .then(() => true, () => false);
+      assert.deepEqual(request.environmentPolicy, { inherit: false });
+      return result(false);
+    },
   };
   const workflow = {
     id: "demo", workspace,
@@ -111,6 +127,7 @@ test("executes sequential stages with only declared handoff and preserves prior 
   assert.deepEqual(outcome.stages.map((x) => x.status), ["succeeded", "failed"]);
   assert.match(tasks[1], /patch-input/);
   assert.match(tasks[1], /"status":"succeeded"/);
+  assert.equal(reviewCanSeeUndeclared, false);
   const state = JSON.parse(await readFile(outcome.statePath, "utf8"));
   assert.deepEqual(state.stages.map((x) => x.status), ["succeeded", "failed"]);
 });
@@ -123,6 +140,89 @@ test("rejects artifact paths outside the workflow workspace", async () => {
   });
   assert.equal(validation.success, false);
   assert.match(validation.issues.map((x) => x.message).join(" "), /inside/);
+
+  const rootArtifact = validateWorkflow({
+    id: "root-artifact", workspace,
+    stages: [{ id: "a", requirements: [], task: "a", outputs: [{ name: "everything", kind: "directory", path: "." }] }],
+  });
+  assert.equal(rootArtifact.success, false);
+});
+
+test("rejects produced artifacts whose symlink resolves outside the workflow workspace", async () => {
+  const workspace = await mkdtemp(join(tmpdir(), "switchyard-compose-"));
+  const outside = await mkdtemp(join(tmpdir(), "switchyard-compose-outside-"));
+  const implementation = {
+    id: "implementation", supportedOperations: operations,
+    async execute(request) {
+      await writeFile(join(outside, "secret.txt"), "must not cross the boundary");
+      await symlink(join(outside, "secret.txt"), join(request.cwd, "patch.diff"));
+      return result(true);
+    },
+  };
+  const review = {
+    id: "review", supportedOperations: operations,
+    async execute() { throw new Error("must not run after unsafe output"); },
+  };
+  const outcome = await executeWorkflow({
+    workflow: {
+      id: "symlink-escape",
+      workspace,
+      stages: [
+        {
+          id: "implementation",
+          requirements: [],
+          task: "implement",
+          outputs: [{ name: "patch", kind: "file", path: "patch.diff" }],
+        },
+        {
+          id: "review",
+          dependsOn: ["implementation"],
+          requirements: [],
+          task: "review",
+          inputs: [{ name: "patch-input", fromStage: "implementation", artifact: "patch" }],
+        },
+      ],
+    },
+    adapters: { implementation, review },
+  });
+  assert.equal(outcome.status, "failed");
+  assert.deepEqual(outcome.stages.map((stage) => stage.status), ["failed", "skipped"]);
+  assert.match(outcome.stages[0].diagnostic, /outside the workflow workspace/);
+});
+
+test("rejects opaque schema fields and unusable artifact declarations", async () => {
+  const workspace = await mkdtemp(join(tmpdir(), "switchyard-compose-"));
+  const validation = validateWorkflow({
+    id: "strict-schema",
+    workspace,
+    unexpected: "must not cross the workflow boundary",
+    stages: [{
+      id: "a",
+      requirements: [],
+      task: "a",
+      extra: true,
+    }],
+  });
+  assert.equal(validation.success, false);
+  assert.match(validation.issues.map((x) => x.message).join(" "), /recognized field/);
+
+  const artifacts = validateWorkflow({
+    id: "strict-artifacts",
+    workspace,
+    stages: [{
+      id: "a",
+      requirements: [],
+      task: "a",
+      outputs: [
+        { name: "metadata-with-path", kind: "metadata", path: "metadata.json" },
+        { name: "file-without-path", kind: "file" },
+      ],
+    }],
+  });
+  assert.equal(artifacts.success, false);
+  const artifactMessages = artifacts.issues.map((x) => x.message).join(" ");
+  assert.match(artifactMessages, /must not declare a path/);
+  assert.match(artifactMessages, /workspace-contained relative path/);
 });
 
 test("requires unique declared inputs and rejects undeclared or duplicate context", async () => {
@@ -155,7 +255,7 @@ test("records a sanitized handoff manifest and rejects missing or mismatched art
     async execute(request) {
       tasks.push(request.task);
       if (request.task === "implement") {
-        await (await import("node:fs/promises")).writeFile(join(workspace, "notes.txt"), "notes");
+        await (await import("node:fs/promises")).writeFile(join(request.cwd, "notes.txt"), "notes");
       }
       return result(true, "implementation");
     },
@@ -215,8 +315,8 @@ test("records a sanitized handoff manifest and rejects missing or mismatched art
   await (await import("node:fs/promises")).unlink(join(workspace, "notes.txt"));
   const missing = await executeWorkflow({ workflow: missingWorkflow, adapters: { implementation, review } });
   assert.equal(missing.status, "failed");
-  assert.deepEqual(missing.stages.map((stage) => stage.status), ["succeeded", "failed"]);
-  assert.match(missing.stages[1].diagnostic, /notes from implementation .*missing/);
+  assert.deepEqual(missing.stages.map((stage) => stage.status), ["failed", "skipped"]);
+  assert.match(missing.stages[0].diagnostic, /declared output notes .*missing/);
 
   const wrongKindWorkflow = {
     ...workflow,
@@ -227,5 +327,57 @@ test("records a sanitized handoff manifest and rejects missing or mismatched art
   };
   const wrongKind = await executeWorkflow({ workflow: wrongKindWorkflow, adapters: { implementation, review } });
   assert.equal(wrongKind.status, "failed");
-  assert.match(wrongKind.stages[1].diagnostic, /notes from implementation .*not a directory/);
+  assert.deepEqual(wrongKind.stages.map((stage) => stage.status), ["failed", "skipped"]);
+  assert.match(wrongKind.stages[0].diagnostic, /declared output notes .*not a directory/);
+});
+
+test("preserves completed stages when selection or execution fails and skips dependents", async () => {
+  const workspace = await mkdtemp(join(tmpdir(), "switchyard-compose-"));
+  const calls = [];
+  const implementation = {
+    id: "implementation", supportedOperations: operations,
+    async execute() {
+      calls.push("implementation");
+      return result(true);
+    },
+  };
+  const review = {
+    id: "review", supportedOperations: operations,
+    async execute() {
+      calls.push("review");
+      throw new Error("review adapter failed");
+    },
+  };
+  const followup = {
+    id: "followup", supportedOperations: operations,
+    async execute() {
+      calls.push("followup");
+      return result(true);
+    },
+  };
+
+  const outcome = await executeWorkflow({
+    workflow: {
+      id: "partial-selection",
+      workspace,
+      stages: [
+        { id: "implementation", requirements: [], task: "implement" },
+        { id: "review", dependsOn: ["implementation"], requirements: [], task: "review" },
+        { id: "followup", dependsOn: ["review"], requirements: [], task: "follow up" },
+      ],
+    },
+    selectAdapter: (stage) => stage.id === "implementation"
+      ? implementation
+      : stage.id === "review"
+        ? review
+        : followup,
+    adapters: {},
+  });
+
+  assert.equal(outcome.status, "failed");
+  assert.deepEqual(calls, ["implementation", "review"]);
+  assert.deepEqual(outcome.stages.map((stage) => stage.status), ["succeeded", "failed", "skipped"]);
+  const state = JSON.parse(await readFile(outcome.statePath, "utf8"));
+  assert.deepEqual(state.stages.map((stage) => stage.status), ["succeeded", "failed", "skipped"]);
+  assert.match(outcome.stages[1].diagnostic, /review adapter failed/);
 });

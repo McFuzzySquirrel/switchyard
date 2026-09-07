@@ -51,7 +51,7 @@
 ### Phase 2: Execution and Demonstration
 - [x] Orchestrate sequential adapter calls.
 - [x] Persist per-stage results.
-- [ ] Implement OpenCode-to-Copilot implementation/review example.
+- [x] Implement OpenCode-to-Copilot implementation/review example.
 - [x] Add partial-failure reporting.
 
 ## 6. Testing Strategy
@@ -60,7 +60,7 @@
 |-------|-------|----------|
 | Unit Tests | Workflow validation and handoff | Schema and artifact fixtures |
 | Integration Tests | Sequential stage execution | Stub adapters |
-| Manual / Exploratory | Real two-harness demonstration | Reproducible example repository |
+| Integration Tests | Reproducible OpenCode-to-Copilot demonstration | Real adapters when installed and execute-capable, fixture adapters otherwise (`tests/composition-demo.test.mjs`) |
 
 Key test scenarios:
 1. Implementation output is passed to review.
@@ -99,10 +99,56 @@ The public composition API is exported from `src/composition/index.ts`:
   requested stage context fields (`status`, `selectedHarness`, `durationMs`, or
   `diagnostic`). The exact sanitized manifest is retained on the receiving
   `CompositionStageResult.handoff` for inspection. Opaque conversation state,
-  stdout/stderr, and process environment are never copied.
+  stdout/stderr, and process environment are never copied. Each stage executes
+  in a fresh restricted workspace with only declared input artifacts
+  materialized; undeclared files from a prior stage are discarded at the stage
+  boundary and composition disables inherited process environment variables.
 - Path-bearing file and directory artifacts are checked when a receiving stage
-  is about to run. Missing, wrong-kind, or symlink-escaped paths fail that
-  receiving stage without erasing the successful producer result. Dependent
-  stages are recorded as skipped rather than losing their stage-level status.
+  is about to run and after the producer completes. Missing, wrong-kind, or
+  symlink-escaped paths fail the appropriate stage without erasing successful
+  prior results. Dependent stages are recorded as skipped rather than losing
+  their stage-level status.
 - `switchyard-workflow-state.json` is updated after each stage and retains
-  successful stage results and diagnostics when a later stage fails.
+  successful stage results and diagnostics when a later stage fails. Captured
+  execution streams are redacted before they are persisted; raw streams never
+  enter a declared handoff. Checkpoints are written with restrictive
+  permissions through atomic replacement so an interrupted write does not
+  destroy the previous state.
+
+`switchyard compose <workflow-file> [--json] [--registry PATH] [--config PATH]`
+(`src/commands/compose.ts`) is the CLI entry point. It never reimplements
+matching or subprocess lifecycle itself: the workflow file is parsed and
+validated with `validateWorkflow` before any stage is selected (an invalid
+graph, cycle, unsatisfied dependency, or undeclared handoff is reported as
+`status: "invalid-input"` with the same `SchemaIssue[]` shape as `run` and
+`explain`, never partially launched); each stage's adapter is then selected
+by calling `explain` with that stage's declared requirements (or bare
+capability list) — the exact deterministic routing policy `run` uses — and
+the resolved harness ID is looked up in the injected/built-in
+`HarnessAdapterRegistry`; execution and durable per-stage state persistence
+are delegated entirely to `executeWorkflow`. `ComposeCommandResult.status` is
+`"success"` only when every declared stage succeeded, and `"partial"`
+otherwise, so a partially completed workflow is never reported as total
+success or total failure. A stage with no declared requirements, or no
+qualifying registry candidate, fails only that stage with a "no eligible
+adapter" diagnostic; earlier successful stages and their persisted artifacts
+are untouched, matching `COMP-FR-03`.
+
+### Reproducible OpenCode-to-Copilot demonstration
+
+`tests/composition-demo.test.mjs` is the reproducible implementation/review
+demonstration required by the product vision's composition success metric.
+It builds a genuine two-stage `opencode` → `copilot` workflow (`headless`
+requirement routed to `opencode`, `github-context` routed to `copilot`,
+patch handoff declared between them) and resolves each participant with
+`findExecutable` plus `adapter.supportedOperations.execute`: when a vendor
+executable is installed on `PATH` **and** its built-in adapter has
+implemented `execute`, the demonstration runs that real adapter; otherwise it
+registers a fixture adapter under the exact same harness ID, so routing
+cannot distinguish the two paths and the demonstration is reproducible
+everywhere. Built-in `opencode`/`copilot` adapters are currently
+discovery-only (see `docs/features/adapter-extensibility-and-configuration.md`),
+so the suite exercises the fixture path today and will transparently exercise
+the real one once execution is implemented for those adapters. A companion
+scenario proves a failing review stage preserves the implementation stage's
+status, artifacts, and persisted state.

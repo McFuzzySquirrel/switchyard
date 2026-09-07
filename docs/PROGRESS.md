@@ -1,9 +1,9 @@
 # Project Progress
 
 ## Current State
-**Phase**: MULTI-HARNESS-COMPOSITION-1
+**Phase**: MULTI-HARNESS-COMPOSITION-2
 **Status**: In Progress
-**Last Updated**: 2026-09-07T22:16:36.402Z
+**Last Updated**: 2026-09-07T22:52:15.276Z
 **Run ID**: faef066b-e967-49ae-ba56-4dbe4255f89d
 **Harness**: copilot
 **Execution Mode**: auto
@@ -85,6 +85,8 @@
   - Files: CHANGELOG.md, README.md, docs/features/multi-harness-composition.md, src/composition/schema.ts, src/composition/workflow.ts, tests/composition.test.mjs
 - [x] Phase MULTI-HARNESS-COMPOSITION-1, Task MULTI-HARNESS-COMPOSITION-1.3: [ ] Validate dependencies and stage ordering (@workflow-composition-engineer)
   - Files: CHANGELOG.md, src/composition/schema.ts, tests/composition.test.mjs
+- [x] Phase MULTI-HARNESS-COMPOSITION-2, Task MULTI-HARNESS-COMPOSITION-2.1: [ ] Orchestrate sequential adapter calls (@workflow-composition-engineer)
+  - Files: docs/features/multi-harness-composition.md, src/cli.ts, src/commands/index.ts, src/composition/schema.ts, src/composition/workflow.ts, tests/composition.test.mjs, src/commands/compose.ts, tests/compose-command.test.mjs, tests/composition-demo.test.mjs
 
 ## Current Task
 - None currently running

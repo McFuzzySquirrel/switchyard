@@ -25,6 +25,18 @@ export interface VerificationRunOptions {
 export interface VerificationRunResult {
   readonly results: readonly VerificationResult[];
   readonly decisions: Readonly<Record<string, ProbePolicyDecision>>;
+  /**
+   * Stable, payload-free warnings for probes that are not purely local and
+   * read-only. Keeping these separate from adapter messages makes it safe for
+   * command consumers to surface the warning before inspecting probe output.
+   */
+  readonly warnings: readonly VerificationWarning[];
+}
+
+export interface VerificationWarning {
+  readonly capability: CapabilityName;
+  readonly risks: readonly Exclude<ProbeRisk, "read-only">[];
+  readonly messages: readonly string[];
 }
 
 function boundedTimeout(value: number | undefined): number {
@@ -158,7 +170,22 @@ export async function verifyCapabilities(
     }
   }
 
-  if (allowed.length === 0) return { results: rejected, decisions };
+  const warnings = capabilities
+    .map((capability): VerificationWarning | undefined => {
+      const decision = decisions[capability];
+      const risks = decision.risks.filter(
+        (risk): risk is Exclude<ProbeRisk, "read-only"> => risk !== "read-only",
+      );
+      if (risks.length === 0) return undefined;
+      return {
+        capability,
+        risks,
+        messages: decision.warnings,
+      };
+    })
+    .filter((warning): warning is VerificationWarning => warning !== undefined);
+
+  if (allowed.length === 0) return { results: rejected, decisions, warnings };
   const context: ProbeContext = {
     ...(options.context ?? {}),
     // The adapter receives the complete risk envelope for the batch. This
@@ -168,5 +195,5 @@ export async function verifyCapabilities(
     probePolicy: options.policy,
   };
   const results = await runBoundedVerification(adapter, allowed, context, now);
-  return { results: [...results, ...rejected], decisions };
+  return { results: [...results, ...rejected], decisions, warnings };
 }

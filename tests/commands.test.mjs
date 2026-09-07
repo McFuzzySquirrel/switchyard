@@ -13,6 +13,8 @@ import {
   formatDiscoverJson,
   formatCapabilitiesHuman,
   formatDiscoverHuman,
+  formatVerifyHuman,
+  verify,
   explain,
   formatExplainJson,
   formatExplainHuman,
@@ -23,6 +25,7 @@ import {
   CLI_EXIT_CODES,
   exitCodeForStatus,
   runCli,
+  createStubHarnessAdapter,
 } from "../src/index.ts";
 
 const observedAt = "2026-09-07T19:00:00.000Z";
@@ -137,6 +140,78 @@ test("discover refreshes missing registries and returns a stable command payload
   const json = JSON.parse(formatDiscoverJson(result));
   assert.equal(json.schemaVersion, 1);
   assert.equal(json.harnesses[0].capabilities[0].discovery.evidence.excerpt, "Usage: fixture --[REDACTED]");
+});
+
+test("verify surfaces external-access and cost warnings without changing unrelated profiles", async (t) => {
+  const directory = await mkdtemp(join(tmpdir(), "switchyard-verify-command-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const registryPath = join(directory, "registry.json");
+  await discover({
+    registryPath,
+    adapters: [
+      { id: "fixture", discover: async () => profile("fixture") },
+      { id: "other", discover: async () => profile("other") },
+    ],
+    now: () => new Date(observedAt),
+  });
+
+  const adapter = createStubHarnessAdapter({ id: "fixture" });
+  const result = await verify({
+    registryPath,
+    harnessId: "fixture",
+    adapters: [adapter],
+    risksByCapability: { headless: ["external-access", "paid"] },
+    now: () => new Date(observedAt),
+  });
+
+  assert.equal(result.status, "partial");
+  assert.deepEqual(result.warnings, [{
+    harnessId: "fixture",
+    capability: "headless",
+    risks: ["external-access", "paid"],
+    messages: [
+      "Probe may access an external service or network.",
+      "Probe may incur provider or usage charges.",
+    ],
+  }]);
+  assert.match(formatVerifyHuman(result), /external service or network/);
+  assert.deepEqual((await readFile(registryPath, "utf8")).includes("other"), true);
+  const refreshed = await capabilities({ registryPath });
+  assert.equal(refreshed.harnesses.find((item) => item.id === "other").capabilities[0].verification.status, "not-requested");
+  assert.equal(refreshed.harnesses.find((item) => item.id === "fixture").capabilities[0].verification.status, "skipped");
+});
+
+test("CLI verify exposes probe warnings in JSON without leaking probe payloads", async (t) => {
+  const directory = await mkdtemp(join(tmpdir(), "switchyard-cli-verify-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const registryPath = join(directory, "registry.json");
+  await discover({
+    registryPath,
+    adapters: [{ id: "fixture", discover: async () => profile("fixture") }],
+    now: () => new Date(observedAt),
+  });
+
+  const output = [];
+  const code = await runCli(
+    [
+      "verify",
+      "--registry", registryPath,
+      "--harness=fixture",
+      "--capability=headless",
+      "--risk=external-access",
+      "--risk=paid",
+      "--json",
+    ],
+    { stdout: (text) => output.push(text) },
+    undefined,
+    [createStubHarnessAdapter({ id: "fixture" })],
+  );
+
+  assert.equal(code, CLI_EXIT_CODES.partial);
+  const json = JSON.parse(output.join(""));
+  assert.deepEqual(json.warnings[0].risks, ["external-access", "paid"]);
+  assert.match(json.warnings[0].messages.join(" "), /external service|charges/);
+  assert.doesNotMatch(JSON.stringify(json), /secret|prompt|argv|environment/i);
 });
 
 test("discover loads the local adapter config and applies per-harness environment overrides", async (t) => {

@@ -48,7 +48,7 @@
 ### Phase 2: Routing Integration
 - [x] Include verification state in candidate ranking.
 - [x] Implement explicit preferred-harness and fallback policy.
-- [ ] Add warnings for probes that may incur cost or external access.
+- [x] Add warnings for probes that may incur cost or external access.
 
 ## 6. Testing Strategy
 
@@ -84,6 +84,12 @@ timeout (or the adapter context's positive `timeoutMs`), pass an abort signal
 to the adapter, and return a `timed-out` result for every in-flight capability
 if the adapter does not finish. Probe runners bound output and time through
 the adapter context and do not alter routing or fallback decisions.
+
+The `verify` command surfaces fixed warnings before its verification records
+when a requested probe declares `external-access`, `paid`, `mutating`, or
+`model-invoking` risk. These warnings contain no command arguments, prompt
+text, environment values, or probe output. External-access and paid probes
+remain denied unless their matching policy approval is explicitly enabled.
 
 ## 7. Acceptance Criteria
 

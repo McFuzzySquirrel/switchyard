@@ -1,9 +1,9 @@
 # Project Progress
 
 ## Current State
-**Phase**: HARNESS-EXECUTION-RUNTIME-2
+**Phase**: VERIFICATION-AND-RESILIENCE-2
 **Status**: In Progress
-**Last Updated**: 2026-09-07T21:52:20.469Z
+**Last Updated**: 2026-09-07T22:00:23.948Z
 **Run ID**: faef066b-e967-49ae-ba56-4dbe4255f89d
 **Harness**: copilot
 **Execution Mode**: auto
@@ -61,6 +61,8 @@
   - Files: docs/features/verification-and-resilience.md, tests/capability-matcher.test.mjs
 - [x] Phase VERIFICATION-AND-RESILIENCE-2, Task VERIFICATION-AND-RESILIENCE-2.2: [ ] Implement explicit preferred-harness and fallback policy (@routing-policy-engineer)
   - Files: CHANGELOG.md, README.md, docs/adr/0003-versioned-command-json-contracts.md, docs/features/deterministic-routing-and-explainability.md, docs/features/verification-and-resilience.md, src/capabilities/index.ts, src/commands/explain.ts, src/commands/run.ts, tests/capability-matcher.test.mjs, tests/commands.test.mjs, tests/run-command.test.mjs, src/capabilities/routing.ts
+- [x] Phase VERIFICATION-AND-RESILIENCE-2, Task VERIFICATION-AND-RESILIENCE-2.3: [ ] Add warnings for probes that may incur cost or external access (@routing-policy-engineer)
+  - Files: CHANGELOG.md, README.md, docs/features/verification-and-resilience.md, src/cli.ts, src/commands/index.ts, src/verification/runner.ts, tests/commands.test.mjs, tests/verification-policy.test.mjs, src/commands/verify.ts
 - [x] Phase ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1, Task ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1.1: [ ] Define discovery, verification, execution, resume, and fork adapter interfaces (@adapter-platform-engineer)
   - Files: CHANGELOG.md, README.md, src/config/index.ts, src/harness/adapter.ts, src/harness/copilot.ts, src/harness/discovery-adapter.ts, src/harness/index.ts, src/harness/opencode.ts, docs/adapter-development.md, docs/adr/0002-adapter-contract-and-typed-configuration.md, src/config/loader.ts, src/config/resolve.ts, src/config/schema.ts, src/harness/adapter-registry.ts, src/harness/stub.ts, tests/adapter-conformance.test.mjs, tests/harness-config.test.mjs
 - [x] Phase ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1, Task ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1.2: [ ] Define capability observation and operation support schemas (@adapter-platform-engineer)
@@ -79,7 +81,6 @@
 
 ## Remaining
 - [ ] Phase HARNESS-EXECUTION-RUNTIME-2: Phase 2: CLI Integration
-- [ ] Phase VERIFICATION-AND-RESILIENCE-2: Phase 2: Routing Integration
 - [ ] Phase MULTI-HARNESS-COMPOSITION-1: Phase 1: Workflow Model
 - [ ] Phase MULTI-HARNESS-COMPOSITION-2: Phase 2: Execution and Demonstration
 

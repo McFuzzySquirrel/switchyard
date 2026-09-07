@@ -6,7 +6,7 @@ The product direction is described in [`docs/PRD.md`](docs/PRD.md). The library 
 
 ## Current status
 
-The current completed slice covers discovery schemas, executable lookup, bounded version/help probing, built-in discovery adapters, atomic local registry persistence, refreshable registry profiles, the `discover`, `capabilities`, `explain`, and `run` commands, normalized all-required capability matching with deterministic ranking and human-readable explanations, the full vendor-neutral `HarnessAdapter` contract with explicit registration, typed local configuration with environment/executable/registry/probe-policy precedence, and the bounded process execution runtime connected to routed selection. Built-in adapters currently support `discover` only and fail fast on other operations, so `run` against them deterministically reports `unavailable` until a real `execute` implementation is registered.
+The current completed slice covers discovery schemas, executable lookup, bounded version/help probing, built-in discovery adapters, atomic local registry persistence, refreshable registry profiles, the `discover`, `capabilities`, `verify`, `explain`, and `run` commands, normalized all-required capability matching with deterministic ranking and human-readable explanations, the full vendor-neutral `HarnessAdapter` contract with explicit registration, typed local configuration with environment/executable/registry/probe-policy precedence, and the bounded process execution runtime connected to routed selection. Built-in adapters currently support `discover` only and fail fast on other operations, so `verify` and `run` against them deterministically report unavailable results until a real operation implementation is registered.
 
 ## Development
 
@@ -33,6 +33,7 @@ npx switchyard discover
 npx switchyard discover --refresh --json
 npx switchyard capabilities
 npx switchyard capabilities --verified --json
+npx switchyard verify --harness=opencode --capability=headless --json
 npx switchyard explain --requires=headless,repository-access
 npx switchyard explain --requires=headless --json
 npx switchyard capabilities --config ./switchyard.config.json
@@ -57,6 +58,17 @@ preferred qualifying harness; fallback remains disabled unless
 `--allow-fallback` is explicitly supplied. Invalid requirements exit `2`
 (`CLI_EXIT_CODES.invalidInput`), and valid requirements with no qualifying
 selection exit `4` (`CLI_EXIT_CODES.noMatch`).
+
+`verify` runs bounded probes for capabilities already observed in the local
+registry and persists the resulting verification state. Use `--harness=<id>`
+to select one harness and repeat `--capability=<name>` to select capabilities.
+Probe risks are declared with repeatable `--risk=<read-only|mutating|external-access|paid|model-invoking>`
+options. Read-only probes are allowed by default; probes that may access an
+external service or incur provider/model charges require explicit policy
+approval (`--allow-external-access`, `--allow-paid-probes`, or typed
+configuration). JSON and human output include fixed, payload-free warnings
+for those risks and never include command arguments, prompts, environment
+values, or secrets.
 
 `run --requires=<capabilities> [--json] [--dry-run] [--cwd PATH]
 [--timeout-ms MS] "<task>"` connects that same routing decision to adapter

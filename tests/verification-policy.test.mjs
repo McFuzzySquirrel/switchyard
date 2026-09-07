@@ -43,6 +43,22 @@ test("mutating, paid, and model probes require their individual approvals", () =
   }, { allowMutatingProbes: true }).allowed, false);
 });
 
+test("surfaces fixed warnings for external and potentially costly probes", () => {
+  const decision = evaluateProbePolicy({
+    adapterId: "fixture",
+    capability: "model-selection",
+    risks: ["external-access", "paid", "model-invoking"],
+    description: "prompt=secret-token",
+  });
+
+  assert.deepEqual(decision.warnings, [
+    "Probe may access an external service or network.",
+    "Probe may incur provider or usage charges.",
+    "Probe invokes a model and may send prompt or repository context.",
+  ]);
+  assert.doesNotMatch(formatProbeWarnings(decision), /secret-token|prompt=/);
+});
+
 test("policy rejection skips only unsafe capabilities and never invokes them", async () => {
   const adapter = createStubHarnessAdapter({ id: "fixture" });
   const run = await verifyCapabilities(adapter, ["headless", "github-context"], {
@@ -53,6 +69,30 @@ test("policy rejection skips only unsafe capabilities and never invokes them", a
     ["github-context", "skipped"],
   ]);
   assert.deepEqual(adapter.calls.map((call) => call.operation), ["verify"]);
+});
+
+test("verification results retain warnings for both approved and rejected probes", async () => {
+  const adapter = createStubHarnessAdapter({ id: "fixture" });
+  const run = await verifyCapabilities(adapter, ["headless", "github-context"], {
+    policy: { allowExternalAccess: true },
+    risksByCapability: {
+      headless: ["paid"],
+      "github-context": ["external-access"],
+    },
+  });
+
+  assert.deepEqual(run.warnings, [
+    {
+      capability: "headless",
+      risks: ["paid"],
+      messages: ["Probe may incur provider or usage charges."],
+    },
+    {
+      capability: "github-context",
+      risks: ["external-access"],
+      messages: ["Probe may access an external service or network."],
+    },
+  ]);
 });
 
 test("passes the complete approved risk envelope to the adapter", async () => {

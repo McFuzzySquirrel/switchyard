@@ -4,6 +4,11 @@ All notable user-facing changes to Switchyard are documented here. The format fo
 
 ## [Unreleased]
 
+- Added `switchyard verify` with selective harness/capability probes,
+  atomic verification-state persistence, and fixed redacted warnings for
+  probes that may access external services, invoke models, mutate state, or
+  incur provider charges. Risky probes remain denied until their matching
+  policy approval is explicitly enabled.
 - Added a pure routing-policy decision layer for preferred harnesses and
   explicit fallback. A preferred harness can never bypass all-required
   capability matching, fallback remains disabled unless `allowFallback` or

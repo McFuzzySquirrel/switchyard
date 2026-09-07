@@ -1,7 +1,7 @@
 {
   "runId": "faef066b-e967-49ae-ba56-4dbe4255f89d",
   "startedAt": "2026-09-07T19:10:17.558Z",
-  "lastUpdatedAt": "2026-09-07T22:55:00.807Z",
+  "lastUpdatedAt": "2026-09-07T22:57:19.668Z",
   "manifestPath": "/home/mcfuzzysquirrel/Projects/switchyard/docs/EXECUTION-MANIFEST.json",
   "manifestVersion": "1.0",
   "harness": "copilot",
@@ -869,10 +869,23 @@
     },
     "MULTI-HARNESS-COMPOSITION-2.4": {
       "taskId": "MULTI-HARNESS-COMPOSITION-2.4",
-      "status": "pending",
+      "status": "complete",
       "ownerAgent": "switchyard-qa-engineer",
-      "attempt": 0,
-      "outputFiles": []
+      "attempt": 1,
+      "outputFiles": [
+        "CHANGELOG.md",
+        "README.md",
+        "docs/features/multi-harness-composition.md",
+        "src/commands/compose.ts",
+        "tests/compose-command.test.mjs"
+      ],
+      "startedAt": "2026-09-07T22:55:00.835Z",
+      "completedAt": "2026-09-07T22:57:19.668Z",
+      "agentOutput": "● Switchyard-qa-engineer (model: gpt-5.6-luna) Implement partial failure reporting            1m 51s\n  │ Implemented partial-failure reporting for `compose`.\n  │ Verify full test result and review changed files (shell)\n  │   │ tail -n 20\n  │   │ /tmp/1788821811123-copilot-tool-output-158083-4dadbd79-2587-4691-9af8-5efe3edeb4cf.txt &&\n  │   git\n  │   │ status --short && git diff --stat && git diff --check\n  │   └ 36 lines…\n  └ update_todo todos: \"- [completed] Inspect composition workflow, result contracts…\"\n      └ TODO list updated\n\n● Review partial failure changes (shell)                                                          5s\n  │ git --no-pager status --short && git --no-pager diff --stat && git --no-pager diff --\n  │ src/commands/compose.ts tests/compose-command.test.mjs README.md\n  │ docs/features/multi-harness-composition.md CHANGELOG.md\n  └ 195 lines…\n\n● Run project validation (shell)                                                                  5s\n  │ npm test && npm run typecheck && npm run test:docs\n  └ 23 lines…\n\nImplemented partial-failure reporting for multi-harness composition.\n\n**Changed files:**\n- `src/commands/compose.ts`\n- `tests/compose-command.test.mjs`\n- `README.md`\n- `docs/features/multi-harness-composition.md`\n- `CHANGELOG.md`\n\n`compose` now reports stable `stageSummary` counts for succeeded, failed, and skipped stages in JSON and human-readable output. Partial workflows preserve all stage results, return `status: \"partial\"`, and use the documented partial exit code `1`.\n\n",
+      "artifactId": "work-multi-harness-composition-2-4-001",
+      "inputArtifactIds": [
+        "work-multi-harness-composition-2-3-001"
+      ]
     }
   },
   "blockers": [

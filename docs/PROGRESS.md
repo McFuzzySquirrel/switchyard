@@ -3,7 +3,7 @@
 ## Current State
 **Phase**: MULTI-HARNESS-COMPOSITION-2
 **Status**: In Progress
-**Last Updated**: 2026-09-07T22:55:00.809Z
+**Last Updated**: 2026-09-07T22:57:19.671Z
 **Run ID**: faef066b-e967-49ae-ba56-4dbe4255f89d
 **Harness**: copilot
 **Execution Mode**: auto
@@ -91,12 +91,14 @@
   - Files: CHANGELOG.md, README.md, docs/features/multi-harness-composition.md, src/composition/workflow.ts, tests/composition.test.mjs
 - [x] Phase MULTI-HARNESS-COMPOSITION-2, Task MULTI-HARNESS-COMPOSITION-2.3: [ ] Implement OpenCode-to-Copilot implementation/review example (@workflow-composition-engineer)
   - Files: CHANGELOG.md, README.md, tests/composition-demo.test.mjs, examples/opencode-to-copilot.workflow.json
+- [x] Phase MULTI-HARNESS-COMPOSITION-2, Task MULTI-HARNESS-COMPOSITION-2.4: [ ] Add partial-failure reporting (@switchyard-qa-engineer)
+  - Files: CHANGELOG.md, README.md, docs/features/multi-harness-composition.md, src/commands/compose.ts, tests/compose-command.test.mjs
 
 ## Current Task
 - None currently running
 
 ## Remaining
-- [ ] Phase MULTI-HARNESS-COMPOSITION-2: Phase 2: Execution and Demonstration
+- [x] No remaining phases
 
 ## Blockers
 - Manifest reconciliation changed 9 existing task(s): DISCOVERY-AND-REGISTRY-2.4, DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-2.1, HARNESS-EXECUTION-RUNTIME-1.2, HARNESS-EXECUTION-RUNTIME-2.1, HARNESS-EXECUTION-RUNTIME-2.3, VERIFICATION-AND-RESILIENCE-1.2, VERIFICATION-AND-RESILIENCE-1.3, MULTI-HARNESS-COMPOSITION-2.2, MULTI-HARNESS-COMPOSITION-2.4

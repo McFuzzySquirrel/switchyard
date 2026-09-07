@@ -116,6 +116,10 @@ artifacts. Every path-bearing file or directory handoff is checked at the
 receiving stage: the path must still resolve inside the workflow workspace and
 must have the declared kind. A missing or escaped artifact fails only the receiving stage;
 successful earlier stages and their diagnostics remain in the state file.
+The `compose` result reports `status: "partial"` and a `stageSummary` count
+(`succeeded`, `failed`, and `skipped`) whenever any stage fails or is skipped;
+the per-stage results remain available for diagnostics and recovery, and the
+CLI exits with the stable partial code `1`.
 
 An input must name its source stage (which must also be a declared dependency)
 and may request one declared artifact plus the explicitly allowed stage

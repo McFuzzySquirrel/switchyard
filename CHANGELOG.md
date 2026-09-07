@@ -17,6 +17,10 @@ All notable user-facing changes to Switchyard are documented here. The format fo
   sanitized handoff manifests plus earlier successes when a later stage fails.
 - Added a reusable OpenCode-to-Copilot implementation/review workflow example
   under `examples/`, with a reproducible fixture-backed demonstration test.
+- Added explicit composition partial-failure reporting: `compose` now exposes
+  stable succeeded/failed/skipped stage counts in `stageSummary`, includes the
+  summary in JSON and human output, and returns the documented partial exit
+  category (`1`) while preserving every stage result.
 - Composition dependency validation now produces a deterministic topological
   stage order and rejects cyclic or unknown dependencies before execution.
 - Added `switchyard verify` with selective harness/capability probes,

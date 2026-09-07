@@ -38,6 +38,15 @@ export interface ComposeCommandResult {
   readonly workflowId: string;
   readonly statePath: string;
   readonly stages: readonly CompositionStageResult[];
+  /**
+   * Stable aggregate details for callers that need to react to a partial
+   * workflow without reimplementing stage-status counting.
+   */
+  readonly stageSummary: {
+    readonly succeeded: number;
+    readonly failed: number;
+    readonly skipped: number;
+  };
 }
 
 export interface ComposeInvalidInputResult {
@@ -135,6 +144,18 @@ function composeStatus(result: CompositionResult): ComposeCommandStatus {
     : "partial";
 }
 
+function composeStageSummary(result: CompositionResult): ComposeCommandResult["stageSummary"] {
+  return result.stages.reduce(
+    (summary, stage) => {
+      if (stage.status === "succeeded") summary.succeeded += 1;
+      else if (stage.status === "failed") summary.failed += 1;
+      else if (stage.status === "skipped") summary.skipped += 1;
+      return summary;
+    },
+    { succeeded: 0, failed: 0, skipped: 0 },
+  );
+}
+
 /**
  * Runs a declared multi-stage workflow (`COMP-FR-01`..`COMP-FR-03`).
  *
@@ -203,6 +224,7 @@ export async function compose(
     workflowId: result.workflowId,
     statePath: result.statePath,
     stages: result.stages,
+    stageSummary: composeStageSummary(result),
   };
 }
 
@@ -272,6 +294,7 @@ export function formatComposeHuman(
     `Workflow: ${presented.workflowId}`,
     `Status: ${presented.status}`,
     `State: ${presented.statePath}`,
+    `Stage summary: succeeded=${presented.stageSummary.succeeded}, failed=${presented.stageSummary.failed}, skipped=${presented.stageSummary.skipped}`,
     "Stages:",
   ];
   for (const stage of presented.stages) {

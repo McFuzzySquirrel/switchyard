@@ -179,6 +179,7 @@ test("compose routes each stage through the same deterministic policy as explain
 
   assert.equal(result.command, "compose");
   assert.equal(result.status, "partial");
+  assert.deepEqual(result.stageSummary, { succeeded: 1, failed: 1, skipped: 0 });
   assert.deepEqual(result.stages.map((stage) => stage.status), ["succeeded", "failed"]);
   assert.deepEqual(result.stages.map((stage) => stage.selectedHarness), ["implementer", "reviewer"]);
   assert.match(tasks[1], /patch-input/);
@@ -186,6 +187,7 @@ test("compose routes each stage through the same deterministic policy as explain
   assert.deepEqual(persisted.stages.map((stage) => stage.status), ["succeeded", "failed"]);
   assert.match(formatComposeHuman(result), /implementation: succeeded/);
   assert.match(formatComposeHuman(result), /review: failed/);
+  assert.match(formatComposeHuman(result), /Stage summary: succeeded=1, failed=1, skipped=0/);
 });
 
 test("compose fails a stage with no eligible adapter without selecting an unrelated one", async (t) => {
@@ -205,6 +207,7 @@ test("compose fails a stage with no eligible adapter without selecting an unrela
 
   const result = await compose({ workflow, registryPath, adapters: [] });
   assert.equal(result.status, "partial");
+  assert.deepEqual(result.stageSummary, { succeeded: 0, failed: 1, skipped: 0 });
   assert.equal(result.stages[0].status, "failed");
   assert.match(result.stages[0].diagnostic, /no eligible adapter/);
 });
@@ -254,6 +257,7 @@ test("CLI compose command validates, executes, and reports stable exit categorie
   const payload = JSON.parse(stdout.join(""));
   assert.equal(payload.command, "compose");
   assert.equal(payload.status, "success");
+  assert.deepEqual(payload.stageSummary, { succeeded: 2, failed: 0, skipped: 0 });
   assert.deepEqual(payload.stages.map((stage) => stage.status), ["succeeded", "succeeded"]);
   assert.doesNotMatch(JSON.stringify(payload), /leaked-value/);
   assert.match(JSON.stringify(payload), /\[REDACTED\]/);
@@ -272,4 +276,42 @@ test("CLI compose command validates, executes, and reports stable exit categorie
   );
   assert.equal(usageExit, CLI_EXIT_CODES.invalidInput);
   assert.match(usageStderr.join(""), /workflow or workflowPath/);
+});
+
+test("CLI compose reports partial failure in JSON and returns the partial exit category", async (t) => {
+  const directory = await mkdtemp(join(tmpdir(), "switchyard-compose-cli-partial-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const registryPath = join(directory, "registry.json");
+  await seedRegistry(registryPath);
+  const workflowPath = join(directory, "workflow.json");
+  await writeFile(workflowPath, JSON.stringify({
+    id: "cli-partial",
+    workspace: join(directory, "workspace"),
+    stages: [
+      { id: "implementation", requirements: ["headless"], task: "implement" },
+      {
+        id: "review",
+        dependsOn: ["implementation"],
+        requirements: ["github-context"],
+        task: "review",
+      },
+    ],
+  }));
+
+  const stdout = [];
+  const exitCode = await runCli(
+    ["compose", workflowPath, "--registry", registryPath, "--json"],
+    { stdout: (text) => stdout.push(text), stderr: () => {} },
+    undefined,
+    [
+      { id: "implementer", supportedOperations: operations, async execute() { return executionResult(true); } },
+      { id: "reviewer", supportedOperations: operations, async execute() { return executionResult(false); } },
+    ],
+  );
+
+  assert.equal(exitCode, CLI_EXIT_CODES.partial);
+  const payload = JSON.parse(stdout.join(""));
+  assert.equal(payload.status, "partial");
+  assert.deepEqual(payload.stageSummary, { succeeded: 1, failed: 1, skipped: 0 });
+  assert.deepEqual(payload.stages.map((stage) => stage.status), ["succeeded", "failed"]);
 });

@@ -134,7 +134,10 @@ otherwise, so a partially completed workflow is never reported as total
 success or total failure. A stage with no declared requirements, or no
 qualifying registry candidate, fails only that stage with a "no eligible
 adapter" diagnostic; earlier successful stages and their persisted artifacts
-are untouched, matching `COMP-FR-03`.
+are untouched, matching `COMP-FR-03`. The command also returns a stable
+`stageSummary` with counts for `succeeded`, `failed`, and `skipped` stages.
+JSON and human output include this summary, and the CLI returns exit code `1`
+(`CLI_EXIT_CODES.partial`) for the partial status.
 
 ### Reproducible OpenCode-to-Copilot demonstration
 

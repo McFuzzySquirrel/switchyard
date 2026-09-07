@@ -19,11 +19,13 @@ export interface WorkflowArtifact {
   readonly description?: string;
 }
 
+export type StageContextField = "status" | "selectedHarness" | "durationMs" | "diagnostic";
+
 export interface StageInput {
   readonly name: string;
   readonly fromStage: string;
   readonly artifact?: string;
-  readonly context?: readonly string[];
+  readonly context?: readonly StageContextField[];
 }
 
 export interface WorkflowStage {
@@ -50,6 +52,7 @@ export interface ValidatedWorkflow extends WorkflowDefinition {
 
 const ID = /^[a-z0-9][a-z0-9._-]*$/;
 const MAX_TEXT = 32_768;
+const STAGE_CONTEXT_FIELDS: readonly StageContextField[] = ["status", "selectedHarness", "durationMs", "diagnostic"];
 
 function issue(path: string, message: string): SchemaIssue {
   return { path, message };
@@ -66,6 +69,10 @@ function pathInside(workspace: string, candidate: string): boolean {
   return rel === "" || (rel !== ".." && !rel.startsWith(`..${sep}`) && !isAbsolute(rel));
 }
 
+function isIdentifier(value: unknown): value is string {
+  return typeof value === "string" && ID.test(value);
+}
+
 /** Validates the complete graph and all handoff declarations before execution. */
 export function validateWorkflow(input: unknown): ValidationResult<ValidatedWorkflow> {
   const issues: SchemaIssue[] = [];
@@ -73,8 +80,8 @@ export function validateWorkflow(input: unknown): ValidationResult<ValidatedWork
     return { success: false, issues: [issue("$", "must be an object")] };
   }
   const value = input as Record<string, unknown>;
-  if (typeof value.id !== "string" || !ID.test(value.id)) issues.push(issue("$.id", "must be a valid identifier"));
-  if (typeof value.workspace !== "string" || value.workspace.length === 0) issues.push(issue("$.workspace", "must be a non-empty path"));
+  if (!isIdentifier(value.id)) issues.push(issue("$.id", "must be a valid identifier"));
+  if (typeof value.workspace !== "string" || value.workspace.trim() === "") issues.push(issue("$.workspace", "must be a non-empty path"));
   if (!Array.isArray(value.stages) || value.stages.length === 0) {
     issues.push(issue("$.stages", "must contain at least one stage"));
   }
@@ -97,8 +104,12 @@ export function validateWorkflow(input: unknown): ValidationResult<ValidatedWork
       issues.push(issue(`${p}.requirements`, "must be task requirements or a capability list"));
     }
     if (stage.operation !== undefined && stage.operation !== "execute") issues.push(issue(`${p}.operation`, "must be 'execute'"));
-    if (stage.dependsOn !== undefined && (!Array.isArray(stage.dependsOn) || stage.dependsOn.some((dependency) => typeof dependency !== "string"))) {
-      issues.push(issue(`${p}.dependsOn`, "must be an array of stage identifiers"));
+    if (stage.dependsOn !== undefined && (
+      !Array.isArray(stage.dependsOn) ||
+      stage.dependsOn.some((dependency) => !isIdentifier(dependency)) ||
+      new Set(stage.dependsOn).size !== stage.dependsOn.length
+    )) {
+      issues.push(issue(`${p}.dependsOn`, "must be an array of unique stage identifiers"));
     }
     if (stage.outputs !== undefined && !Array.isArray(stage.outputs)) issues.push(issue(`${p}.outputs`, "must be an array"));
     if (stage.inputs !== undefined && !Array.isArray(stage.inputs)) issues.push(issue(`${p}.inputs`, "must be an array"));
@@ -132,24 +143,44 @@ export function validateWorkflow(input: unknown): ValidationResult<ValidatedWork
       if (typeof candidate.name !== "string" || !ID.test(candidate.name) || names.has(candidate.name)) issues.push(issue(`$.stages.${stage.id}.outputs`, "artifact names must be unique valid identifiers"));
       if (typeof candidate.name === "string") names.add(candidate.name);
       if (!["file", "directory", "metadata"].includes(candidate.kind ?? "")) issues.push(issue(`$.stages.${stage.id}.outputs`, "has invalid kind"));
-      if (candidate.path !== undefined && (typeof candidate.path !== "string" || !pathInside(workspace, candidate.path) || isAbsolute(candidate.path))) issues.push(issue(`$.stages.${stage.id}.outputs.${candidate.name ?? "?"}.path`, "must remain inside the workflow workspace"));
+      if (candidate.path !== undefined && (
+        typeof candidate.path !== "string" ||
+        candidate.path.trim() === "" ||
+        !pathInside(workspace, candidate.path) ||
+        isAbsolute(candidate.path)
+      )) issues.push(issue(`$.stages.${stage.id}.outputs.${candidate.name ?? "?"}.path`, "must remain inside the workflow workspace"));
+      if (candidate.description !== undefined && (typeof candidate.description !== "string" || candidate.description.length > MAX_TEXT)) {
+        issues.push(issue(`$.stages.${stage.id}.outputs.${candidate.name ?? "?"}.description`, "must be a bounded string"));
+      }
     }
+    const inputNames = new Set<string>();
     for (const input of stage.inputs ?? []) {
       if (typeof input !== "object" || input === null || Array.isArray(input)) {
         issues.push(issue(`$.stages.${stage.id}.inputs`, "must contain input objects"));
         continue;
       }
       const candidate = input as Partial<StageInput>;
-      if (typeof candidate.name !== "string" || !ID.test(candidate.name)) issues.push(issue(`$.stages.${stage.id}.inputs`, "input names must be valid identifiers"));
-      if (typeof candidate.fromStage !== "string") {
+      if (typeof candidate.name !== "string" || !ID.test(candidate.name) || inputNames.has(candidate.name)) issues.push(issue(`$.stages.${stage.id}.inputs`, "input names must be unique valid identifiers"));
+      if (typeof candidate.name === "string") inputNames.add(candidate.name);
+      if (typeof candidate.fromStage !== "string" || !ID.test(candidate.fromStage)) {
         issues.push(issue(`$.stages.${stage.id}.inputs.${candidate.name ?? "?"}`, "must declare a source stage"));
         continue;
       }
       if (!byId.has(candidate.fromStage)) issues.push(issue(`$.stages.${stage.id}.inputs`, `unknown source stage '${candidate.fromStage}'`));
       else if (!(stage.dependsOn ?? []).includes(candidate.fromStage)) issues.push(issue(`$.stages.${stage.id}.inputs.${candidate.name ?? "?"}`, "source stage must be a declared dependency"));
       const source = byId.get(candidate.fromStage);
-      if (candidate.artifact !== undefined && (typeof candidate.artifact !== "string" || (source && !(source.outputs ?? []).some((x) => x.name === candidate.artifact)))) issues.push(issue(`$.stages.${stage.id}.inputs.${candidate.name ?? "?"}`, `artifact '${candidate.artifact}' is not declared by source stage`));
-      if (candidate.context !== undefined && (!Array.isArray(candidate.context) || candidate.context.some((x) => !["status", "selectedHarness", "durationMs", "diagnostic"].includes(x)))) issues.push(issue(`$.stages.${stage.id}.inputs.${candidate.name ?? "?"}.context`, "contains undeclared context"));
+      if (candidate.artifact === undefined && candidate.context === undefined) {
+        issues.push(issue(`$.stages.${stage.id}.inputs.${candidate.name ?? "?"}`, "must declare an artifact or context"));
+      }
+      if (candidate.artifact !== undefined && (
+        !isIdentifier(candidate.artifact) ||
+        (source && !(source.outputs ?? []).some((x) => x.name === candidate.artifact))
+      )) issues.push(issue(`$.stages.${stage.id}.inputs.${candidate.name ?? "?"}`, `artifact '${candidate.artifact}' is not declared by source stage`));
+      if (candidate.context !== undefined && (
+        !Array.isArray(candidate.context) ||
+        candidate.context.some((x) => !(STAGE_CONTEXT_FIELDS as readonly string[]).includes(x)) ||
+        new Set(candidate.context).size !== candidate.context.length
+      )) issues.push(issue(`$.stages.${stage.id}.inputs.${candidate.name ?? "?"}.context`, "contains undeclared or duplicate context"));
     }
   }
   const order: string[] = [];

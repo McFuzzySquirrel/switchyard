@@ -76,3 +76,108 @@ test("rejects artifact paths outside the workflow workspace", async () => {
   assert.equal(validation.success, false);
   assert.match(validation.issues.map((x) => x.message).join(" "), /inside/);
 });
+
+test("requires unique declared inputs and rejects undeclared or duplicate context", async () => {
+  const workspace = await mkdtemp(join(tmpdir(), "switchyard-compose-"));
+  const validation = validateWorkflow({
+    id: "invalid-handoff",
+    workspace,
+    stages: [
+      { id: "impl", requirements: [], task: "implement",
+        outputs: [{ name: "patch", kind: "file", path: "patch.diff" }] },
+      { id: "review", dependsOn: ["impl"], requirements: [], task: "review",
+        inputs: [
+          { name: "patch", fromStage: "impl", artifact: "patch", context: ["status", "status"] },
+          { name: "patch", fromStage: "impl", artifact: "missing" },
+        ] },
+    ],
+  });
+  assert.equal(validation.success, false);
+  const messages = validation.issues.map((x) => x.message).join(" ");
+  assert.match(messages, /unique valid identifiers/);
+  assert.match(messages, /undeclared or duplicate context/);
+  assert.match(messages, /not declared/);
+});
+
+test("records a sanitized handoff manifest and rejects missing or mismatched artifacts", async () => {
+  const workspace = await mkdtemp(join(tmpdir(), "switchyard-compose-"));
+  const tasks = [];
+  const implementation = {
+    id: "implementation", supportedOperations: operations,
+    async execute(request) {
+      tasks.push(request.task);
+      if (request.task === "implement") {
+        await (await import("node:fs/promises")).writeFile(join(workspace, "notes.txt"), "notes");
+      }
+      return result(true, "implementation");
+    },
+  };
+  const review = {
+    id: "review", supportedOperations: operations,
+    async execute(request) { tasks.push(request.task); return result(true, "review"); },
+  };
+  const workflow = {
+    id: "handoff-manifest", workspace,
+    stages: [
+      { id: "implementation", requirements: [], task: "implement",
+        outputs: [
+          { name: "notes", kind: "file", path: "notes.txt", description: "declared notes" },
+          { name: "summary", kind: "metadata", description: "declared summary" },
+        ] },
+      { id: "review", dependsOn: ["implementation"], requirements: [], task: "review",
+        inputs: [
+          { name: "notes-input", fromStage: "implementation", artifact: "notes",
+            context: ["status", "selectedHarness", "durationMs"] },
+          { name: "summary-input", fromStage: "implementation", artifact: "summary",
+            context: ["diagnostic"] },
+        ] },
+    ],
+  };
+
+  const outcome = await executeWorkflow({ workflow, adapters: { implementation, review } });
+  assert.equal(outcome.status, "succeeded");
+  assert.deepEqual(outcome.stages[0].artifacts, [
+    { name: "notes", kind: "file", path: "notes.txt", description: "declared notes" },
+    { name: "summary", kind: "metadata", description: "declared summary" },
+  ]);
+  assert.deepEqual(outcome.stages[1].handoff, [
+    {
+      name: "notes-input",
+      artifact: { name: "notes", kind: "file", path: "notes.txt", description: "declared notes" },
+      context: { status: "succeeded", selectedHarness: "implementation", durationMs: 1 },
+    },
+    {
+      name: "summary-input",
+      artifact: { name: "summary", kind: "metadata", description: "declared summary" },
+      context: { diagnostic: null },
+    },
+  ]);
+  assert.match(tasks[1], /Declared handoff/);
+  assert.doesNotMatch(tasks[1], /"stdout"/);
+  assert.doesNotMatch(tasks[1], /"stderr"/);
+
+  const missingWorkflow = {
+    ...workflow,
+    id: "missing-handoff",
+    stages: workflow.stages.map((stage) => stage.id === "review"
+      ? { ...stage, inputs: [{ name: "notes-input", fromStage: "implementation", artifact: "notes" }] }
+      : stage.id === "implementation" ? { ...stage, task: "implement-without-file" }
+      : stage),
+  };
+  await (await import("node:fs/promises")).unlink(join(workspace, "notes.txt"));
+  const missing = await executeWorkflow({ workflow: missingWorkflow, adapters: { implementation, review } });
+  assert.equal(missing.status, "failed");
+  assert.deepEqual(missing.stages.map((stage) => stage.status), ["succeeded", "failed"]);
+  assert.match(missing.stages[1].diagnostic, /notes from implementation .*missing/);
+
+  const wrongKindWorkflow = {
+    ...workflow,
+    id: "wrong-kind-handoff",
+    stages: workflow.stages.map((stage) => stage.id === "implementation"
+      ? { ...stage, outputs: stage.outputs.map((artifact) => artifact.name === "notes" ? { ...artifact, kind: "directory" } : artifact) }
+      : stage),
+  };
+  const wrongKind = await executeWorkflow({ workflow: wrongKindWorkflow, adapters: { implementation, review } });
+  assert.equal(wrongKind.status, "failed");
+  assert.match(wrongKind.stages[1].diagnostic, /notes from implementation .*not a directory/);
+});

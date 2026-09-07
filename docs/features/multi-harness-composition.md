@@ -44,6 +44,9 @@
 - [x] Define workflow and stage schemas.
 - [x] Define declared artifact/context handoff.
 - [x] Validate dependencies and stage ordering.
+- [x] Validate unique input/output declarations and restrict context fields.
+- [x] Validate artifact containment at schema time and re-check produced paths
+  (including symlink resolution) at the receiving stage.
 
 ### Phase 2: Execution and Demonstration
 - [x] Orchestrate sequential adapter calls.
@@ -64,6 +67,8 @@ Key test scenarios:
 2. Missing declared artifact stops the correct stage.
 3. Review failure preserves implementation results.
 4. Invalid workflow dependencies are rejected before launch.
+5. Only requested artifact metadata and whitelisted stage context appear in
+   the receiving task and persisted handoff manifest.
 
 ## 7. Acceptance Criteria
 
@@ -84,13 +89,20 @@ Key test scenarios:
 The public composition API is exported from `src/composition/index.ts`:
 
 - `validateWorkflow` / `assertWorkflow` validate stage identifiers, dependency
-  ordering, cycles, declared inputs/outputs, and workspace-contained artifact
-  paths before any adapter is called.
+  ordering, cycles, unique declared inputs/outputs, whitelisted context,
+  declared inputs/outputs, and workspace-contained artifact paths before any
+  adapter is called.
 - `executeWorkflow` runs stages in topological order through normalized
   `HarnessAdapter.execute` operations. Adapter selection is injectable so the
   existing routing policy can be reused by callers.
-- Handoffs contain only declared artifact metadata and the explicitly requested
-  stage context fields. Opaque conversation state and process environment are
-  never copied.
+- Handoffs contain only requested artifact metadata and the explicitly
+  requested stage context fields (`status`, `selectedHarness`, `durationMs`, or
+  `diagnostic`). The exact sanitized manifest is retained on the receiving
+  `CompositionStageResult.handoff` for inspection. Opaque conversation state,
+  stdout/stderr, and process environment are never copied.
+- Path-bearing file and directory artifacts are checked when a receiving stage
+  is about to run. Missing, wrong-kind, or symlink-escaped paths fail that
+  receiving stage without erasing the successful producer result. Dependent
+  stages are recorded as skipped rather than losing their stage-level status.
 - `switchyard-workflow-state.json` is updated after each stage and retains
   successful stage results and diagnostics when a later stage fails.

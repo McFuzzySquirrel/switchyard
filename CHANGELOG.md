@@ -7,6 +7,11 @@ All notable user-facing changes to Switchyard are documented here. The format fo
 - Added versioned workflow and stage composition schemas with dependency-cycle
   validation, workspace-contained artifact declarations, explicit stage input
   handoffs, sequential execution, and durable per-stage results.
+- Hardened composition handoff boundaries: input/output declarations are
+  unique and validated before launch, only whitelisted context and requested
+  artifact metadata are forwarded, receiving stages re-check artifact
+  containment/kind (including symlink resolution), and persisted results retain
+  sanitized handoff manifests plus earlier successes when a later stage fails.
 - Added `switchyard verify` with selective harness/capability probes,
   atomic verification-state persistence, and fixed redacted warnings for
   probes that may access external services, invoke models, mutate state, or

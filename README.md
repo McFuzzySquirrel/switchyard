@@ -111,7 +111,55 @@ Use `validateWorkflow` for structured validation or `assertWorkflow` when
 invalid definitions should raise `WorkflowValidationError`. The
 `executeWorkflow` helper runs validated stages sequentially and persists
 per-stage results without transferring undeclared conversation state or
-artifacts.
+artifacts. Every path-bearing file or directory handoff is checked at the
+receiving stage: the path must still resolve inside the workflow workspace and
+must have the declared kind. A missing or escaped artifact fails only the receiving stage;
+successful earlier stages and their diagnostics remain in the state file.
+
+An input must name its source stage (which must also be a declared dependency)
+and may request one declared artifact plus the explicitly allowed stage
+context fields `status`, `selectedHarness`, `durationMs`, and `diagnostic`.
+Input names, context fields, stage dependencies, and output names are unique
+and validated before any adapter is selected or invoked. The receiving
+adapter gets a bounded task string containing a JSON handoff manifest; the
+manifest contains only the requested artifact metadata and context, never
+stdout, stderr, environment variables, or opaque conversation state. Each
+stage result also exposes the exact sanitized `handoff` manifest for audit and
+replay.
+
+For example, an implementation stage can publish a file and a review stage
+can explicitly consume it:
+
+```ts
+const workflow = {
+  id: "implementation-review",
+  workspace: "/tmp/switchyard-workspace",
+  stages: [
+    {
+      id: "implementation",
+      requirements: [],
+      task: "implement the requested change",
+      outputs: [{ name: "patch", kind: "file", path: "patch.diff" }],
+    },
+    {
+      id: "review",
+      dependsOn: ["implementation"],
+      requirements: [],
+      task: "review the implementation",
+      inputs: [
+        {
+          name: "patch-input",
+          fromStage: "implementation",
+          artifact: "patch",
+          context: ["status", "durationMs"],
+        },
+      ],
+    },
+  ],
+};
+
+const result = await executeWorkflow({ workflow, adapters });
+```
 
 JSON output is versioned with `schemaVersion: 1`. All command JSON payloads use
 the shared `serializeCommandJson` contract exported from `src/output/index.ts`;

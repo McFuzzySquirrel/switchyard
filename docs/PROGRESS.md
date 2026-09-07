@@ -3,7 +3,7 @@
 ## Current State
 **Phase**: MULTI-HARNESS-COMPOSITION-1
 **Status**: In Progress
-**Last Updated**: 2026-09-07T22:10:50.599Z
+**Last Updated**: 2026-09-07T22:15:30.508Z
 **Run ID**: faef066b-e967-49ae-ba56-4dbe4255f89d
 **Harness**: copilot
 **Execution Mode**: auto
@@ -81,6 +81,8 @@
   - Files: CHANGELOG.md, README.md, docs/adapter-development.md
 - [x] Phase MULTI-HARNESS-COMPOSITION-1, Task MULTI-HARNESS-COMPOSITION-1.1: [ ] Define workflow and stage schemas (@workflow-composition-engineer)
   - Files: CHANGELOG.md, README.md, docs/features/multi-harness-composition.md, package.json, src/index.ts, src/composition/index.ts, src/composition/schema.ts, src/composition/workflow.ts, tests/composition.test.mjs
+- [x] Phase MULTI-HARNESS-COMPOSITION-1, Task MULTI-HARNESS-COMPOSITION-1.2: [ ] Define declared artifact/context handoff (@workflow-composition-engineer)
+  - Files: CHANGELOG.md, README.md, docs/features/multi-harness-composition.md, src/composition/schema.ts, src/composition/workflow.ts, tests/composition.test.mjs
 
 ## Current Task
 - None currently running

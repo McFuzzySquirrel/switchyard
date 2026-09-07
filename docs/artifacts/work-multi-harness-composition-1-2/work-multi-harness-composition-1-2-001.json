@@ -1,0 +1,27 @@
+{
+  "type": "work.multi-harness-composition-1.2",
+  "category": "work",
+  "taskId": "MULTI-HARNESS-COMPOSITION-1.2",
+  "producedBy": "workflow-composition-engineer",
+  "status": "complete",
+  "summary": "[ ] Define declared artifact/context handoff: [ ] Define declared artifact/context handoff.",
+  "confidence": 0.9,
+  "inputs": [
+    "work-multi-harness-composition-1-1-001"
+  ],
+  "filesChanged": [
+    "CHANGELOG.md",
+    "README.md",
+    "docs/features/multi-harness-composition.md",
+    "src/composition/schema.ts",
+    "src/composition/workflow.ts",
+    "tests/composition.test.mjs"
+  ],
+  "payload": {
+    "agentOutputExcerpt": "● Workflow-composition-engineer (model: gpt-5.6-luna) Define artifact context handoff         4m 18s\n  │ Implemented declared artifact/context handoff for multi-harness composition.\n  │ Verify changed files and diff cleanliness (shell)\n  │   │ git status --short && git diff --stat && git diff --check\n  │   └ 18 lines…\n  └ update_todo todos: \"- [x] Define and validate declared artifact/context schemas …\"\n      └ TODO list updated\n\n● Confirm changed files and diff summary (shell)\n  │ git status --",
+    "taskDescription": "[ ] Define declared artifact/context handoff."
+  },
+  "nextActions": [],
+  "artifactId": "work-multi-harness-composition-1-2-001",
+  "createdAt": "2026-09-07T22:15:30.506Z"
+}

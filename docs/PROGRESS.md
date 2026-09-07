@@ -1,9 +1,9 @@
 # Project Progress
 
 ## Current State
-**Phase**: VERIFICATION-AND-RESILIENCE-1
+**Phase**: HARNESS-EXECUTION-RUNTIME-1
 **Status**: In Progress
-**Last Updated**: 2026-09-07T21:14:00.773Z
+**Last Updated**: 2026-09-07T21:16:09.177Z
 **Run ID**: faef066b-e967-49ae-ba56-4dbe4255f89d
 **Harness**: copilot
 **Execution Mode**: auto
@@ -41,6 +41,8 @@
   - Files: CHANGELOG.md, README.md, docs/features/deterministic-routing-and-explainability.md, docs/features/discovery-and-registry.md, src/cli.ts, tests/commands.test.mjs
 - [x] Phase HARNESS-EXECUTION-RUNTIME-1, Task HARNESS-EXECUTION-RUNTIME-1.1: [ ] Implement adapter execution request/result types (@execution-runtime-engineer)
   - Files: CHANGELOG.md, README.md, docs/adapter-development.md, docs/features/harness-execution-runtime.md, src/harness/adapter.ts, src/harness/stub.ts, tests/adapter-conformance.test.mjs, docs/adr/0004-execution-request-result-contract.md
+- [x] Phase HARNESS-EXECUTION-RUNTIME-1, Task HARNESS-EXECUTION-RUNTIME-1.2: [ ] Implement bounded asynchronous process execution (@execution-runtime-engineer)
+  - Files: CHANGELOG.md, README.md, docs/features/harness-execution-runtime.md, src/harness/index.ts, docs/adr/0005-bounded-process-execution.md, src/harness/process.ts, tests/process-execution.test.mjs
 - [x] Phase VERIFICATION-AND-RESILIENCE-1, Task VERIFICATION-AND-RESILIENCE-1.1: [ ] Define read-only and mutating probe policies (@verification-resilience-engineer)
   - Files: CHANGELOG.md, docs/features/verification-and-resilience.md, package.json, src/config/resolve.ts, src/config/schema.ts, src/harness/adapter.ts, src/index.ts, src/verification/index.ts, src/verification/policy.ts, src/verification/runner.ts, tests/verification-policy.test.mjs
 - [x] Phase ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1, Task ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-1.1: [ ] Define discovery, verification, execution, resume, and fork adapter interfaces (@adapter-platform-engineer)

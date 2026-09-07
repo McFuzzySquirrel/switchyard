@@ -6,7 +6,7 @@ The product direction is described in [`docs/PRD.md`](docs/PRD.md). The library 
 
 ## Current status
 
-The current completed slice covers discovery schemas, executable lookup, bounded version/help probing, built-in discovery adapters, atomic local registry persistence, refreshable registry profiles, the `discover`, `capabilities`, and `explain` commands, normalized all-required capability matching with deterministic ranking and human-readable explanations, the full vendor-neutral `HarnessAdapter` contract with explicit registration, and typed local configuration with environment/executable/registry/probe-policy precedence. Real harness execution/verification and composition remain roadmap items — built-in adapters currently support `discover` only and fail fast on other operations.
+The current completed slice covers discovery schemas, executable lookup, bounded version/help probing, built-in discovery adapters, atomic local registry persistence, refreshable registry profiles, the `discover`, `capabilities`, and `explain` commands, normalized all-required capability matching with deterministic ranking and human-readable explanations, the full vendor-neutral `HarnessAdapter` contract with explicit registration, typed local configuration with environment/executable/registry/probe-policy precedence, and the bounded process execution runtime. Built-in adapters currently support `discover` only and fail fast on other operations.
 
 ## Development
 
@@ -109,6 +109,10 @@ integration testing without a real vendor binary. The exported
 directory/environment policy, safe stdin and cancellation inputs, bounded
 output metadata, lifecycle status, and stable failure categories for the
 execution runtime.
+`executeProcess` and `runProcess` provide the shared direct-argv runtime for
+adapter implementations. They never invoke a shell, apply environment
+inheritance allow/deny rules, cap each output stream independently, redact
+diagnostics, and distinguish ordinary failures from timeout and cancellation.
 
 Executable location, probe timeout, maximum probe output length, the
 mutating-probe policy flag, and the registry path all resolve through the same

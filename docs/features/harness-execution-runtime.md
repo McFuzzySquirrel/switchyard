@@ -56,9 +56,9 @@
 
 ### Phase 1: Process Runner
 - [x] Implement adapter execution request/result types.
-- [ ] Implement bounded asynchronous process execution.
-- [ ] Implement timeout, cancellation, and descendant cleanup.
-- [ ] Implement environment filtering and output capture.
+- [x] Implement bounded asynchronous process execution.
+- [x] Implement timeout, cancellation, and descendant cleanup.
+- [x] Implement environment filtering and output capture.
 
 The vendor-neutral execution contract is defined in
 `src/harness/adapter.ts`. `ExecutionRequest` carries the task, controlled
@@ -70,6 +70,12 @@ stderr with per-stream truncation flags, duration, and an optional redacted
 diagnostic. These types describe the process boundary; adapter modules remain
 responsible for translating a normalized task into vendor-specific arguments
 or stdin without shell interpolation.
+
+`executeProcess` and `runProcess` in `src/harness/process.ts` implement that
+boundary. They spawn an adapter-provided executable and argv directly, apply
+the request's environment policy, cap stdout and stderr independently, redact
+failure diagnostics, and terminate the process group (or Windows process
+tree) for timeout and cancellation.
 
 ### Phase 2: CLI Integration
 - [ ] Connect routing to adapter execution.

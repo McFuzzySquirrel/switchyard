@@ -1,12 +1,12 @@
 {
   "runId": "faef066b-e967-49ae-ba56-4dbe4255f89d",
   "startedAt": "2026-09-07T19:10:17.558Z",
-  "lastUpdatedAt": "2026-09-07T21:14:00.772Z",
+  "lastUpdatedAt": "2026-09-07T21:16:09.176Z",
   "manifestPath": "/home/mcfuzzysquirrel/Projects/switchyard/docs/EXECUTION-MANIFEST.json",
   "manifestVersion": "1.0",
   "harness": "copilot",
   "status": "running",
-  "currentPhase": "VERIFICATION-AND-RESILIENCE-1",
+  "currentPhase": "HARNESS-EXECUTION-RUNTIME-1",
   "tasks": {
     "DISCOVERY-AND-REGISTRY-1.1": {
       "taskId": "DISCOVERY-AND-REGISTRY-1.1",
@@ -345,10 +345,25 @@
     },
     "HARNESS-EXECUTION-RUNTIME-1.2": {
       "taskId": "HARNESS-EXECUTION-RUNTIME-1.2",
-      "status": "pending",
+      "status": "complete",
       "ownerAgent": "execution-runtime-engineer",
-      "attempt": 0,
-      "outputFiles": []
+      "attempt": 1,
+      "outputFiles": [
+        "CHANGELOG.md",
+        "README.md",
+        "docs/features/harness-execution-runtime.md",
+        "src/harness/index.ts",
+        "docs/adr/0005-bounded-process-execution.md",
+        "src/harness/process.ts",
+        "tests/process-execution.test.mjs"
+      ],
+      "startedAt": "2026-09-07T21:14:00.798Z",
+      "completedAt": "2026-09-07T21:16:09.176Z",
+      "agentOutput": "● skill(safe-subprocess-fixtures)\n\nI’m tracing the existing adapter contract and runtime boundaries first, then I’ll implement the process runner against those interfaces and add focused safety coverage.\n\n● Read process-fixture-playbook.md\n  │ .github/skills/safe-subprocess-fixtures/references/process-fixture-playbook.md\n  └ 67 lines read\n\n● Read package.json\n  └ 33 lines read\n\n● Read adapter.ts\n  │ src/harness/adapter.ts\n  └ 374 lines read\n\n● Read stub.ts\n  │ src/harness/stub.ts\n  └ 162 lines read\n\n/ Search (glob)\n  │ \"src/**/*.ts\"\n  └ 52 files found\n\n● codegraph_explore (MCP: codegraph) · bounded asynchronous process execution adapter execution req…\n  └ The project at /home/mcfuzzysquirrel/Projects/switchyard isn't indexed with c...\n\n/ Search (glob)\n  │ \"tests/**/*\"\n  └ 14 files found\n\n● Read index.ts\n  │ src/harness/index.ts\n  └ 7 lines read\n\n● Read copilot.ts\n  │ src/harness/copilot.ts\n  └ 101 lines read\n\n● Read discovery-adapter.ts\n  │ src/harness/discovery-adapter.ts\n  └ 334 lines read\n\n● Read CHANGELOG.md\n  └ 90 lines read\n\n● Read harness-execution-runtime.md\n  │ docs/features/harness-execution-runtime.md\n  └ 108 lines read\n\n● Read opencode.ts\n  │ src/harness/opencode.ts\n  └ 106 lines read\n\n● Read README.md\n  └ L1:180 (160 lines read)\n\n/ Search (grep)\n  │ \"timeout|cancel|spawn|execution|process\" (docs, src, tests)\n  └ 73 lines found\n\n● Read probe.ts\n  │ src/discovery/probe.ts\n  └ 493 lines read\n\n● Read index.ts\n  │ src/index.ts\n  └ 8 lines read\n\n● Read tsconfig.json\n  └ 13 lines read\n\n● Read adapter-development.md\n  │ docs/adapter-development.md\n  └ 222 lines read\n\n● Read version-help-probing.test.mjs\n  │ tests/version-help-probing.test.mjs\n  └ 174 lines read\n\n/ Search (grep)\n  │ \"ProcessRunner|runProcess|executeProcess|ExecutionResult|ExecutionRequest\"\n  └ 47 lines found\n\n● Read 0004-execution-request-result-contract.md\n  │ docs/adr/0004-execution-request-result-contract.md\n  └ 55 lines read\n\n● Read resolve.ts\n  │ src/config/resolve.ts\n  └ L1:240 (240 lines read)\n\n/ Search (grep)\n  │ \"process runner|bounded asynchronous|descendant|environmentPolicy\" (docs)\n  └ 27 lines found\n\n● Inspect worktree and recent commits (shell)\n  │ git status --short && git log --oneline -8\n  └ 11 lines…\n\nThe existing discovery probe is bounded but cannot satisfy the execution contract: it kills only the direct child, has no environment allow/deny policy, and conflates timeout/cancellation. I’m adding a dedicated runner with explicit argv spawning, bounded per-stream capture, redacted diagnostics, and platform-specific process-tree termination.\n\n● Edit\n  │ Create src/harness/process.ts\n  └ Edit src/harness/index.ts\n\n● Edit\n  └ Edit src/harness/process.ts\n\n● Check patch whitespace (shell)\n  │ git diff --check\n  └ 1 line…\n\n● Type-check process runner (shell)\n  │ npm run typecheck\n  └ 3 lines…\n\n✗ Edit\n  │ Create tests/process-execution.test.mjs\n  │ Edit README.md\n  │ Edit CHANGELOG.md\n  │ Edit docs/features/harness-execution-runtime.md\n  │ Create docs/adr/0005-bounded-process-execution.md\n  └ Error: Failed to find expected lines in /home/mcfuzzysquirrel/Projects/switchyard/README.md:\n    `ExecutionRequest` and `ExecutionResult` types define controlled working\n    directory/environment policy, safe stdin and cancellation inputs, bounded output metadata,\n    lifecycle status, and stable failure categories for the execution runtime.\n\n● Read process-execution.test.mjs\n  │ tests/process-execution.test.mjs\n  └ 88 lines read\n\n/ Search (grep)\n  │ \"current completed slice|ExecutionRequest|runtime\" (README.md)\n  └ 4 lines found\n\n● Inspect runtime diff (shell)\n  │ git diff --stat && git diff -- src/harness/process.ts | sed -n '1,260p'\n  └ 5 lines…\n\n● Edit\n  │ Edit tests/process-execution.test.mjs\n  │ Edit README.md\n  │ Edit CHANGELOG.md\n  │ Edit docs/features/harness-execution-runtime.md\n  └ Create docs/adr/0005-bounded-process-execution.md\n\nThe runner and contract-facing exports are in place, with documentation and focused subprocess coverage added. I’m running the targeted suite now; any failures here will be corrected before the full repository checks.\n\n● Run documentation governance checks (shell)\n  │ npm run test:docs\n  └ 26 lines…\n\n● Run process execution tests (shell)\n  │ node --experimental-strip-types --test tests/process-execution.test.mjs\n  └ 29 lines…\n\n● Run TypeScript typecheck (shell)\n  │ npm run typecheck\n  └ 3 lines…\n\n● Edit\n  └ Edit src/harness/process.ts\n\n● Run full test suite (shell)\n  │ npm test\n  └ 542 lines…\n\n● Review final changed files (shell)\n  │ git status --short && git diff --check && git diff --stat -- README.md CHANGELOG.md\n  │ docs/features/harness-execution-runtime.md docs/adr/0005-bounded-process-execution.md\n  │ src/harness/index.ts src/harness/process.ts tests/process-execution.test.mjs\n  └ 15 lines…\n\n● Reconfirm typecheck and docs checks (shell)\n  │ npm run typecheck >/dev/null && npm run test:docs >/dev/null\n  └ 1 line…\n\nImplemented bounded asynchronous process execution.\n\n**Added**\n- `src/harness/process.ts`\n  - Direct argv spawning with `shell: false`\n  - Environment inheritance allow/deny filtering\n  - Bounded stdout/stderr capture with truncation metadata\n  - Timeout and cancellation classification\n  - POSIX process-group and Windows process-tree cleanup\n  - Redacted diagnostics\n  - Dry-run support\n- `tests/process-execution.test.mjs`\n- `docs/adr/0005-bounded-process-execution.md`\n\n**Updated**\n- `src/harness/index.ts`\n- `README.md`\n- `CHANGELOG.md`\n- `docs/features/harness-execution-runtime.md`\n\nAll tests, type checking, documentation checks, and whitespace validation pass. Existing unrelated changes in `docs/EXECUTION-AUDIT.jsonl` and `docs/WORKFLOW-STATE.json` were left untouched.\n\n",
+      "artifactId": "work-harness-execution-runtime-1-2-001",
+      "inputArtifactIds": [
+        "work-harness-execution-runtime-1-1-001"
+      ]
     },
     "HARNESS-EXECUTION-RUNTIME-1.3": {
       "taskId": "HARNESS-EXECUTION-RUNTIME-1.3",

@@ -34,6 +34,11 @@ Human output remains a separate plain-text presentation of the same status and
 decision information. No serializer or decision field may contain credentials
 or other unredacted harness output.
 
+Routing-policy additions follow the same rule: `policy.attempts` is an
+additive, deterministic explanation field. It reports only policy candidates
+that were checked (preferred first, then the selected qualifying fallback or
+ranked candidate); it does not imply that a harness process was launched.
+
 ## Consequences
 
 - Command output has one reusable compatibility boundary for CLI and library

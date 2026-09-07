@@ -15,6 +15,7 @@ import {
   explain,
   ExplainInputError,
   type ExplainCommandOptions,
+  type ExplainPolicy,
 } from "./explain.ts";
 import { COMMAND_SCHEMA_VERSION, serializeCommandJson } from "../output/json.ts";
 
@@ -51,6 +52,8 @@ export interface RunCommandResult {
   readonly dryRun: boolean;
   readonly selectedHarness: string | null;
   readonly selection: RunSelection | null;
+  /** The pure routing policy and qualifying attempts used before execution. */
+  readonly policy: ExplainPolicy;
   readonly reason: string;
   /** Null only when routing never reached execution (no-match). */
   readonly execution: ExecutionResult | null;
@@ -214,6 +217,7 @@ export async function run(options: RunCommandOptions): Promise<RunCommandResult>
       dryRun,
       selectedHarness: null,
       selection: null,
+      policy: decision.policy,
       reason: decision.reason,
       execution: null,
     };
@@ -277,6 +281,7 @@ export async function run(options: RunCommandOptions): Promise<RunCommandResult>
     dryRun,
     selectedHarness: harnessId,
     selection,
+    policy: decision.policy,
     reason: decision.reason,
     execution,
   };
@@ -318,6 +323,12 @@ export function formatRunHuman(result: RunCommandResult | RunInvalidInputResult)
     `Task: ${result.task}`,
     `Dry run: ${result.dryRun ? "yes" : "no"}`,
     `Requirements: ${result.requirements.requires.join(", ")}`,
+    `Policy: preferred=${result.policy.preferredHarness ?? "none"}; fallback=${result.policy.allowFallback ? "enabled" : "disabled"}; fallback-used=${result.policy.fallbackUsed ? "yes" : "no"}`,
+    `Attempts: ${result.policy.attempts.length === 0
+      ? "none"
+      : result.policy.attempts
+        .map((attempt) => `${attempt.harnessId} [role: ${attempt.role}; qualifies: ${attempt.qualifies ? "yes" : "no"}; selected: ${attempt.selected ? "yes" : "no"}; missing: ${attempt.missing.join(", ") || "none"}]`)
+        .join("; ")}`,
     `Selection: ${result.selectedHarness ?? "none"}`,
     `Reason: ${result.reason}`,
   ];

@@ -112,7 +112,12 @@ only when every required capability was positively observed during discovery.
 profiles: fully verified matches come first, followed by discovered matches,
 with equal-tier ties resolved by ascending harness ID (never input order).
 Stale or discovery-only lifecycle profiles are never promoted to the verified
-tier. Verification state is not treated as discovery evidence.
+tier. Verification state is not treated as discovery evidence. When
+`preferredHarness` is set, the preferred profile is checked first and is
+selected only if it satisfies every requirement. A different qualifying
+profile is selected only when `allowFallback: true`; fallback is disabled by
+default. Explain and run results include deterministic `policy.attempts`
+records for the preferred check and selected fallback/ranked candidate.
 
 ## Adapters and configuration
 

@@ -1,0 +1,33 @@
+{
+  "type": "work.verification-and-resilience-2.2",
+  "category": "work",
+  "taskId": "VERIFICATION-AND-RESILIENCE-2.2",
+  "producedBy": "routing-policy-engineer",
+  "status": "complete",
+  "summary": "[ ] Implement explicit preferred-harness and fallback policy: [ ] Implement explicit preferred-harness and fallback policy.",
+  "confidence": 0.9,
+  "inputs": [
+    "work-verification-and-resilience-2-1-001"
+  ],
+  "filesChanged": [
+    "CHANGELOG.md",
+    "README.md",
+    "docs/adr/0003-versioned-command-json-contracts.md",
+    "docs/features/deterministic-routing-and-explainability.md",
+    "docs/features/verification-and-resilience.md",
+    "src/capabilities/index.ts",
+    "src/commands/explain.ts",
+    "src/commands/run.ts",
+    "tests/capability-matcher.test.mjs",
+    "tests/commands.test.mjs",
+    "tests/run-command.test.mjs",
+    "src/capabilities/routing.ts"
+  ],
+  "payload": {
+    "agentOutputExcerpt": "● Routing-policy-engineer (model: gpt-5.6-luna) Implement fallback policy                      9m 5s\n  │ Implemented explicit preferred-harness and fallback routing policy.\n  │ Confirm final status and clean diff (shell)\n  │   │ git status --short && git diff --check\n  │   └ 15 lines…\n  └ Search (grep)\n      │ \"^# tests |^# pass |^# fail |^1\\.\\.\"\n      │ (/tmp/1788817824598-copilot-tool-output-116584-755f5601-e427-4ae9-b8ec-79b87dc3ea17.txt)\n      └ 4 lines found\n\n● Read routing.ts\n  │ src/capab",
+    "taskDescription": "[ ] Implement explicit preferred-harness and fallback policy."
+  },
+  "nextActions": [],
+  "artifactId": "work-verification-and-resilience-2-2-001",
+  "createdAt": "2026-09-07T21:51:03.672Z"
+}

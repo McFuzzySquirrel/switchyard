@@ -55,6 +55,10 @@ invalid-input exit `2` (`invalidInput`). Human and JSON output carry the same de
 versioned command schema (`schemaVersion: 1`). The shared output contract
 requires the stable `schemaVersion`, `command`, and `status` envelope; the
 explain-specific fields remain command-owned and additive for compatibility.
+The `policy.attempts` array records the preferred qualification check and the
+selected fallback or ranked candidate, with role, missing capabilities, and
+selection state. No candidate lacking a required capability can appear as a
+selected attempt.
 Library consumers can use `parseDecisionJson` to validate the explain
 discriminator and status before reading candidate details.
 
@@ -69,6 +73,7 @@ discriminator and status before reading candidate details.
 - [x] Implement human-readable explanation output.
 - [x] Implement stable JSON decision schema.
 - [x] Define no-match and invalid-input exit codes.
+- [x] Implement explicit preferred-harness and opt-in fallback policy.
 
 ## 6. Testing Strategy
 
@@ -96,4 +101,4 @@ Key test scenarios:
 
 | # | Question | Default Assumption |
 |---|----------|--------------------|
-| 1 | Should users be able to require a preferred harness? | Defer preference policy to Adapter Configuration and use capability matching here |
+| 1 | Should users be able to require a preferred harness? | Yes; `preferredHarness` is explicit policy input and fallback remains opt-in |

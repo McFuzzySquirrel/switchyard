@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  applyRoutingPolicy,
   capabilityRankingInputs,
   matchCapabilities,
   matchRequiredCapabilities,
@@ -264,4 +265,87 @@ test("only passed verification can promote a qualifying candidate", () => {
     ranked.slice(1).map((candidate) => candidate.verificationTier),
     statuses.map(() => "discovered"),
   );
+});
+
+test("applies preferred-harness policy without ever bypassing capability matching", () => {
+  const profiles = [
+    {
+      id: "preferred",
+      capabilities: [observation("headless")],
+    },
+    {
+      id: "fallback",
+      capabilities: [observation("headless"), observation("mcp")],
+    },
+  ];
+
+  const preferred = applyRoutingPolicy(profiles, {
+    requires: ["headless", "mcp"],
+    preferredHarness: "preferred",
+    allowFallback: false,
+  });
+  assert.equal(preferred.selected, undefined);
+  assert.deepEqual(preferred.preferredAttempt, {
+    harnessId: "preferred",
+    role: "preferred",
+    qualifies: false,
+    missing: ["mcp"],
+    selected: false,
+  });
+  assert.deepEqual(preferred.attempts, [preferred.preferredAttempt]);
+  assert.equal(preferred.fallbackUsed, false);
+
+  const fallback = applyRoutingPolicy(profiles, {
+    requires: ["headless", "mcp"],
+    preferredHarness: "preferred",
+    allowFallback: true,
+  });
+  assert.equal(fallback.selected?.harnessId, "fallback");
+  assert.equal(fallback.fallbackUsed, true);
+  assert.deepEqual(
+    fallback.attempts.map((attempt) => ({
+      harnessId: attempt.harnessId,
+      role: attempt.role,
+      qualifies: attempt.qualifies,
+      selected: attempt.selected,
+      missing: attempt.missing,
+    })),
+    [
+      {
+        harnessId: "preferred",
+        role: "preferred",
+        qualifies: false,
+        selected: false,
+        missing: ["mcp"],
+      },
+      {
+        harnessId: "fallback",
+        role: "fallback",
+        qualifies: true,
+        selected: true,
+        missing: [],
+      },
+    ],
+  );
+});
+
+test("uses deterministic ranking when no preferred harness is supplied", () => {
+  const profiles = [
+    { id: "zeta", capabilities: [observation("headless")] },
+    { id: "alpha", capabilities: [observation("headless")] },
+  ];
+
+  const forward = applyRoutingPolicy(profiles, { requires: ["headless"] });
+  const reverse = applyRoutingPolicy([...profiles].reverse(), { requires: ["headless"] });
+
+  assert.equal(forward.selected?.harnessId, "alpha");
+  assert.deepEqual(forward, reverse);
+  assert.equal(forward.allowFallback, false);
+  assert.deepEqual(forward.attempts, [{
+    harnessId: "alpha",
+    role: "ranked",
+    qualifies: true,
+    missing: [],
+    selected: true,
+  }]);
 });

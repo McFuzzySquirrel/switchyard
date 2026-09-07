@@ -36,7 +36,7 @@
 
 ## 4. UI / Interaction Design
 
-`switchyard verify [--harness=<id>] [--capability=<name>]` runs bounded policy-controlled probes. `run --allow-fallback` enables fallback explicitly and reports every attempted candidate.
+`switchyard verify [--harness=<id>] [--capability=<name>]` runs bounded policy-controlled probes. `run --preferred-harness=<id> --allow-fallback` enables fallback explicitly. The routing result reports the preferred qualification check and the selected qualifying fallback attempt; no fallback candidate is selected when fallback is omitted.
 
 ## 5. Implementation Tasks
 
@@ -47,7 +47,7 @@
 
 ### Phase 2: Routing Integration
 - [x] Include verification state in candidate ranking.
-- [ ] Implement explicit preferred-harness and fallback policy.
+- [x] Implement explicit preferred-harness and fallback policy.
 - [ ] Add warnings for probes that may incur cost or external access.
 
 ## 6. Testing Strategy
@@ -62,7 +62,8 @@ Key test scenarios:
 1. Verified and discovered candidates are ranked correctly.
 2. A probe times out safely.
 3. Fallback is disabled by default.
-4. Explicit fallback tries only qualifying alternatives.
+4. Explicit fallback tries only qualifying alternatives and reports the
+   preferred and selected attempts.
 5. Mutating probes require policy approval.
 
 ## Probe safety policy

@@ -394,6 +394,126 @@ test("explain produces complete, stable all-required ranking data without mutati
   assert.equal(formatExplainJson(result), formatExplainJson(repeated));
 });
 
+test("explain enforces preferred-harness policy and reports qualifying attempts", async (t) => {
+  const directory = await mkdtemp(join(tmpdir(), "switchyard-preferred-policy-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const registryPath = join(directory, "registry.json");
+  await discover({
+    registryPath,
+    adapters: [
+      {
+        id: "preferred",
+        discover: async () => profile("preferred", "not-requested", ["headless"]),
+      },
+      {
+        id: "fallback",
+        discover: async () => profile("fallback", "not-requested", ["headless", "mcp"]),
+      },
+    ],
+    now: () => new Date(observedAt),
+  });
+
+  const requirements = {
+    requires: ["headless", "mcp"],
+    preferredHarness: "preferred",
+  };
+  const disabled = await explain({ registryPath, requirements, now: () => new Date(observedAt) });
+  assert.equal(disabled.status, "no-match");
+  assert.equal(disabled.selectedHarness, null);
+  assert.equal(disabled.policy.allowFallback, false);
+  assert.deepEqual(disabled.policy.attempts.map((attempt) => attempt.harnessId), ["preferred"]);
+  assert.equal(disabled.policy.preferredAttempt.qualifies, false);
+
+  const enabled = await explain({
+    registryPath,
+    requirements: { ...requirements, allowFallback: true },
+    now: () => new Date(observedAt),
+  });
+  assert.equal(enabled.status, "success");
+  assert.equal(enabled.selectedHarness, "fallback");
+  assert.equal(enabled.policy.fallbackUsed, true);
+  assert.deepEqual(
+    enabled.policy.attempts.map((attempt) => ({
+      harnessId: attempt.harnessId,
+      role: attempt.role,
+      qualifies: attempt.qualifies,
+      selected: attempt.selected,
+    })),
+    [
+      { harnessId: "preferred", role: "preferred", qualifies: false, selected: false },
+      { harnessId: "fallback", role: "fallback", qualifies: true, selected: true },
+    ],
+  );
+  assert.match(formatExplainHuman(enabled), /Attempts: preferred .*fallback/);
+  assert.equal(
+    formatExplainJson(enabled),
+    formatExplainJson(await explain({
+      registryPath,
+      requirements: { ...requirements, allowFallback: true },
+      now: () => new Date(observedAt),
+    })),
+  );
+});
+
+test("CLI explain fallback controls have distinct no-match and success outcomes", async (t) => {
+  const directory = await mkdtemp(join(tmpdir(), "switchyard-cli-fallback-policy-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const registryPath = join(directory, "registry.json");
+  await discover({
+    registryPath,
+    adapters: [
+      {
+        id: "preferred",
+        discover: async () => profile("preferred", "not-requested", ["headless"]),
+      },
+      {
+        id: "fallback",
+        discover: async () => profile("fallback", "not-requested", ["headless", "mcp"]),
+      },
+    ],
+    now: () => new Date(observedAt),
+  });
+
+  const run = (args) => execFileAsync(
+    process.execPath,
+    ["--experimental-strip-types", "src/cli.ts", ...args],
+    { cwd: process.cwd(), encoding: "utf8" },
+  );
+  await assert.rejects(
+    run([
+      "explain",
+      "--requires=headless,mcp",
+      "--preferred-harness=preferred",
+      "--json",
+      "--registry",
+      registryPath,
+    ]),
+    (error) => {
+      assert.equal(error.code, 4);
+      const payload = JSON.parse(error.stdout);
+      assert.equal(payload.status, "no-match");
+      assert.equal(payload.policy.allowFallback, false);
+      assert.equal(payload.policy.attempts[0].qualifies, false);
+      return true;
+    },
+  );
+
+  const enabled = await run([
+    "explain",
+    "--requires=headless,mcp",
+    "--preferred-harness=preferred",
+    "--allow-fallback",
+    "--json",
+    "--registry",
+    registryPath,
+  ]);
+  const payload = JSON.parse(enabled.stdout);
+  assert.equal(enabled.stderr, "");
+  assert.equal(payload.status, "success");
+  assert.equal(payload.selectedHarness, "fallback");
+  assert.equal(payload.policy.fallbackUsed, true);
+});
+
 test("explain JSON uses the shared versioned decision contract", async (t) => {
   const directory = await mkdtemp(join(tmpdir(), "switchyard-decision-schema-"));
   t.after(() => rm(directory, { recursive: true, force: true }));

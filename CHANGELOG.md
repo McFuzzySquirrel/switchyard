@@ -4,6 +4,11 @@ All notable user-facing changes to Switchyard are documented here. The format fo
 
 ## [Unreleased]
 
+- Added a pure routing-policy decision layer for preferred harnesses and
+  explicit fallback. A preferred harness can never bypass all-required
+  capability matching, fallback remains disabled unless `allowFallback` or
+  `--allow-fallback` is supplied, and `explain`/`run` now report the
+  qualifying policy attempts in stable human and JSON output.
 - Added `switchyard run --requires=<capabilities> [--json] [--dry-run]
   [--cwd PATH] [--timeout-ms MS] "<task>"`, connecting deterministic routing
   (`explain`) to adapter execution. `run` never reimplements matching or

@@ -1,12 +1,12 @@
 {
   "runId": "faef066b-e967-49ae-ba56-4dbe4255f89d",
   "startedAt": "2026-09-07T19:10:17.558Z",
-  "lastUpdatedAt": "2026-09-07T21:41:34.679Z",
+  "lastUpdatedAt": "2026-09-07T21:51:03.673Z",
   "manifestPath": "/home/mcfuzzysquirrel/Projects/switchyard/docs/EXECUTION-MANIFEST.json",
   "manifestVersion": "1.0",
   "harness": "copilot",
   "status": "running",
-  "currentPhase": "HARNESS-EXECUTION-RUNTIME-2",
+  "currentPhase": "VERIFICATION-AND-RESILIENCE-2",
   "tasks": {
     "DISCOVERY-AND-REGISTRY-1.1": {
       "taskId": "DISCOVERY-AND-REGISTRY-1.1",
@@ -528,10 +528,30 @@
     },
     "VERIFICATION-AND-RESILIENCE-2.2": {
       "taskId": "VERIFICATION-AND-RESILIENCE-2.2",
-      "status": "pending",
+      "status": "complete",
       "ownerAgent": "routing-policy-engineer",
-      "attempt": 0,
-      "outputFiles": []
+      "attempt": 1,
+      "outputFiles": [
+        "CHANGELOG.md",
+        "README.md",
+        "docs/adr/0003-versioned-command-json-contracts.md",
+        "docs/features/deterministic-routing-and-explainability.md",
+        "docs/features/verification-and-resilience.md",
+        "src/capabilities/index.ts",
+        "src/commands/explain.ts",
+        "src/commands/run.ts",
+        "tests/capability-matcher.test.mjs",
+        "tests/commands.test.mjs",
+        "tests/run-command.test.mjs",
+        "src/capabilities/routing.ts"
+      ],
+      "startedAt": "2026-09-07T21:41:34.706Z",
+      "completedAt": "2026-09-07T21:51:03.673Z",
+      "agentOutput": "● Routing-policy-engineer (model: gpt-5.6-luna) Implement fallback policy                      9m 5s\n  │ Implemented explicit preferred-harness and fallback routing policy.\n  │ Confirm final status and clean diff (shell)\n  │   │ git status --short && git diff --check\n  │   └ 15 lines…\n  └ Search (grep)\n      │ \"^# tests |^# pass |^# fail |^1\\.\\.\"\n      │ (/tmp/1788817824598-copilot-tool-output-116584-755f5601-e427-4ae9-b8ec-79b87dc3ea17.txt)\n      └ 4 lines found\n\n● Read routing.ts\n  │ src/capabilities/routing.ts\n  └ 166 lines read\n\n● Read index.ts\n  │ src/capabilities/index.ts\n  └ 3 lines read\n\n● Review implemented changes (shell)\n  │ git status --short && git diff --stat && git diff --check\n  └ 29 lines…\n\nImplemented explicit preferred-harness and fallback routing policy.\n\n- Added `applyRoutingPolicy` / `resolveRoutingPolicy` in `src/capabilities/routing.ts`.\n- Preferred harnesses are selected only when all required capabilities match.\n- Fallback routing is opt-in via `allowFallback`.\n- Added deterministic policy attempts and selection reporting to CLI explain/run results.\n- Exported routing APIs through `src/capabilities/index.ts`.\n- Added matcher and CLI coverage.\n- Updated `README.md`, `CHANGELOG.md`, ADR, and routing feature documentation.\n\nChanged or created files:\n\n`src/capabilities/routing.ts`, `src/capabilities/index.ts`, `src/commands/explain.ts`, `src/commands/run.ts`, `tests/capability-matcher.test.mjs`, `tests/commands.test.mjs`, `tests/run-command.test.mjs`, `README.md`, `CHANGELOG.md`, `docs/adr/0003-versioned-cli-contracts.md`, `docs/features/deterministic-routing-and-explainability.md`, `docs/features/verification-and-resilience.md`.\n\n",
+      "artifactId": "work-verification-and-resilience-2-2-001",
+      "inputArtifactIds": [
+        "work-verification-and-resilience-2-1-001"
+      ]
     },
     "VERIFICATION-AND-RESILIENCE-2.3": {
       "taskId": "VERIFICATION-AND-RESILIENCE-2.3",

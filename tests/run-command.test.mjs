@@ -338,6 +338,8 @@ test("CLI run --json executes through the built-in wiring and maps stable exit c
   assert.equal(payload.command, "run");
   assert.equal(payload.status, "success");
   assert.equal(payload.task, "fix the bug");
+  assert.equal(payload.policy.allowFallback, false);
+  assert.deepEqual(payload.policy.attempts.map((attempt) => attempt.harnessId), ["fixture"]);
   assert.match(payload.execution.stdout, /fix the bug/);
 });
 
@@ -473,4 +475,6 @@ test("CLI shares --requires and --preferred-harness between explain and run", as
   assert.equal(exitCode, CLI_EXIT_CODES.success);
   const payload = JSON.parse(stdout.join(""));
   assert.equal(payload.selectedHarness, "fixture");
+  assert.equal(payload.policy.preferredHarness, "fixture");
+  assert.equal(payload.policy.attempts[0].selected, true);
 });

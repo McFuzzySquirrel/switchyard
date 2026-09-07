@@ -5,6 +5,10 @@ import {
   type CapabilityRankingInputs,
 } from "../capabilities/matcher.ts";
 import {
+  applyRoutingPolicy,
+  type RoutingAttempt,
+} from "../capabilities/routing.ts";
+import {
   markStaleEntries,
   readRegistry,
   type RegistryPath,
@@ -58,6 +62,14 @@ export interface ExplainSelection {
   readonly reason: string;
 }
 
+export interface ExplainAttempt {
+  readonly harnessId: string;
+  readonly role: RoutingAttempt["role"];
+  readonly qualifies: boolean;
+  readonly missing: readonly CapabilityName[];
+  readonly selected: boolean;
+}
+
 export interface ExplainPolicy {
   readonly preferredHarness: string | null;
   readonly allowFallback: boolean;
@@ -66,6 +78,7 @@ export interface ExplainPolicy {
     readonly qualifies: boolean;
     readonly missing: readonly CapabilityName[];
   } | null;
+  readonly attempts: readonly ExplainAttempt[];
   readonly fallbackUsed: boolean;
 }
 
@@ -196,6 +209,16 @@ function noMatchReason(
     : "No harness satisfies every required capability.";
 }
 
+function explainAttempt(attempt: RoutingAttempt): ExplainAttempt {
+  return {
+    harnessId: attempt.harnessId,
+    role: attempt.role,
+    qualifies: attempt.qualifies,
+    missing: [...attempt.missing],
+    selected: attempt.selected,
+  };
+}
+
 function normalizeRequirements(input: unknown): TaskRequirements {
   const result = assertTaskRequirements(input);
   if (result.requires.length === 0) {
@@ -258,34 +281,24 @@ export async function explain(
   const candidates = profiles.map((profile) => candidateFor(profile, requirements));
   const ranked = rankCapabilityMatches(profiles, requirements);
   const qualifyingById = new Map(ranked.map((candidate) => [candidate.harnessId, candidate]));
-  const preferredHarness = requirements.preferredHarness;
-  const allowFallback = requirements.allowFallback === true;
-  const preferred = preferredHarness === undefined
+  const routing = applyRoutingPolicy(profiles, requirements);
+  const preferredHarness = routing.preferredHarness;
+  const selected = routing.selected === undefined
     ? undefined
-    : candidates.find((candidate) => candidate.harnessId === preferredHarness);
-  const preferredAttempt = preferredHarness === undefined
-    ? null
-    : {
-        harnessId: preferredHarness,
-        qualifies: preferred?.qualifies ?? false,
-        missing: preferred?.missing ?? requirements.requires,
-      };
-
-  let selected: ExplainCandidate | undefined;
-  let fallbackUsed = false;
-  if (preferredHarness !== undefined && preferred?.qualifies === true) {
-    selected = preferred;
-  } else if (preferredHarness === undefined || allowFallback) {
-    const rankedSelection = ranked[0];
-    selected = rankedSelection === undefined
-      ? undefined
-      : candidates.find((candidate) => candidate.harnessId === rankedSelection.harnessId);
-    fallbackUsed = preferredHarness !== undefined && selected !== undefined;
-  }
+    : candidates.find((candidate) => candidate.harnessId === routing.selected?.harnessId);
 
   const reason = selected === undefined
-    ? noMatchReason(requirements, preferredHarness, allowFallback, candidates)
-    : selectionReason(selected, preferredHarness, fallbackUsed);
+    ? noMatchReason(
+        requirements,
+        preferredHarness === null ? undefined : preferredHarness,
+        routing.allowFallback,
+        candidates,
+      )
+    : selectionReason(
+        selected,
+        preferredHarness === null ? undefined : preferredHarness,
+        routing.fallbackUsed,
+      );
   const selection = selected === undefined
     ? null
     : { harnessId: selected.harnessId, reason };
@@ -309,10 +322,17 @@ export async function explain(
       tieBreaker: "harness-id-ascending",
     },
     policy: {
-      preferredHarness: preferredHarness ?? null,
-      allowFallback,
-      preferredAttempt,
-      fallbackUsed,
+      preferredHarness,
+      allowFallback: routing.allowFallback,
+      preferredAttempt: routing.preferredAttempt === null
+        ? null
+        : {
+            harnessId: routing.preferredAttempt.harnessId,
+            qualifies: routing.preferredAttempt.qualifies,
+            missing: [...routing.preferredAttempt.missing],
+          },
+      attempts: routing.attempts.map(explainAttempt),
+      fallbackUsed: routing.fallbackUsed,
     },
     candidates,
     selectedHarness: selected?.harnessId ?? null,
@@ -350,6 +370,11 @@ export function formatExplainHuman(
     `Preferred attempt: ${result.policy.preferredAttempt === null
       ? "none"
       : `${result.policy.preferredAttempt.harnessId} [qualifies: ${result.policy.preferredAttempt.qualifies ? "yes" : "no"}; missing: ${result.policy.preferredAttempt.missing.join(", ") || "none"}]`}`,
+    `Attempts: ${result.policy.attempts.length === 0
+      ? "none"
+      : result.policy.attempts
+        .map((attempt) => `${attempt.harnessId} [role: ${attempt.role}; qualifies: ${attempt.qualifies ? "yes" : "no"}; selected: ${attempt.selected ? "yes" : "no"}; missing: ${attempt.missing.join(", ") || "none"}]`)
+        .join("; ")}`,
     "Candidates:",
   ];
   for (const candidate of result.candidates) {

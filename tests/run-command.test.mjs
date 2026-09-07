@@ -252,6 +252,38 @@ test("run reports execution-failure for a completed but failing process", async 
   assert.equal(result.execution.stderr, "boom");
 });
 
+test("run serializers redact secret-bearing task and execution output", async (t) => {
+  const registryPath = await withRegistry(t);
+  const secret = "sk-abcdef0123456789";
+  const leaking = makeExecutionAdapter("fixture", async () => ({
+    succeeded: false,
+    status: "failed",
+    failureCategory: "execution-failure",
+    exitCode: 1,
+    stdout: `token=${secret}`,
+    stderr: `secret=${secret}`,
+    stdoutTruncated: false,
+    stderrTruncated: false,
+    durationMs: 1,
+    error: `failed with token=${secret}`,
+  }));
+
+  const result = await run({
+    registryPath,
+    requirements: { requires: ["headless"] },
+    task: `use token=${secret}`,
+    adapters: [leaking],
+    now: fixedClock,
+  });
+
+  const json = formatRunJson(result);
+  const human = formatRunHuman(result);
+  assert.doesNotMatch(json, new RegExp(secret));
+  assert.doesNotMatch(human, new RegExp(secret));
+  assert.match(json, /\[REDACTED\]/);
+  assert.match(human, /\[REDACTED\]/);
+});
+
 test("run reports execution-failure distinctly for timeout and cancellation", async (t) => {
   const registryPath = await withRegistry(t);
   const timedOut = makeExecutionAdapter("fixture", async () => ({

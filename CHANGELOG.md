@@ -41,7 +41,8 @@ All notable user-facing changes to Switchyard are documented here. The format fo
   output, plain-text presentation, per-user registry path resolution, cached
   discovery refreshes, verified-capability filtering, and redacted diagnostics.
 - Centralized human and JSON command serializers so CLI output uses the same
-  versioned payload and redaction rules.
+  versioned payload and redaction rules, including secret-bearing task text
+  and captured execution output.
 - Added the shared versioned command JSON envelope and routing-decision
   contract. `serializeCommandJson`, `parseCommandJson`, and
   `parseDecisionJson` are exported for script and library consumers, while

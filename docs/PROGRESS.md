@@ -1,9 +1,9 @@
 # Project Progress
 
 ## Current State
-**Phase**: VERIFICATION-AND-RESILIENCE-2
+**Phase**: HARNESS-EXECUTION-RUNTIME-2
 **Status**: In Progress
-**Last Updated**: 2026-09-07T22:00:23.948Z
+**Last Updated**: 2026-09-07T22:02:33.777Z
 **Run ID**: faef066b-e967-49ae-ba56-4dbe4255f89d
 **Harness**: copilot
 **Execution Mode**: auto
@@ -51,6 +51,8 @@
   - Files: CHANGELOG.md, README.md, docs/features/harness-execution-runtime.md, src/cli.ts, src/commands/index.ts, tests/commands.test.mjs, docs/adr/0006-run-command-execution-routing.md, src/commands/run.ts, tests/run-command.test.mjs
 - [x] Phase HARNESS-EXECUTION-RUNTIME-2, Task HARNESS-EXECUTION-RUNTIME-2.2: [ ] Define exit-code taxonomy (@execution-runtime-engineer)
   - Files: CHANGELOG.md, README.md, src/cli.ts, src/output/index.ts, tests/commands.test.mjs, src/output/exit-codes.ts
+- [x] Phase HARNESS-EXECUTION-RUNTIME-2, Task HARNESS-EXECUTION-RUNTIME-2.3: [ ] Add human/JSON result serializers (@execution-runtime-engineer)
+  - Files: CHANGELOG.md, src/commands/run.ts, tests/run-command.test.mjs
 - [x] Phase VERIFICATION-AND-RESILIENCE-1, Task VERIFICATION-AND-RESILIENCE-1.1: [ ] Define read-only and mutating probe policies (@verification-resilience-engineer)
   - Files: CHANGELOG.md, docs/features/verification-and-resilience.md, package.json, src/config/resolve.ts, src/config/schema.ts, src/harness/adapter.ts, src/index.ts, src/verification/index.ts, src/verification/policy.ts, src/verification/runner.ts, tests/verification-policy.test.mjs
 - [x] Phase VERIFICATION-AND-RESILIENCE-1, Task VERIFICATION-AND-RESILIENCE-1.2: [ ] Add verification result schema and timestamps (@verification-resilience-engineer)

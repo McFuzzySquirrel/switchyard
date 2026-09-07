@@ -303,11 +303,47 @@ export function runInvalidInput(error: RunInputError): RunInvalidInputResult {
   };
 }
 
+function presentationRunResult(
+  result: RunCommandResult | RunInvalidInputResult,
+): RunCommandResult | RunInvalidInputResult {
+  if (result.status === "invalid-input") {
+    return {
+      ...result,
+      error: {
+        ...result.error,
+        message: redactSecrets(result.error.message),
+        issues: result.error.issues.map((issue) => ({
+          ...issue,
+          path: redactSecrets(issue.path),
+          message: redactSecrets(issue.message),
+        })),
+      },
+    };
+  }
+
+  return {
+    ...result,
+    task: redactSecrets(result.task),
+    reason: redactSecrets(result.reason),
+    execution: result.execution === null
+      ? null
+      : {
+          ...result.execution,
+          stdout: redactSecrets(result.execution.stdout),
+          stderr: redactSecrets(result.execution.stderr),
+          ...(result.execution.error === undefined
+            ? {}
+            : { error: redactSecrets(result.execution.error) }),
+        },
+  };
+}
+
 export function formatRunJson(result: RunCommandResult | RunInvalidInputResult): string {
-  return serializeCommandJson(result);
+  return serializeCommandJson(presentationRunResult(result));
 }
 
 export function formatRunHuman(result: RunCommandResult | RunInvalidInputResult): string {
+  result = presentationRunResult(result);
   if (result.status === "invalid-input") {
     return [
       "Switchyard run",

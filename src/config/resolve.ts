@@ -25,6 +25,9 @@ export interface HarnessRuntimeOverrides {
   readonly timeoutMs?: number;
   readonly maxOutputLength?: number;
   readonly allowMutatingProbes?: boolean;
+  readonly allowExternalAccess?: boolean;
+  readonly allowPaidProbes?: boolean;
+  readonly allowModelInvocation?: boolean;
   readonly platform?: ConfigResolutionPlatform;
 }
 
@@ -66,11 +69,17 @@ export interface ResolvedHarnessRuntimeConfig {
   readonly timeoutMs: number;
   readonly maxOutputLength: number;
   readonly allowMutatingProbes: boolean;
+  readonly allowExternalAccess: boolean;
+  readonly allowPaidProbes: boolean;
+  readonly allowModelInvocation: boolean;
 }
 
 export const DEFAULT_PROBE_TIMEOUT_MS = 5000;
 export const DEFAULT_PROBE_MAX_OUTPUT_LENGTH = 8192;
 export const DEFAULT_ALLOW_MUTATING_PROBES = false;
+export const DEFAULT_ALLOW_EXTERNAL_ACCESS = false;
+export const DEFAULT_ALLOW_PAID_PROBES = false;
+export const DEFAULT_ALLOW_MODEL_INVOCATION = false;
 const MAX_EXECUTABLE_PATH_LENGTH = 4096;
 
 function environmentKeySegment(harnessId: string): string {
@@ -272,6 +281,27 @@ export function resolveHarnessRuntimeConfig(
     harnessConfig?.probePolicy?.allowMutatingProbes ??
     config.probePolicy?.allowMutatingProbes ??
     DEFAULT_ALLOW_MUTATING_PROBES;
+  const allowExternalAccess =
+    overrides.allowExternalAccess ??
+    parseEnvBoolean(env, `SWITCHYARD_${segment}_ALLOW_EXTERNAL_ACCESS`, platform, issues) ??
+    parseEnvBoolean(env, "SWITCHYARD_ALLOW_EXTERNAL_ACCESS", platform, issues) ??
+    harnessConfig?.probePolicy?.allowExternalAccess ??
+    config.probePolicy?.allowExternalAccess ??
+    DEFAULT_ALLOW_EXTERNAL_ACCESS;
+  const allowPaidProbes =
+    overrides.allowPaidProbes ??
+    parseEnvBoolean(env, `SWITCHYARD_${segment}_ALLOW_PAID_PROBES`, platform, issues) ??
+    parseEnvBoolean(env, "SWITCHYARD_ALLOW_PAID_PROBES", platform, issues) ??
+    harnessConfig?.probePolicy?.allowPaidProbes ??
+    config.probePolicy?.allowPaidProbes ??
+    DEFAULT_ALLOW_PAID_PROBES;
+  const allowModelInvocation =
+    overrides.allowModelInvocation ??
+    parseEnvBoolean(env, `SWITCHYARD_${segment}_ALLOW_MODEL_INVOCATION`, platform, issues) ??
+    parseEnvBoolean(env, "SWITCHYARD_ALLOW_MODEL_INVOCATION", platform, issues) ??
+    harnessConfig?.probePolicy?.allowModelInvocation ??
+    config.probePolicy?.allowModelInvocation ??
+    DEFAULT_ALLOW_MODEL_INVOCATION;
 
   if (issues.length > 0) {
     throw new ConfigValidationError(issues);
@@ -291,6 +321,9 @@ export function resolveHarnessRuntimeConfig(
     timeoutMs,
     maxOutputLength,
     allowMutatingProbes,
+    allowExternalAccess,
+    allowPaidProbes,
+    allowModelInvocation,
   };
 }
 

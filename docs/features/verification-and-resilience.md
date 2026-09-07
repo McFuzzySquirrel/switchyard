@@ -41,7 +41,7 @@
 ## 5. Implementation Tasks
 
 ### Phase 1: Probes
-- [ ] Define read-only and mutating probe policies.
+- [x] Define read-only and mutating probe policies.
 - [ ] Add verification result schema and timestamps.
 - [ ] Implement bounded adapter probes.
 
@@ -64,6 +64,22 @@ Key test scenarios:
 3. Fallback is disabled by default.
 4. Explicit fallback tries only qualifying alternatives.
 5. Mutating probes require policy approval.
+
+## Probe safety policy
+
+Verification is deny-by-default for anything beyond a bounded, non-interactive
+read-only probe. A probe declares its risk classes before the adapter is
+called. `read-only` probes are allowed by default; `mutating`,
+`external-access`, `paid`, and `model-invoking` probes are skipped unless the
+corresponding policy approval is explicitly enabled. A rejected probe produces
+an inspectable `skipped` result with a timestamp rather than disappearing.
+
+Policy can be configured globally or per harness using
+`allowMutatingProbes`, `allowExternalAccess`, `allowPaidProbes`, and
+`allowModelInvocation` (all default to `false`). Warnings contain only fixed
+risk descriptions: command arguments, environment values, prompts, and
+secrets are never included. Probe runners bound output and time through the
+adapter context and do not alter routing or fallback decisions.
 
 ## 7. Acceptance Criteria
 

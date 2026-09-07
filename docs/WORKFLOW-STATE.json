@@ -1,12 +1,12 @@
 {
   "runId": "faef066b-e967-49ae-ba56-4dbe4255f89d",
   "startedAt": "2026-09-07T19:10:17.558Z",
-  "lastUpdatedAt": "2026-09-07T21:10:20.405Z",
+  "lastUpdatedAt": "2026-09-07T21:14:00.772Z",
   "manifestPath": "/home/mcfuzzysquirrel/Projects/switchyard/docs/EXECUTION-MANIFEST.json",
   "manifestVersion": "1.0",
   "harness": "copilot",
   "status": "running",
-  "currentPhase": "HARNESS-EXECUTION-RUNTIME-1",
+  "currentPhase": "VERIFICATION-AND-RESILIENCE-1",
   "tasks": {
     "DISCOVERY-AND-REGISTRY-1.1": {
       "taskId": "DISCOVERY-AND-REGISTRY-1.1",
@@ -394,10 +394,26 @@
     },
     "VERIFICATION-AND-RESILIENCE-1.1": {
       "taskId": "VERIFICATION-AND-RESILIENCE-1.1",
-      "status": "pending",
+      "status": "complete",
       "ownerAgent": "verification-resilience-engineer",
-      "attempt": 0,
-      "outputFiles": []
+      "attempt": 1,
+      "outputFiles": [
+        "CHANGELOG.md",
+        "docs/features/verification-and-resilience.md",
+        "package.json",
+        "src/config/resolve.ts",
+        "src/config/schema.ts",
+        "src/harness/adapter.ts",
+        "src/index.ts",
+        "src/verification/index.ts",
+        "src/verification/policy.ts",
+        "src/verification/runner.ts",
+        "tests/verification-policy.test.mjs"
+      ],
+      "startedAt": "2026-09-07T21:10:20.429Z",
+      "completedAt": "2026-09-07T21:14:00.772Z",
+      "agentOutput": "● Verification-resilience-engineer (model: gpt-5.6-luna) Define probe policies                2m 47s\n  │ Implemented read-only and mutating probe policies with explicit safety enforc...\n  │ update_todo todos: \"- [x] Inspect verification architecture, PRD, and existing t…\"\n  │   └ TODO list updated\n  └ Confirm final changed files (shell)\n      │ git status --short\n      └ 9 lines…\n\n/ Search (glob)\n  │ \"tests/*verification*\"\n  └ 1 file found\n\n/ Search (glob)\n  │ \"src/verification/*\"\n  └ 3 files found\n\n● Inspect policy changes and whitespace (shell)\n  │ git status --short && git diff --stat && git diff --check\n  └ 16 lines…\n\n● Read policy.ts\n  │ src/verification/policy.ts\n  └ 121 lines read\n\n● Read index.ts\n  │ src/verification/index.ts\n  └ 2 lines read\n\n● Read runner.ts\n  │ src/verification/runner.ts\n  └ 79 lines read\n\n● Read schema.ts\n  │ src/config/schema.ts\n  └ 324 lines read\n\n● Read resolve.ts\n  │ src/config/resolve.ts\n  └ 350 lines read\n\n● Read verification-policy.test.mjs\n  │ tests/verification-policy.test.mjs\n  └ 79 lines read\n\n● Read package.json\n  └ 33 lines read\n\n● Read adapter.ts\n  │ src/harness/adapter.ts\n  └ 374 lines read\n\n● Read index.ts\n  │ src/index.ts\n  └ 8 lines read\n\n● Read verification-and-resilience.md\n  │ docs/features/verification-and-resilience.md\n  └ 96 lines read\n\n● Read CHANGELOG.md\n  └ L1:50 (50 lines read)\n\n● Read CHANGELOG.md\n  └ L45:100 (42 lines read)\n\nThe policy implementation is present; I’m tightening the rejection path and aligning the user-facing changelog before running the repository’s required checks.\n\n● Edit\n  │ Edit src/verification/runner.ts\n  └ Edit CHANGELOG.md\n\n● Run documentation governance tests (shell)\n  │ npm run test:docs\n  └ 26 lines…\n\n● Run TypeScript typecheck (shell)\n  │ npm run typecheck\n  └ 3 lines…\n\n● Run the full test suite (shell)\n  │ npm test\n  └ 524 lines…\n\n● Review final policy and documentation diff (shell)\n  │ git diff -- docs/features/verification-and-resilience.md CHANGELOG.md src/verification/runner.ts\n  └ 52 lines…\n\n● Summarize final changed files (shell)\n  │ git status --short && git diff --stat\n  └ 18 lines…\n\nImplemented read-only and mutating verification probe policies.\n\n**Created**\n- `src/verification/policy.ts`\n- `src/verification/runner.ts`\n- `src/verification/index.ts`\n- `tests/verification-policy.test.mjs`\n\n**Changed**\n- `src/config/schema.ts`\n- `src/config/resolve.ts`\n- `src/harness/adapter.ts`\n- `src/index.ts`\n- `package.json`\n- `docs/features/verification-and-resilience.md`\n- `CHANGELOG.md`\n\nRead-only probes are allowed by default. Mutating, external-access, paid, and model-invoking probes require explicit approval and produce timestamped skipped results when rejected. Policy decisions are propagated to adapters without exposing probe payloads or secrets.\n\n",
+      "artifactId": "work-verification-and-resilience-1-1-001"
     },
     "VERIFICATION-AND-RESILIENCE-1.2": {
       "taskId": "VERIFICATION-AND-RESILIENCE-1.2",

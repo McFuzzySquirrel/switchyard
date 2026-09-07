@@ -21,6 +21,12 @@ export interface ProbePolicyConfig {
   readonly maxOutputLength?: number;
   /** Opt-in flag for probes that may mutate state, call external services, or incur cost. */
   readonly allowMutatingProbes?: boolean;
+  /** Opt in to probes that contact external services. */
+  readonly allowExternalAccess?: boolean;
+  /** Opt in to probes that may incur provider charges. */
+  readonly allowPaidProbes?: boolean;
+  /** Opt in to probes that invoke a model. */
+  readonly allowModelInvocation?: boolean;
 }
 
 /** Per-harness configuration entry. */
@@ -161,7 +167,14 @@ function validateProbePolicy(
     issues.push({ path, message: "must be an object" });
     return undefined;
   }
-  hasOnlyKeys(value, ["timeoutMs", "maxOutputLength", "allowMutatingProbes"], path, issues);
+  hasOnlyKeys(value, [
+    "timeoutMs",
+    "maxOutputLength",
+    "allowMutatingProbes",
+    "allowExternalAccess",
+    "allowPaidProbes",
+    "allowModelInvocation",
+  ], path, issues);
   const timeoutMs = validatePositiveInteger(
     value.timeoutMs,
     `${path}.timeoutMs`,
@@ -179,10 +192,24 @@ function validateProbePolicy(
     `${path}.allowMutatingProbes`,
     issues,
   );
+  const allowExternalAccess = validateBoolean(
+    value.allowExternalAccess,
+    `${path}.allowExternalAccess`,
+    issues,
+  );
+  const allowPaidProbes = validateBoolean(value.allowPaidProbes, `${path}.allowPaidProbes`, issues);
+  const allowModelInvocation = validateBoolean(
+    value.allowModelInvocation,
+    `${path}.allowModelInvocation`,
+    issues,
+  );
   return {
     ...(timeoutMs === undefined ? {} : { timeoutMs }),
     ...(maxOutputLength === undefined ? {} : { maxOutputLength }),
     ...(allowMutatingProbes === undefined ? {} : { allowMutatingProbes }),
+    ...(allowExternalAccess === undefined ? {} : { allowExternalAccess }),
+    ...(allowPaidProbes === undefined ? {} : { allowPaidProbes }),
+    ...(allowModelInvocation === undefined ? {} : { allowModelInvocation }),
   };
 }
 

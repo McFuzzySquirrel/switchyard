@@ -122,6 +122,21 @@ export interface ProbeContext {
   readonly cwd?: string;
   readonly timeoutMs?: number;
   readonly nonInteractive?: boolean;
+  /** Risk classes must be declared before verification is launched. */
+  readonly probeRisks?: readonly (
+    | "read-only"
+    | "mutating"
+    | "external-access"
+    | "paid"
+    | "model-invoking"
+  )[];
+  readonly probePolicy?: {
+    readonly allowReadOnly?: boolean;
+    readonly allowMutatingProbes?: boolean;
+    readonly allowExternalAccess?: boolean;
+    readonly allowPaidProbes?: boolean;
+    readonly allowModelInvocation?: boolean;
+  };
 }
 
 export interface VerificationResult {

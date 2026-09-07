@@ -56,6 +56,10 @@ All notable user-facing changes to Switchyard are documented here. The format fo
   explicit-override > environment-variable > configuration-file > default
   consistently across executable, timeout, output-length, mutating-probe
   policy, and registry-path fields.
+- Added deny-by-default verification probe policies: bounded read-only probes
+  are allowed by default, while mutating, external-access, paid, and
+  model-invoking probes require explicit approval and produce inspectable,
+  timestamped skips when rejected.
 - Normalized executable overrides into one resolved adapter field with a
   preserved source (`override` or `configured`), and made `capabilities` and
   `explain` honor the typed configuration file's registry location.

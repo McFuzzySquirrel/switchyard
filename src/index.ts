@@ -5,3 +5,4 @@ export * from "./config/index.ts";
 export * from "./discovery/index.ts";
 export * from "./harness/index.ts";
 export * from "./output/index.ts";
+export * from "./verification/index.ts";

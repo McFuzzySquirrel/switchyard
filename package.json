@@ -11,6 +11,7 @@
   },
   "scripts": {
     "test": "node --experimental-strip-types --test tests/*.test.mjs",
+    "test:docs": "node --test tests/documentation-governance.test.mjs",
     "typecheck": "tsc --noEmit"
   },
   "types": "./src/index.ts",

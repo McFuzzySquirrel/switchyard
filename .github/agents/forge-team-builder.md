@@ -25,6 +25,15 @@ Run the **`forge-build-agent-team`** skill. It detects which mode applies (Full 
 
 ---
 
+## Responsibilities
+
+1. Detect the PRD input mode and resolved GitHub Copilot agent and skill directories.
+2. Generate or extend the specialist team with non-overlapping requirement ownership.
+3. Persist the versioned skill-candidate handoff without creating skill packages or execution artifacts.
+4. Run the team-stage validation gate before reporting completion.
+
+---
+
 ## Collaboration
 
 - **forge-build-prd**, **forge-decompose-prd**, **forge-build-feature-prd** skills - Upstream authoring skills that produce the inputs I consume.

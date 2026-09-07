@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "stages": {
+    "team": {
+      "status": "complete",
+      "inputFingerprint": "a822d86fce153ba2ae5ef779a43c4a24e5e0e98c38c4904d9932e53175b186a3",
+      "outputs": [
+        ".github/agents",
+        "docs/SKILL-CANDIDATES.json"
+      ],
+      "startedAt": "2026-09-07T18:48:47.616Z",
+      "invocation": {
+        "runner": "copilot",
+        "source": "inherit",
+        "argv": [
+          "-p",
+          "/forge-build-agent-team Use the decomposed PRD representation (docs/product-vision.md + docs/features/*.md) to build the agent team. Write agent files under .github/agents/. Write docs/SKILL-CANDIDATES.json as {version:1,candidates:[]}, with each candidate containing name, description, consumers (agent-name strings), action (reuse, extend, create, or omit), and reason. Analyze the PRD for reusable, repeated, or fragile project-specific processes. Add a candidate with action create when a needed process has no suitable package, extend when an existing package needs additive guidance, reuse when an existing package satisfies it, or omit when the responsibility is not justified. Keep candidates empty only when no project skills are required. Plan references under .github/skills/ but do not create or modify skill packages; forge-build-project-skills owns them. Do not write a manifest, compiled responsibility matrix, engine state, or progress file, and do not start the build. Auto-proceed with default assumptions and no questions.",
+          "--yolo"
+        ],
+        "skill": "forge-build-agent-team"
+      },
+      "outputFingerprint": "b73be36c6f80003746696ce1627f7168b9d8857a44d4a688c242ab0d73678940",
+      "completedAt": "2026-09-07T18:50:44.256Z"
+    },
+    "skills": {
+      "status": "pending",
+      "inputFingerprint": "fab19c079c3555e6489887829d856bb1ddb756cf1460b6b85482404f73df042a",
+      "outputs": []
+    }
+  }
+}

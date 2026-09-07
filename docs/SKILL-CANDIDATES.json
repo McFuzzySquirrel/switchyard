@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "candidates": [
+    {
+      "name": "safe-subprocess-fixtures",
+      "description": "Reusable cross-platform stub-process fixtures and assertions for bounded output, timeout, cancellation, descendant cleanup, and redacted diagnostics.",
+      "consumers": [
+        "discovery-registry-engineer",
+        "verification-resilience-engineer",
+        "execution-runtime-engineer",
+        "workflow-composition-engineer",
+        "switchyard-qa-engineer"
+      ],
+      "action": "create",
+      "reason": "Process safety is fragile and the same child-process setup and cleanup evidence is required by discovery, verification, execution, composition, and regression tests; no existing project skill provides these Switchyard-specific fixtures."
+    },
+    {
+      "name": "adapter-conformance",
+      "description": "Repeatable procedure and fixtures for implementing, registering, normalizing, and validating a Switchyard harness adapter without matcher changes.",
+      "consumers": [
+        "adapter-platform-engineer",
+        "discovery-registry-engineer",
+        "verification-resilience-engineer",
+        "execution-runtime-engineer",
+        "switchyard-qa-engineer"
+      ],
+      "action": "create",
+      "reason": "Built-in and future adapters repeat a strict vendor-boundary and conformance process across discovery, verification, and execution; existing generic skills do not encode the project contract or policy constraints."
+    },
+    {
+      "name": "versioned-cli-contracts",
+      "description": "Procedure for evolving Switchyard human and JSON command results with stable schemas, exit categories, no-color parity, and redaction checks.",
+      "consumers": [
+        "switchyard-architect",
+        "discovery-registry-engineer",
+        "routing-policy-engineer",
+        "execution-runtime-engineer",
+        "workflow-composition-engineer",
+        "switchyard-qa-engineer"
+      ],
+      "action": "create",
+      "reason": "Multiple commands expose script-facing JSON and human diagnostics under compatibility, accessibility, and privacy constraints, making contract evolution a repeated and failure-prone project-specific process."
+    }
+  ]
+}

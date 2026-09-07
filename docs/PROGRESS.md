@@ -1,9 +1,9 @@
 # Project Progress
 
 ## Current State
-**Phase**: DETERMINISTIC-ROUTING-AND-EXPLAINABILITY-2
+**Phase**: ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-2
 **Status**: In Progress
-**Last Updated**: 2026-09-07T21:06:29.791Z
+**Last Updated**: 2026-09-07T21:07:08.726Z
 **Run ID**: faef066b-e967-49ae-ba56-4dbe4255f89d
 **Harness**: copilot
 **Execution Mode**: auto
@@ -49,6 +49,8 @@
   - Files: README.md, docs/adapter-development.md, docs/features/adapter-extensibility-and-configuration.md, src/commands/discover.ts, tests/commands.test.mjs
 - [x] Phase ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-2, Task ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-2.2: [ ] Implement harness executable overrides and registry location (@adapter-platform-engineer)
   - Files: CHANGELOG.md, README.md, docs/adapter-development.md, docs/features/adapter-extensibility-and-configuration.md, docs/features/discovery-and-registry.md, src/cli.ts, src/commands/capabilities.ts, src/commands/discover.ts, src/commands/explain.ts, src/config/loader.ts, src/config/registry.ts, src/config/resolve.ts, src/harness/discovery-adapter.ts, tests/adapter-conformance.test.mjs, tests/commands.test.mjs, tests/harness-config.test.mjs
+- [x] Phase ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-2, Task ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-2.3: [ ] Document adapter registration and testing (@adapter-platform-engineer)
+  - Files: CHANGELOG.md, README.md, docs/adapter-development.md
 
 ## Current Task
 - None currently running
@@ -58,7 +60,6 @@
 - [ ] Phase HARNESS-EXECUTION-RUNTIME-2: Phase 2: CLI Integration
 - [ ] Phase VERIFICATION-AND-RESILIENCE-1: Phase 1: Probes
 - [ ] Phase VERIFICATION-AND-RESILIENCE-2: Phase 2: Routing Integration
-- [ ] Phase ADAPTER-EXTENSIBILITY-AND-CONFIGURATION-2: Phase 2: Configuration
 - [ ] Phase MULTI-HARNESS-COMPOSITION-1: Phase 1: Workflow Model
 - [ ] Phase MULTI-HARNESS-COMPOSITION-2: Phase 2: Execution and Demonstration
 

@@ -59,6 +59,9 @@ All notable user-facing changes to Switchyard are documented here. The format fo
   registration, testing, error handling, and security expectations, and
   ADR-0002 recording the adapter contract and configuration precedence
   design.
+- Expanded adapter documentation with an explicit registration workflow,
+  registry selection guidance, and the focused conformance-suite command for
+  testing new adapters without a vendor installation.
 
 ### Added
 

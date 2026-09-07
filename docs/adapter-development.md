@@ -82,6 +82,26 @@ const registry = createBuiltInHarnessAdapterRegistry();
 registry.register(createMyHarnessAdapter({ executable: "/opt/my-harness/bin/my-harness" }));
 ```
 
+### Registration workflow
+
+When adding an adapter, use this order:
+
+1. Implement the vendor-specific factory and normalize its capabilities to the shared vocabulary.
+2. Register the constructed adapter with the existing registry. Use
+   `HarnessDiscoveryAdapterRegistry` for a discovery-only adapter and
+   `HarnessAdapterRegistry` for a complete adapter.
+3. Add the adapter to the built-in factory only when it is maintained and
+   shipped as part of Switchyard. Do not add vendor-specific branches to
+   routing, matching, or registry classes.
+4. Add conformance cases for the registration, support matrix, configuration
+   precedence, executable override consistency, and fail-before-launch
+   behavior described in Section 6.
+
+The registration boundary is intentionally explicit: this release does not
+load third-party adapters from configuration or package names. A registration
+test should therefore construct the adapter, call `register`, and assert its
+id is returned by `list()` (and that a duplicate id is rejected).
+
 ## 4. Errors and fail-fast unsupported operations
 
 `src/harness/adapter.ts` exports the shared, vendor-neutral failure primitives every adapter must use:
@@ -167,6 +187,18 @@ Use `tests/adapter-conformance.test.mjs` as the template. At minimum, a new adap
 5. **Configuration precedence and diagnostics.** `resolveHarnessRuntimeConfig` and `validateSwitchyardConfig` behave per Section 5 for this harness's id, and invalid input produces actionable, secret-free diagnostics.
 
 For adapters that do not have (or should not require) a real vendor binary in CI, use `createStubHarnessAdapter` from `src/harness/stub.ts` as a reusable fixture; it implements the full contract, records every operation actually invoked (`.calls`), and defaults `fork` to unsupported so both the success and fail-fast paths are exercised from one instance.
+
+Run the focused suite while developing an adapter:
+
+```sh
+node --experimental-strip-types --test tests/adapter-conformance.test.mjs
+```
+
+The fixture and suite use the same production registry boundary as built-in
+adapters. Keep the test independent of a vendor installation; use a temporary
+executable fixture or the stub's recorded `.calls` instead of invoking a real
+binary. Before submitting, run the repository checks documented in the
+README, including `npm run test:docs`.
 
 ## 7. Security expectations
 

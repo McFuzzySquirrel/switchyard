@@ -120,6 +120,18 @@ handling, and security expectations, and
 for the design rationale. Configuration diagnostics always identify the
 adapter and field path and never echo the submitted value.
 
+To validate a new adapter without installing its vendor binary, register it
+through the existing registry and run the reusable conformance suite:
+
+```sh
+node --experimental-strip-types --test tests/adapter-conformance.test.mjs
+```
+
+The suite covers registration, normalized operation support, configuration
+precedence, executable-override consistency, and unsupported-operation
+fail-fast behavior. See the [adapter development guide](docs/adapter-development.md)
+for the registration workflow and fixture pattern.
+
 The `discover`, `capabilities`, and `explain` commands load the per-user JSON
 configuration automatically. Use `--config PATH`, `SWITCHYARD_CONFIG_PATH`, or
 the corresponding `{ configPath }` library option to select another file.

@@ -11,6 +11,7 @@
     "./capabilities": "./src/capabilities/index.ts",
     "./cli": "./src/cli.ts",
     "./commands": "./src/commands/index.ts",
+    "./composition": "./src/composition/index.ts",
     "./config": "./src/config/index.ts",
     "./discovery": "./src/discovery/index.ts",
     "./harness": "./src/harness/index.ts",

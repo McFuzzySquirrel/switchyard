@@ -4,6 +4,9 @@ All notable user-facing changes to Switchyard are documented here. The format fo
 
 ## [Unreleased]
 
+- Added versioned workflow and stage composition schemas with dependency-cycle
+  validation, workspace-contained artifact declarations, explicit stage input
+  handoffs, sequential execution, and durable per-stage results.
 - Added `switchyard verify` with selective harness/capability probes,
   atomic verification-state persistence, and fixed redacted warnings for
   probes that may access external services, invoke models, mutate state, or

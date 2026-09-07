@@ -41,15 +41,15 @@
 ## 5. Implementation Tasks
 
 ### Phase 1: Workflow Model
-- [ ] Define workflow and stage schemas.
-- [ ] Define declared artifact/context handoff.
-- [ ] Validate dependencies and stage ordering.
+- [x] Define workflow and stage schemas.
+- [x] Define declared artifact/context handoff.
+- [x] Validate dependencies and stage ordering.
 
 ### Phase 2: Execution and Demonstration
-- [ ] Orchestrate sequential adapter calls.
-- [ ] Persist per-stage results.
+- [x] Orchestrate sequential adapter calls.
+- [x] Persist per-stage results.
 - [ ] Implement OpenCode-to-Copilot implementation/review example.
-- [ ] Add partial-failure reporting.
+- [x] Add partial-failure reporting.
 
 ## 6. Testing Strategy
 
@@ -78,3 +78,19 @@ Key test scenarios:
 | # | Question | Default Assumption |
 |---|----------|--------------------|
 | 1 | Should opaque conversation continuation be transferred? | No; transfer declared files and metadata only |
+
+## 9. Implementation Notes
+
+The public composition API is exported from `src/composition/index.ts`:
+
+- `validateWorkflow` / `assertWorkflow` validate stage identifiers, dependency
+  ordering, cycles, declared inputs/outputs, and workspace-contained artifact
+  paths before any adapter is called.
+- `executeWorkflow` runs stages in topological order through normalized
+  `HarnessAdapter.execute` operations. Adapter selection is injectable so the
+  existing routing policy can be reused by callers.
+- Handoffs contain only declared artifact metadata and the explicitly requested
+  stage context fields. Opaque conversation state and process environment are
+  never copied.
+- `switchyard-workflow-state.json` is updated after each stage and retains
+  successful stage results and diagnostics when a later stage fails.

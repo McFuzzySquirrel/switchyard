@@ -6,3 +6,4 @@ export * from "./discovery/index.ts";
 export * from "./harness/index.ts";
 export * from "./output/index.ts";
 export * from "./verification/index.ts";
+export * from "./composition/index.ts";

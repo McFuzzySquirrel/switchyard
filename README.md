@@ -6,7 +6,7 @@ The product direction is described in [`docs/PRD.md`](docs/PRD.md). The library 
 
 ## Current status
 
-The current completed slice covers discovery schemas, executable lookup, bounded version/help probing, built-in discovery adapters, atomic local registry persistence, refreshable registry profiles, the `discover`, `capabilities`, `verify`, `explain`, and `run` commands, normalized all-required capability matching with deterministic ranking and human-readable explanations, the full vendor-neutral `HarnessAdapter` contract with explicit registration, typed local configuration with environment/executable/registry/probe-policy precedence, and the bounded process execution runtime connected to routed selection. Built-in adapters currently support `discover` only and fail fast on other operations, so `verify` and `run` against them deterministically report unavailable results until a real operation implementation is registered.
+The current completed slice covers discovery schemas, executable lookup, bounded version/help probing, built-in discovery adapters, atomic local registry persistence, refreshable registry profiles, the `discover`, `capabilities`, `verify`, `explain`, and `run` commands, normalized all-required capability matching with deterministic ranking and human-readable explanations, the full vendor-neutral `HarnessAdapter` contract with explicit registration, typed local configuration with environment/executable/registry/probe-policy precedence, the bounded process execution runtime connected to routed selection, and versioned workflow/stage schemas with declared artifact handoff validation. Built-in adapters currently support `discover` only and fail fast on other operations, so `verify` and `run` against them deterministically report unavailable results until a real operation implementation is registered.
 
 ## Development
 
@@ -101,6 +101,17 @@ CLI exit categories are stable and centralized in `src/output/exit-codes.ts`:
 The deprecated `usage` key aliases `invalidInput`. Timeout and cancellation
 are distinct nested execution failure categories, but intentionally map to
 the command-level `failure` code.
+
+## Workflow composition
+
+The exported composition contracts in `src/composition/index.ts` model
+multi-stage workflows with validated dependencies, capability requirements,
+workspace-contained artifact declarations, and explicit stage-to-stage inputs.
+Use `validateWorkflow` for structured validation or `assertWorkflow` when
+invalid definitions should raise `WorkflowValidationError`. The
+`executeWorkflow` helper runs validated stages sequentially and persists
+per-stage results without transferring undeclared conversation state or
+artifacts.
 
 JSON output is versioned with `schemaVersion: 1`. All command JSON payloads use
 the shared `serializeCommandJson` contract exported from `src/output/index.ts`;

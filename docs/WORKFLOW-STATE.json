@@ -1,12 +1,12 @@
 {
   "runId": "faef066b-e967-49ae-ba56-4dbe4255f89d",
   "startedAt": "2026-09-07T19:10:17.558Z",
-  "lastUpdatedAt": "2026-09-07T21:51:03.673Z",
+  "lastUpdatedAt": "2026-09-07T21:52:20.467Z",
   "manifestPath": "/home/mcfuzzysquirrel/Projects/switchyard/docs/EXECUTION-MANIFEST.json",
   "manifestVersion": "1.0",
   "harness": "copilot",
   "status": "running",
-  "currentPhase": "VERIFICATION-AND-RESILIENCE-2",
+  "currentPhase": "HARNESS-EXECUTION-RUNTIME-2",
   "tasks": {
     "DISCOVERY-AND-REGISTRY-1.1": {
       "taskId": "DISCOVERY-AND-REGISTRY-1.1",
@@ -423,10 +423,24 @@
     },
     "HARNESS-EXECUTION-RUNTIME-2.2": {
       "taskId": "HARNESS-EXECUTION-RUNTIME-2.2",
-      "status": "pending",
+      "status": "complete",
       "ownerAgent": "execution-runtime-engineer",
-      "attempt": 0,
-      "outputFiles": []
+      "attempt": 1,
+      "outputFiles": [
+        "CHANGELOG.md",
+        "README.md",
+        "src/cli.ts",
+        "src/output/index.ts",
+        "tests/commands.test.mjs",
+        "src/output/exit-codes.ts"
+      ],
+      "startedAt": "2026-09-07T21:51:03.702Z",
+      "completedAt": "2026-09-07T21:52:20.467Z",
+      "agentOutput": "● skill(versioned-cli-contracts)\n\nI’m tracing the existing run-result and CLI exit paths first, then I’ll add the taxonomy at the shared contract boundary and update focused tests/docs.\n\n● codegraph_explore (MCP: codegraph) · exit code taxonomy run command execution result CLI contract…\n  └ The project at /home/mcfuzzysquirrel/Projects/switchyard isn't indexed with c...\n\n● Read cli-contract-checklist.md\n  │ .github/skills/versioned-cli-contracts/references/cli-contract-checklist.md\n  └ 44 lines read\n\n/ Search (glob)\n  │ \"src/**/*.ts\"\n  └ 56 files found\n\n/ Search (glob)\n  │ \"tests/**/*\"\n  └ 17 files found\n\n/ Search (grep)\n  │ \"exit|Exit|status|timeout|cancel|unsupported|result\" in *.{ts,mjs} (src, tests)\n  └ 208 lines found\n\n● Read commands.test.mjs\n  │ tests/commands.test.mjs\n  └ 1 line read\n\n● Read json.ts\n  │ src/output/json.ts\n  └ 92 lines read\n\n● Read cli.ts\n  │ src/cli.ts\n  └ 468 lines read\n\n● Read run.ts\n  │ src/commands/run.ts\n  └ 354 lines read\n\n● Read adapter.ts\n  │ src/harness/adapter.ts\n  └ 371 lines read\n\n● Read process.ts\n  │ src/harness/process.ts\n  └ 313 lines read\n\n● Read run-command.test.mjs\n  │ tests/run-command.test.mjs\n  └ 480 lines read\n\n● Read package.json\n  └ 33 lines read\n\n● Read CHANGELOG.md\n  └ 124 lines read\n\n● Read README.md\n  └ L1:180 (179 lines read)\n\n● Read index.ts\n  │ src/index.ts\n  └ 8 lines read\n\n● Read process-execution.test.mjs\n  │ tests/process-execution.test.mjs\n  └ 149 lines read\n\n● Read index.ts\n  │ src/output/index.ts\n  └ 2 lines read\n\n● Read commands.test.mjs\n  │ tests/commands.test.mjs\n  └ L1:130 (130 lines read)\n\n● Read index.ts\n  │ src/commands/index.ts\n  └ 4 lines read\n\n/ Search (grep)\n  │ \"CLI_EXIT_CODES|exit code|exit-code|failureCategory|timed-out|cancelled\" in *.md (docs)\n  └ 38 lines found\n\n● Read 0006-run-command-execution-routing.md\n  │ docs/adr/0006-run-command-execution-routing.md\n  └ 80 lines read\n\n● Read explain.ts\n  │ src/commands/explain.ts\n  └ L1:110 (110 lines read)\n\n● Read harness-execution-runtime.md\n  │ docs/features/harness-execution-runtime.md\n  └ 136 lines read\n\n/ Search (grep)\n  │ \"return CLI_EXIT_CODES|status ===\" in *.ts (src)\n  └ 57 lines found\n\n● Read tsconfig.json\n  └ 13 lines read\n\n● Read decision.ts\n  │ src/output/decision.ts\n  └ 49 lines read\n\n● Read capabilities.ts\n  │ src/commands/capabilities.ts\n  └ L1:80 (80 lines read)\n\n● Read discover.ts\n  │ src/commands/discover.ts\n  └ L1:80 (80 lines read)\n\nThe runtime already carries distinct timeout/cancellation failure categories, but CLI numeric mapping is duplicated inline and undocumented as a single contract. I’m centralizing the stable categories and mapping, while preserving every existing numeric value and alias.\n\n● Edit\n  │ Create src/output/exit-codes.ts\n  │ Edit src/output/index.ts\n  │ Edit src/cli.ts\n  │ Edit README.md\n  │ Edit CHANGELOG.md\n  └ Edit tests/commands.test.mjs\n\n● Run documentation governance tests (shell)\n  │ npm run test:docs\n  └ 26 lines…\n\n● Run TypeScript typecheck (shell)\n  │ npm run typecheck\n  └ 3 lines…\n\n● Run project tests (shell)\n  │ npm test\n  └ 23 lines…\n\n● Confirm full test summary (shell)\n  │ tail -n 12\n  │ /tmp/1788817922852-copilot-tool-output-121574-c44ed872-9dd4-4456-8f5c-939ab9a070c3.txt\n  └ 13 lines…\n\n● Review exit taxonomy changes (shell)\n  │ git status --short && git diff --stat && git diff -- src/output/exit-codes.ts src/cli.ts\n  │ src/output/index.ts tests/commands.test.mjs\n  └ 108 lines…\n\n● Inspect workflow metadata changes (shell)\n  │ git diff -- docs/EXECUTION-AUDIT.jsonl docs/WORKFLOW-STATE.json\n  └ 48 lines…\n\nImplemented the stable CLI exit-code taxonomy.\n\n**Changes:**\n- Added `src/output/exit-codes.ts` with centralized `CLI_EXIT_CODES`, status-to-code mapping, and documented compatibility behavior.\n- Updated `src/cli.ts` to use the shared mapping.\n- Re-exported the taxonomy through `src/output/index.ts` and the package root.\n- Added coverage for all public statuses in `tests/commands.test.mjs`.\n- Documented the codes in `README.md` and `CHANGELOG.md`.\n\nThe existing codes remain unchanged: success `0`, partial `1`, invalid input `2`, failure `3`, no match `4`, and unavailable `5`. Timeout and cancellation retain their detailed execution categories while mapping to command-level failure `3`.\n\nAll 118 tests, type checking, and documentation checks pass.\n\n",
+      "artifactId": "work-harness-execution-runtime-2-2-001",
+      "inputArtifactIds": [
+        "work-harness-execution-runtime-2-1-001"
+      ]
     },
     "HARNESS-EXECUTION-RUNTIME-2.3": {
       "taskId": "HARNESS-EXECUTION-RUNTIME-2.3",

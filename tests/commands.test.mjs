@@ -21,6 +21,7 @@ import {
   serializeCommandJson,
   DECISION_SCHEMA_VERSION,
   CLI_EXIT_CODES,
+  exitCodeForStatus,
   runCli,
 } from "../src/index.ts";
 
@@ -37,6 +38,33 @@ test("CLI exposes stable exit categories for invalid input and no-match decision
     noMatch: 4,
     unavailable: 5,
   });
+});
+
+test("CLI maps every public command status to the stable exit taxonomy", () => {
+  assert.deepEqual(
+    Object.fromEntries([
+      ["success", exitCodeForStatus("success")],
+      ["dry-run", exitCodeForStatus("dry-run")],
+      ["empty", exitCodeForStatus("empty")],
+      ["partial", exitCodeForStatus("partial")],
+      ["invalid-input", exitCodeForStatus("invalid-input")],
+      ["no-match", exitCodeForStatus("no-match")],
+      ["unavailable", exitCodeForStatus("unavailable")],
+      ["execution-failure", exitCodeForStatus("execution-failure")],
+      ["error", exitCodeForStatus("error")],
+    ]),
+    {
+      success: 0,
+      "dry-run": 0,
+      empty: 0,
+      partial: 1,
+      "invalid-input": 2,
+      "no-match": 4,
+      unavailable: 5,
+      "execution-failure": 3,
+      error: 3,
+    },
+  );
 });
 
 function profile(id = "fixture", verification = "not-requested", capabilityNames = ["headless"]) {

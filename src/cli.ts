@@ -34,17 +34,9 @@ import type { HarnessAdapter, HarnessAdapterRegistry } from "./harness/index.ts"
 import { redactSecrets } from "./discovery/probe.ts";
 import { COMMAND_SCHEMA_VERSION } from "./commands/discover.ts";
 import { serializeCommandJson } from "./output/json.ts";
+import { CLI_EXIT_CODES, exitCodeForStatus } from "./output/exit-codes.ts";
 
-export const CLI_EXIT_CODES = Object.freeze({
-  success: 0,
-  partial: 1,
-  invalidInput: 2,
-  /** @deprecated Use invalidInput for the public input-validation category. */
-  usage: 2,
-  failure: 3,
-  noMatch: 4,
-  unavailable: 5,
-});
+export { CLI_EXIT_CODES, exitCodeForStatus } from "./output/exit-codes.ts";
 
 export interface CliIo {
   readonly stdout?: (text: string) => void;
@@ -419,11 +411,7 @@ export async function runCli(
             ? formatRunHuman(result as Awaited<ReturnType<typeof run>>)
             : formatExplainHuman(result as Awaited<ReturnType<typeof explain>>));
     }
-    if (result.status === "partial") return CLI_EXIT_CODES.partial;
-    if (result.status === "no-match") return CLI_EXIT_CODES.noMatch;
-    if (result.status === "unavailable") return CLI_EXIT_CODES.unavailable;
-    if (result.status === "execution-failure") return CLI_EXIT_CODES.failure;
-    return CLI_EXIT_CODES.success;
+    return exitCodeForStatus(result.status);
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
     if (error instanceof RunInputError) {

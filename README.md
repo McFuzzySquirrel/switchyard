@@ -75,6 +75,21 @@ JSON result's nested `execution` field retains the finer-grained
 `ExecutionResult` status and failure category. `no-match` and
 `invalid-input` reuse the same `4` and `2` exit categories as `explain`.
 
+CLI exit categories are stable and centralized in `src/output/exit-codes.ts`:
+
+| Category | Code | Meaning |
+| --- | ---: | --- |
+| `success` | `0` | The command completed successfully, including `dry-run`. |
+| `partial` | `1` | The command completed with some refresh failures. |
+| `invalidInput` | `2` | Arguments or command input failed validation. |
+| `failure` | `3` | A command or selected harness execution failed. |
+| `noMatch` | `4` | No harness satisfied the requested capabilities. |
+| `unavailable` | `5` | The selected harness cannot execute the request. |
+
+The deprecated `usage` key aliases `invalidInput`. Timeout and cancellation
+are distinct nested execution failure categories, but intentionally map to
+the command-level `failure` code.
+
 JSON output is versioned with `schemaVersion: 1`. All command JSON payloads use
 the shared `serializeCommandJson` contract exported from `src/output/index.ts`;
 the serializer preserves command-owned fields while enforcing the common

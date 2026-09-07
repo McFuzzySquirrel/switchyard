@@ -25,6 +25,11 @@ All notable user-facing changes to Switchyard are documented here. The format fo
   [ADR-0006](docs/adr/0006-run-command-execution-routing.md).
   Dry-run previews return a synthetic result after routing and never resolve
   or invoke an adapter.
+- Centralized the stable CLI exit-code taxonomy and status-to-code mapping in
+  `src/output/exit-codes.ts`, preserving codes `0` through `5` and the
+  deprecated `usage` alias while documenting that timeout and cancellation
+  remain nested execution categories under the generic execution-failure
+  command exit.
 - `--requires`, `--preferred-harness`, and `--allow-fallback` are now shared
   between `explain` and `run` instead of being explain-only options.
 - Implemented the `discover` and `capabilities` commands with versioned JSON

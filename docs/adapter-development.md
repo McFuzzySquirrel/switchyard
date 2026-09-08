@@ -75,6 +75,12 @@ vendor-specific argument translation.
 3. **Discover.** `discover()` probes the executable and returns a schema-valid `HarnessProfile` (see `src/discovery/schema.ts`). Discovery never proves runtime capability — only that a capability was *advertised*.
 4. **Verify** (when supported). `verify()` runs bounded, adapter-specific probes and returns `VerificationResult[]`, updating the profile's `verification` state independently of `discovery`.
 5. **Execute / resume / fork** (when supported). These operations invoke the vendor process. Every one of them must check `supportedOperations` (directly, or through `assertOperationSupported`) *before* doing any adapter-specific work.
+
+Session lifecycle operations are exposed through the top-level `resume` and
+`fork` commands. Callers provide the provider-specific harness ID and session
+ID; adapters translate those values to vendor CLI arguments without a shell.
+OpenCode supports both operations. GitHub Copilot supports resume, but does
+not expose a dedicated fork operation and must report it as unsupported.
 6. **Fail fast when unsupported.** An operation an adapter does not support must reject before any subprocess is spawned — never after a vendor command starts and then errors out. See Section 4.
 
 ## 3. Registration

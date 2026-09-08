@@ -53,6 +53,13 @@ import type { HarnessAdapter, HarnessAdapterRegistry } from "./harness/index.ts"
 import { normalizeCapabilityName, type CapabilityName } from "./capabilities/vocabulary.ts";
 import type { ProbeRisk } from "./verification/policy.ts";
 import { redactSecrets } from "./discovery/probe.ts";
+import {
+  fork,
+  formatSessionHuman,
+  formatSessionJson,
+  resume,
+  type SessionCommandOptions,
+} from "./commands/session.ts";
 import { COMMAND_SCHEMA_VERSION } from "./commands/discover.ts";
 import { serializeCommandJson } from "./output/json.ts";
 import { CLI_EXIT_CODES, exitCodeForStatus } from "./output/exit-codes.ts";
@@ -67,7 +74,7 @@ export interface CliIo {
 }
 
 interface ParsedArguments {
-  readonly command: "discover" | "capabilities" | "explain" | "run" | "prompt" | "verify" | "compose" | "help";
+  readonly command: "discover" | "capabilities" | "explain" | "run" | "prompt" | "verify" | "resume" | "fork" | "compose" | "help";
   readonly json: boolean;
   readonly refresh: boolean;
   readonly verified: boolean;
@@ -81,6 +88,7 @@ interface ParsedArguments {
   readonly staleAfterMs?: number;
   readonly executable?: string;
   readonly task?: string;
+  readonly sessionId?: string;
   readonly cwd?: string;
   readonly timeoutMs?: number;
   readonly dryRun: boolean;
@@ -127,7 +135,7 @@ function parseArguments(args: readonly string[]): ParsedArguments {
     command !== "explain" &&
     command !== "run" &&
     command !== "prompt" &&
-    command !== "verify" &&
+     command !== "verify" && command !== "resume" && command !== "fork" &&
     command !== "compose"
   ) {
     throw usageError(`Unknown command '${command}'`);
@@ -149,6 +157,7 @@ function parseArguments(args: readonly string[]): ParsedArguments {
   let harnessId: string | undefined;
   let staleAfterMs: number | undefined;
   let executable: string | undefined;
+  let sessionId: string | undefined;
   let capabilities: string[] = [];
   let risks: ProbeRisk[] = [];
   let allowMutatingProbes = false;
@@ -202,10 +211,15 @@ function parseArguments(args: readonly string[]): ParsedArguments {
         dryRun = true;
         break;
       case "--harness":
-        if (command !== "verify") {
-          throw usageError(`${argument} is only supported by the verify command`);
+        if (command !== "verify" && command !== "resume" && command !== "fork") {
+          throw usageError(`${argument} is only supported by verify, resume, and fork commands`);
         }
         harnessId = valueAfter(args, index, "--harness");
+        index += 1;
+        break;
+      case "--session":
+        if (command !== "resume" && command !== "fork") throw usageError(`${argument} is only supported by resume and fork`);
+        sessionId = valueAfter(args, index, "--session");
         index += 1;
         break;
       case "--risk": {
@@ -237,15 +251,15 @@ function parseArguments(args: readonly string[]): ParsedArguments {
         allowModelInvocation = true;
         break;
       case "--cwd":
-        if (command !== "run" && command !== "prompt") {
-          throw usageError(`${argument} is only supported by the run command`);
+        if (command !== "run" && command !== "prompt" && command !== "resume" && command !== "fork") {
+          throw usageError(`${argument} is only supported by execution commands`);
         }
         cwd = valueAfter(args, index, "--cwd");
         index += 1;
         break;
       case "--timeout-ms": {
-        if (command !== "run" && command !== "prompt") {
-          throw usageError(`${argument} is only supported by the run command`);
+        if (command !== "run" && command !== "prompt" && command !== "resume" && command !== "fork") {
+          throw usageError(`${argument} is only supported by execution commands`);
         }
         const value = valueAfter(args, index, "--timeout-ms");
         timeoutMs = Number(value);
@@ -294,8 +308,8 @@ function parseArguments(args: readonly string[]): ParsedArguments {
           }
           capabilities.push(argument.slice("--capability=".length));
         } else if (argument.startsWith("--harness=")) {
-          if (command !== "verify") {
-            throw usageError("--harness is only supported by the verify command");
+          if (command !== "verify" && command !== "resume" && command !== "fork") {
+            throw usageError("--harness is only supported by verify, resume, and fork");
           }
           harnessId = argument.slice("--harness=".length);
         } else if (argument.startsWith("--risk=")) {
@@ -314,9 +328,12 @@ function parseArguments(args: readonly string[]): ParsedArguments {
             );
           }
           preferredHarness = argument.slice("--preferred-harness=".length);
+        } else if (argument.startsWith("--session=")) {
+          if (command !== "resume" && command !== "fork") throw usageError("--session is only supported by resume and fork");
+          sessionId = argument.slice("--session=".length);
         } else if (argument.startsWith("--")) {
           throw usageError(`Unknown option '${argument}'`);
-        } else if (command === "run" || command === "prompt") {
+        } else if (command === "run" || command === "prompt" || command === "resume" || command === "fork") {
           taskParts.push(argument);
         } else if (command === "compose") {
           if (workflowPath !== undefined) {
@@ -338,6 +355,7 @@ function parseArguments(args: readonly string[]): ParsedArguments {
     ...(cwd === undefined ? {} : { cwd }),
     ...(timeoutMs === undefined ? {} : { timeoutMs }),
     ...(taskParts.length === 0 ? {} : { task: taskParts.join(" ") }),
+    ...(sessionId === undefined ? {} : { sessionId }),
     ...(workflowPath === undefined ? {} : { workflowPath }),
     ...(requires === undefined ? {} : { requires }),
     ...(preferredHarness === undefined ? {} : { preferredHarness }),
@@ -358,7 +376,7 @@ function parseArguments(args: readonly string[]): ParsedArguments {
 
 function printHelp(): string {
   return [
-    "Usage: switchyard <discover|capabilities|explain|run|prompt|verify|compose> [options]",
+    "Usage: switchyard <discover|capabilities|explain|run|prompt|verify|resume|fork|compose> [options]",
     "",
     "Commands:",
     "  discover       inspect configured harnesses and update the local registry",
@@ -367,6 +385,8 @@ function printHelp(): string {
     "  run            route a task and execute it through the selected harness",
     "  prompt         route and execute a prompt (alias for run)",
     "  verify         run bounded capability probes and record verification state",
+    "  resume         continue an existing provider session",
+    "  fork           fork an existing provider session",
     "  compose        run a declared multi-stage workflow across selected adapters",
     "",
     "Options:",
@@ -383,6 +403,7 @@ function printHelp(): string {
     "  --harness-id <id>         refresh one adapter (discover)",
     "  --executable <path>       override the executable for discovery",
     "  --harness <id>            verify one harness (verify)",
+    "  --session <id>            provider session ID (resume, fork)",
     "  --capability <name>       verify one capability (verify; repeatable)",
     "  --risk <class>            declare probe risk (verify; repeatable)",
     "  --allow-mutating-probes   approve probes that may mutate state",
@@ -404,7 +425,7 @@ function printHelp(): string {
 
 function commandOptions(
   parsed: ParsedArguments,
-): DiscoverCommandOptions | CapabilitiesCommandOptions | ExplainCommandOptions | RunCommandOptions | VerifyCommandOptions | ComposeCommandOptions {
+): DiscoverCommandOptions | CapabilitiesCommandOptions | ExplainCommandOptions | RunCommandOptions | VerifyCommandOptions | ComposeCommandOptions | SessionCommandOptions {
   if (parsed.command === "discover") {
     const options: DiscoverCommandOptions = {
       ...(parsed.registryPath === undefined ? {} : { registryPath: parsed.registryPath }),
@@ -470,6 +491,19 @@ function commandOptions(
       },
     };
   }
+  if (parsed.command === "resume" || parsed.command === "fork") {
+    if (parsed.harnessId === undefined || parsed.sessionId === undefined) {
+      throw usageError(`${parsed.command} requires --harness and --session`);
+    }
+    return {
+      command: parsed.command,
+      harnessId: parsed.harnessId,
+      sessionId: parsed.sessionId,
+      ...(parsed.task === undefined ? {} : { task: parsed.task }),
+      ...(parsed.cwd === undefined ? {} : { cwd: parsed.cwd }),
+      ...(parsed.timeoutMs === undefined ? {} : { timeoutMs: parsed.timeoutMs }),
+    };
+  }
   if (parsed.command === "compose") {
     const options: ComposeCommandOptions = {
       ...(parsed.registryPath === undefined ? {} : { registryPath: parsed.registryPath }),
@@ -496,10 +530,10 @@ function commandOptions(
 
 function jsonInvalidInputCommand(
   args: readonly string[],
-): "explain" | "run" | "prompt" | "verify" | "compose" | undefined {
+): "explain" | "run" | "prompt" | "verify" | "resume" | "fork" | "compose" | undefined {
   const command = args[0];
   if (
-    (command === "explain" || command === "run" || command === "prompt" || command === "verify" || command === "compose") &&
+    (command === "explain" || command === "run" || command === "prompt" || command === "verify" || command === "resume" || command === "fork" || command === "compose") &&
     args.includes("--json")
   ) {
     return command;
@@ -586,12 +620,22 @@ export async function runCli(
                 ...(options as RunCommandOptions),
                 ...(_executionAdapters === undefined ? {} : { adapters: _executionAdapters }),
               })
-          : command.command === "verify"
+      : command.command === "verify"
             ? await verify({
                 ...(options as VerifyCommandOptions),
                 ...(_executionAdapters === undefined ? {} : { adapters: _executionAdapters }),
               })
-            : parsed.command === "compose"
+            : command.command === "resume"
+              ? await resume({
+                  ...(options as SessionCommandOptions),
+                  ...(_executionAdapters === undefined ? {} : { adapters: _executionAdapters }),
+                })
+              : command.command === "fork"
+                ? await fork({
+                    ...(options as SessionCommandOptions),
+                    ...(_executionAdapters === undefined ? {} : { adapters: _executionAdapters }),
+                  })
+              : parsed.command === "compose"
               ? await compose({
                   ...(options as ComposeCommandOptions),
                   ...(_executionAdapters === undefined ? {} : { adapters: _executionAdapters }),
@@ -606,7 +650,9 @@ export async function runCli(
             ? formatRunJson(result as Awaited<ReturnType<typeof run>>)
             : command.command === "verify"
               ? formatVerifyJson(result as Awaited<ReturnType<typeof verify>>)
-              : parsed.command === "compose"
+              : command.command === "resume" || command.command === "fork"
+                ? formatSessionJson(result as Awaited<ReturnType<typeof resume>>)
+                : parsed.command === "compose"
                 ? formatComposeJson(result as Awaited<ReturnType<typeof compose>>)
                 : formatExplainJson(result as Awaited<ReturnType<typeof explain>>));
     } else {
@@ -618,7 +664,9 @@ export async function runCli(
             ? formatRunHuman(result as Awaited<ReturnType<typeof run>>)
               : parsed.command === "verify"
                 ? formatVerifyHuman(result as Awaited<ReturnType<typeof verify>>)
-                : parsed.command === "compose"
+                 : command.command === "resume" || command.command === "fork"
+                   ? formatSessionHuman(result as Awaited<ReturnType<typeof resume>>)
+                   : parsed.command === "compose"
                   ? formatComposeHuman(result as Awaited<ReturnType<typeof compose>>)
                   : formatExplainHuman(result as Awaited<ReturnType<typeof explain>>));
     }

@@ -301,13 +301,14 @@ switch (process.argv[2]) {
 
     const adapter = createAdapter({ executable, env: { PATH: "" }, now: fixedClock });
 
-      assert.deepEqual(adapter.supportedOperations, {
+    const expectedOperations = {
       discover: true,
       verify: false,
-        execute: true,
-      resume: false,
-      fork: false,
-    });
+      execute: true,
+      resume: command === "opencode" || command === "copilot",
+      fork: command === "opencode",
+    };
+    assert.deepEqual(adapter.supportedOperations, expectedOperations);
 
     const profile = await adapter.discover();
     assert.equal(profile.status, "available");
@@ -319,11 +320,11 @@ switch (process.argv[2]) {
     assert.equal(await exists(sentinel), true);
     await unlink(sentinel);
 
-    for (const [operation, invoke] of [
+    const unsupported = [
       ["verify", () => adapter.verify(["headless"], {})],
-      ["resume", () => adapter.resume({ sessionId: "s1" })],
-      ["fork", () => adapter.fork({ sessionId: "s1" })],
-    ]) {
+      ...(command === "copilot" ? [["fork", () => adapter.fork({ sessionId: "s1" })]] : []),
+    ];
+    for (const [operation, invoke] of unsupported) {
       await assert.rejects(
         invoke,
         (error) => {

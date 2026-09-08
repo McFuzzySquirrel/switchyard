@@ -89,8 +89,8 @@ export interface GitHubCopilotAdapterOptions extends HarnessDiscoveryOptions {}
 
 /**
  * Creates the GitHub Copilot adapter. Prompt execution uses Copilot's
- * non-interactive `--prompt` mode with a direct argument array; verification,
- * resume, and fork remain unsupported.
+ * non-interactive `--prompt` mode with a direct argument array. Copilot
+ * supports resuming sessions, but has no provider fork operation.
  */
 export function createGitHubCopilotAdapter(
   options: GitHubCopilotAdapterOptions = {},
@@ -100,7 +100,10 @@ export function createGitHubCopilotAdapter(
 
   return Object.freeze({
     id: "copilot",
-    supportedOperations: DISCOVERY_AND_EXECUTION_OPERATIONS,
+    supportedOperations: Object.freeze({
+      ...DISCOVERY_AND_EXECUTION_OPERATIONS,
+      resume: true,
+    }),
     async discover() {
       return discoveryAdapter.discover(resolvedDiscoveryOptions);
     },
@@ -123,8 +126,21 @@ export function createGitHubCopilotAdapter(
         nonInteractive: request.nonInteractive ?? true,
       });
     },
-    async resume(_request: ResumeRequest): Promise<ExecutionResult> {
-      return throwUnsupportedOperation("copilot", "resume");
+    async resume(request: ResumeRequest): Promise<ExecutionResult> {
+      const executable = resolvedDiscoveryOptions.executable ??
+        resolvedDiscoveryOptions.configuredExecutable ?? "copilot";
+      const args = [`--resume=${request.sessionId}`];
+      if (request.task !== undefined) args.push("--prompt", request.task);
+      return executeProcess(executable, args, {
+        task: request.task ?? "",
+        cwd: request.cwd ?? resolvedDiscoveryOptions.cwd,
+        env: { ...resolvedDiscoveryOptions.env, ...request.env },
+        environmentPolicy: request.environmentPolicy,
+        timeoutMs: request.timeoutMs ?? resolvedDiscoveryOptions.timeoutMs,
+        maxOutputLength: request.maxOutputLength ?? resolvedDiscoveryOptions.maxOutputLength,
+        signal: request.signal,
+        nonInteractive: true,
+      });
     },
     async fork(_request: ForkRequest): Promise<ForkResult> {
       return throwUnsupportedOperation("copilot", "fork");

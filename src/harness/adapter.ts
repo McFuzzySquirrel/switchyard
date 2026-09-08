@@ -231,11 +231,23 @@ export interface ExecutionResult {
 export interface ResumeRequest {
   readonly sessionId: string;
   readonly task?: string;
+  readonly cwd?: string;
+  readonly env?: Readonly<Record<string, string | undefined>>;
+  readonly environmentPolicy?: ExecutionEnvironmentPolicy;
+  readonly timeoutMs?: number;
+  readonly maxOutputLength?: number;
+  readonly signal?: AbortSignal;
 }
 
 export interface ForkRequest {
   readonly sessionId: string;
   readonly task?: string;
+  readonly cwd?: string;
+  readonly env?: Readonly<Record<string, string | undefined>>;
+  readonly environmentPolicy?: ExecutionEnvironmentPolicy;
+  readonly timeoutMs?: number;
+  readonly maxOutputLength?: number;
+  readonly signal?: AbortSignal;
 }
 
 export interface ForkResult {

@@ -9,6 +9,9 @@ All notable user-facing changes to Switchyard are documented here. The format fo
   disposable workspace.
 - Added a [fork capability routing exercise](docs/examples/fork-capability-routing.md)
   showing a normalized capability requirement selecting OpenCode for execution.
+- Clarified that OpenCode's advertised `fork` capability supports capability
+  discovery and routing, while the dedicated fork lifecycle operation remains
+  unsupported.
 - Added terminal-style GIF and MP4 recordings for both live exercises, plus a
   local recorder script that replays the exercises in a pseudo-terminal.
 - Slowed the terminal demo GIF and MP4 recordings to six frames per second so

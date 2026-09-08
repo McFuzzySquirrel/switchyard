@@ -20,8 +20,10 @@ Routing is deterministic and explainable: requirements are matched explicitly, p
 
 > [!NOTE]
 > Switchyard is currently a private development package. The built-in OpenCode
-> and GitHub Copilot adapters support bounded prompt execution; verification,
-> resume, and fork remain unsupported.
+> and GitHub Copilot adapters support bounded prompt execution. OpenCode's
+> advertised `fork` capability can be used for capability-based routing, but
+> verification, resume, and the dedicated fork lifecycle operation remain
+> unsupported.
 
 ## Current status
 

@@ -18,8 +18,8 @@ const observedAt = "2026-09-07T19:00:00.000Z";
 const fixedClock = () => new Date(observedAt);
 
 async function makeScript(directory, name, content) {
-  const path = join(directory, name);
-  await writeFile(path, `#!/bin/sh\n${content}\n`);
+  const path = join(directory, `${name}.mjs`);
+  await writeFile(path, `#!/usr/bin/env node\n${content}\n`);
   await chmod(path, 0o755);
   return path;
 }
@@ -96,22 +96,22 @@ test("discovers OpenCode through an executable override with bounded version and
     directory,
     "custom-opencode",
     `
-case "$1" in
-  --version) echo "opencode 9.8.7"; exit 0 ;;
-  --help)
-    echo "Usage: opencode [command]"
-    echo "Commands: run mcp fork"
-    echo "Options: --model <model> --continue"
-    echo "Providers: Ollama local models"
-    printf '%0500d\n' 0
-    exit 0 ;;
-  *) echo "unexpected probe argument: $1"; exit 32 ;;
-esac`,
+if (process.argv[2] === "--version") console.log("opencode 9.8.7");
+else if (process.argv[2] === "--help") {
+ console.log("Usage: opencode [command]");
+ console.log("Commands: run mcp fork");
+ console.log("Options: --model <model> --continue");
+ console.log("Providers: Ollama local models");
+ console.log("0".repeat(500));
+} else {
+ console.log("unexpected probe argument:", process.argv[2]);
+ process.exitCode = 32;
+}`,
   );
   await makeScript(
     directory,
     "opencode",
-    'if [ "$1" = "--version" ]; then echo "opencode 0.0.1"; else echo "Usage: opencode"; fi',
+    'if (process.argv[2] === "--version") console.log("opencode 0.0.1"); else console.log("Usage: opencode");',
   );
 
   const profile = await createOpenCodeDiscoveryAdapter().discover({
@@ -141,17 +141,14 @@ test("discovers GitHub Copilot through a configured executable and normalizes it
   t.after(() => rm(directory, { recursive: true, force: true }));
   const configured = await makeScript(
     directory,
-    "copilot-fixture",
-    `
-case "$1" in
-  --version) echo "github copilot cli v1.2.3"; exit 0 ;;
-  --help)
-    echo "Usage: copilot --prompt <task>"
-    echo "Options: --model <model> --resume"
-    echo "Commands: mcp issues pull requests"
-    exit 0 ;;
-  *) exit 32 ;;
-esac`,
+   "copilot-fixture",
+   `
+if (process.argv[2] === "--version") console.log("github copilot cli v1.2.3");
+else if (process.argv[2] === "--help") {
+ console.log("Usage: copilot --prompt <task>");
+ console.log("Options: --model <model> --resume");
+ console.log("Commands: mcp issues pull requests");
+} else process.exitCode = 32;`,
   );
 
   const profile = await createGitHubCopilotDiscoveryAdapter().discover({
@@ -206,13 +203,11 @@ test("classifies successful but malformed help output without claiming capabilit
   t.after(() => rm(directory, { recursive: true, force: true }));
   const executable = await makeScript(
     directory,
-    "opencode",
-    `
-case "$1" in
-  --version) echo "opencode 2.0.0"; exit 0 ;;
-  --help) echo "this is a wrapper banner, not help"; exit 0 ;;
-  *) exit 32 ;;
-esac`,
+   "opencode",
+   `
+if (process.argv[2] === "--version") console.log("opencode 2.0.0");
+else if (process.argv[2] === "--help") console.log("this is a wrapper banner, not help");
+else process.exitCode = 32;`,
   );
 
   const profile = await createOpenCodeDiscoveryAdapter().discover({

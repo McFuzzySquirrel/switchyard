@@ -71,6 +71,22 @@ export interface HarnessMetadataProbeResult {
 const DEFAULT_TIMEOUT_MS = 5000;
 const DEFAULT_MAX_OUTPUT_LENGTH = 8192;
 
+function launchCommand(
+  executable: string,
+  args: readonly string[],
+): { executable: string; args: readonly string[] } {
+  // Windows cannot launch Node scripts by their file association when shell
+  // execution is disabled. Prefix them with the current Node executable while
+  // preserving the explicit argv/no-shell process boundary.
+  if (
+    process.platform === "win32" &&
+    /\.(?:cjs|js|mjs)$/i.test(executable)
+  ) {
+    return { executable: process.execPath, args: [executable, ...args] };
+  }
+  return { executable, args };
+}
+
 /** Strips ANSI escape codes from terminal output strings. */
 export function stripAnsi(text: string): string {
   return text.replace(
@@ -204,7 +220,8 @@ export async function probeExecutable(
     }
 
     try {
-      child = spawn(executable, args, {
+      const command = launchCommand(executable, args);
+      child = spawn(command.executable, command.args, {
         cwd,
         env,
         stdio: ["ignore", "pipe", "pipe"],

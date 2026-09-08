@@ -31,6 +31,14 @@ import {
 const observedAt = "2026-09-07T19:00:00.000Z";
 const execFileAsync = promisify(execFile);
 
+function textOutput(value) {
+  return value === undefined ? "" : Buffer.isBuffer(value) ? value.toString("utf8") : value;
+}
+
+function subprocessOptions() {
+  return { cwd: process.cwd(), encoding: "utf8", windowsHide: true };
+}
+
 test("CLI exposes stable exit categories for invalid input and no-match decisions", () => {
   assert.deepEqual(CLI_EXIT_CODES, {
     success: 0,
@@ -579,8 +587,8 @@ test("CLI explain fallback controls have distinct no-match and success outcomes"
 
   const run = (args) => execFileAsync(
     process.execPath,
-    ["--experimental-strip-types", "src/cli.ts", ...args],
-    { cwd: process.cwd(), encoding: "utf8" },
+    ["--no-warnings", "--experimental-strip-types", "src/cli.ts", ...args],
+    subprocessOptions(),
   );
   await assert.rejects(
     run([
@@ -593,7 +601,7 @@ test("CLI explain fallback controls have distinct no-match and success outcomes"
     ]),
     (error) => {
       assert.equal(error.code, 4);
-      const payload = JSON.parse(error.stdout);
+      const payload = JSON.parse(textOutput(error.stdout));
       assert.equal(payload.status, "no-match");
       assert.equal(payload.policy.allowFallback, false);
       assert.equal(payload.policy.attempts[0].qualifies, false);
@@ -711,8 +719,8 @@ test("explain subprocess emits stable JSON for success and distinct no-match/inv
 
   const run = (args) => execFileAsync(
     process.execPath,
-    ["--experimental-strip-types", "src/cli.ts", ...args],
-    { cwd: process.cwd(), encoding: "utf8" },
+    ["--no-warnings", "--experimental-strip-types", "src/cli.ts", ...args],
+    subprocessOptions(),
   );
   const success = await run(["explain", "--requires=headless", "--json", "--registry", registryPath]);
   assert.equal(success.stderr, "");
@@ -722,7 +730,7 @@ test("explain subprocess emits stable JSON for success and distinct no-match/inv
     run(["explain", "--requires=mcp", "--json", "--registry", registryPath]),
     (error) => {
       assert.equal(error.code, 4);
-      assert.equal(JSON.parse(error.stdout).status, "no-match");
+      assert.equal(JSON.parse(textOutput(error.stdout)).status, "no-match");
       return true;
     },
   );
@@ -730,7 +738,7 @@ test("explain subprocess emits stable JSON for success and distinct no-match/inv
     run(["explain", "--requires=headless,headless", "--json"]),
     (error) => {
       assert.equal(error.code, 2);
-      assert.equal(JSON.parse(error.stdout).status, "invalid-input");
+      assert.equal(JSON.parse(textOutput(error.stdout)).status, "invalid-input");
       return true;
     },
   );

@@ -89,6 +89,21 @@ function diagnostic(error: string): string {
   return boundExcerpt(redactSecrets(error), 4096);
 }
 
+function launchCommand(
+  executable: string,
+  args: readonly string[],
+): { executable: string; args: readonly string[] } {
+  // Windows does not execute .js/.mjs/.cjs files directly.  Treating these
+  // files as node-based test/adapter shims keeps the no-shell contract intact.
+  if (
+    process.platform === "win32" &&
+    /\.(?:cjs|js|mjs)$/i.test(executable)
+  ) {
+    return { executable: process.execPath, args: [executable, ...args] };
+  }
+  return { executable, args };
+}
+
 async function terminateProcessTree(
   child: ReturnType<typeof spawn>,
 ): Promise<void> {
@@ -245,7 +260,8 @@ export async function executeProcess(
     if (finished) return;
 
     try {
-      child = spawn(executable, [...args], {
+      const command = launchCommand(executable, args);
+      child = spawn(command.executable, [...command.args], {
         cwd: request.cwd,
         env: buildEnvironment(
           request.environmentPolicy,

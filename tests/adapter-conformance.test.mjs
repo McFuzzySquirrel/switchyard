@@ -66,8 +66,8 @@ test("registry rejects adapters with malformed operation support", () => {
 });
 
 async function makeScript(directory, name, content) {
-  const path = join(directory, name);
-  await writeFile(path, `#!/bin/sh\n${content}\n`);
+  const path = join(directory, `${name}.mjs`);
+  await writeFile(path, `#!/usr/bin/env node\n${content}\n`);
   await chmod(path, 0o755);
   return path;
 }
@@ -292,12 +292,19 @@ for (const [label, createAdapter, command] of [
       directory,
       command,
       `
-case "$1" in
-  --version) echo "${command} 1.0.0"; exit 0 ;;
-  --help) echo "Usage: ${command}"; echo "Options: --model --resume --prompt --continue"; exit 0 ;;
-  *) touch "${sentinel}"; exit 0 ;;
-esac`,
-    );
+import { writeFileSync } from "node:fs";
+switch (process.argv[2]) {
+ case "--version":
+   console.log("${command} 1.0.0");
+   break;
+ case "--help":
+   console.log("Usage: ${command}");
+   console.log("Options: --model --resume --prompt --continue");
+   break;
+ default:
+   writeFileSync(${JSON.stringify(sentinel)}, "launched\\n");
+}`,
+   );
 
     const adapter = createAdapter({ executable, env: { PATH: "" }, now: fixedClock });
 
@@ -340,15 +347,13 @@ esac`,
   test(`${label} built-in adapter applies the same executable override to discover as the factory receives`, async (t) => {
     const directory = await mkdtemp(join(tmpdir(), "switchyard-adapter-override-"));
     t.after(() => rm(directory, { recursive: true, force: true }));
-    const override = await makeScript(
-      directory,
-      `custom-${command}`,
-      `
-case "$1" in
-  --version) echo "${command} 2.0.0"; exit 0 ;;
-  --help) echo "Usage: ${command}"; exit 0 ;;
-  *) exit 32 ;;
-esac`,
+   const override = await makeScript(
+     directory,
+     `custom-${command}`,
+     `
+if (process.argv[2] === "--version") console.log("${command} 2.0.0");
+else if (process.argv[2] === "--help") console.log("Usage: ${command}");
+else process.exitCode = 32;`,
     );
 
     const adapter = createAdapter({ executable: override, env: { PATH: "" }, now: fixedClock });
@@ -361,15 +366,13 @@ esac`,
   test(`${label} built-in adapter preserves normalized configured executable source`, async (t) => {
     const directory = await mkdtemp(join(tmpdir(), "switchyard-adapter-configured-"));
     t.after(() => rm(directory, { recursive: true, force: true }));
-    const configured = await makeScript(
-      directory,
-      `configured-${command}`,
-      `
-case "$1" in
-  --version) echo "${command} 3.0.0"; exit 0 ;;
-  --help) echo "Usage: ${command}"; exit 0 ;;
-  *) exit 32 ;;
-esac`,
+   const configured = await makeScript(
+     directory,
+     `configured-${command}`,
+     `
+if (process.argv[2] === "--version") console.log("${command} 3.0.0");
+else if (process.argv[2] === "--help") console.log("Usage: ${command}");
+else process.exitCode = 32;`,
     );
 
     const adapter = createAdapter({

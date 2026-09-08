@@ -10,6 +10,7 @@ import {
 import {
   DISCOVERY_AND_EXECUTION_OPERATIONS,
   throwUnsupportedOperation,
+  type SupportedOperations,
   type ExecutionRequest,
   type ExecutionResult,
   type ForkRequest,
@@ -80,8 +81,8 @@ export const openCodeDiscoveryAdapter = createOpenCodeDiscoveryAdapter();
 export interface OpenCodeAdapterOptions extends HarnessDiscoveryOptions {}
 
 /**
- * Creates the OpenCode adapter. Prompt execution uses `opencode run` with a
- * direct argument array; verification, resume, and fork remain unsupported.
+ * Creates the OpenCode adapter. Session lifecycle operations use the same
+ * bounded direct process runner as ordinary prompt execution.
  */
 export function createOpenCodeAdapter(
   options: OpenCodeAdapterOptions = {},
@@ -93,7 +94,11 @@ export function createOpenCodeAdapter(
 
   return Object.freeze({
     id: "opencode",
-    supportedOperations: DISCOVERY_AND_EXECUTION_OPERATIONS,
+    supportedOperations: Object.freeze({
+      ...DISCOVERY_AND_EXECUTION_OPERATIONS,
+      resume: true,
+      fork: true,
+    } satisfies SupportedOperations),
     async discover() {
       return discoveryAdapter.discover(resolvedDiscoveryOptions);
     },
@@ -116,11 +121,43 @@ export function createOpenCodeAdapter(
         nonInteractive: request.nonInteractive ?? true,
       });
     },
-    async resume(_request: ResumeRequest): Promise<ExecutionResult> {
-      return throwUnsupportedOperation("opencode", "resume");
+    async resume(request: ResumeRequest): Promise<ExecutionResult> {
+      const executable = resolvedDiscoveryOptions.executable ??
+        resolvedDiscoveryOptions.configuredExecutable ?? "opencode";
+      const args = ["run", "--session", request.sessionId];
+      if (request.task !== undefined) args.push(request.task);
+      return executeProcess(executable, args, {
+        task: request.task ?? "",
+        cwd: request.cwd ?? resolvedDiscoveryOptions.cwd,
+        env: { ...resolvedDiscoveryOptions.env, ...request.env },
+        environmentPolicy: request.environmentPolicy,
+        timeoutMs: request.timeoutMs ?? resolvedDiscoveryOptions.timeoutMs,
+        maxOutputLength: request.maxOutputLength ?? resolvedDiscoveryOptions.maxOutputLength,
+        signal: request.signal,
+        nonInteractive: true,
+      });
     },
-    async fork(_request: ForkRequest): Promise<ForkResult> {
-      return throwUnsupportedOperation("opencode", "fork");
+    async fork(request: ForkRequest): Promise<ForkResult> {
+      const executable = resolvedDiscoveryOptions.executable ??
+        resolvedDiscoveryOptions.configuredExecutable ?? "opencode";
+      const args = ["run", "--session", request.sessionId, "--fork", "--format", "json"];
+      if (request.task !== undefined) args.push(request.task);
+      const result = await executeProcess(executable, args, {
+        task: request.task ?? "",
+        cwd: request.cwd ?? resolvedDiscoveryOptions.cwd,
+        env: { ...resolvedDiscoveryOptions.env, ...request.env },
+        environmentPolicy: request.environmentPolicy,
+        timeoutMs: request.timeoutMs ?? resolvedDiscoveryOptions.timeoutMs,
+        maxOutputLength: request.maxOutputLength ?? resolvedDiscoveryOptions.maxOutputLength,
+        signal: request.signal,
+        nonInteractive: true,
+      });
+      if (!result.succeeded) {
+        throw new Error(result.error ?? "OpenCode fork failed");
+      }
+      const sessionId = result.stdout.match(/"(?:sessionID|sessionId|session_id)"\s*:\s*"([^"]+)"/)?.[1];
+      if (sessionId === undefined) throw new Error("OpenCode fork completed without a session ID");
+      return { sessionId, completedAt: new Date().toISOString() };
     },
   });
 }

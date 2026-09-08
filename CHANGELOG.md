@@ -4,6 +4,9 @@ All notable user-facing changes to Switchyard are documented here. The format fo
 
 ## [Unreleased]
 
+- Added top-level `resume` and `fork` commands. OpenCode supports both
+  operations, while GitHub Copilot supports `resume` and explicitly rejects
+  `fork`.
 - Added a replayable [live routing exercise](docs/examples/live-routing-exercise.md)
   showing discovery, OpenCode implementation, and GitHub Copilot review in a
   disposable workspace.

@@ -44,6 +44,7 @@ support for prompts is available through their non-interactive provider modes.
 - **Verification-aware selection** — Run bounded, policy-controlled probes and keep verification evidence separate from discovery evidence.
 - **Safe execution runtime** — Use direct argument arrays, controlled working directories and environments, output bounds, timeouts, cancellation, and redacted diagnostics.
 - **Workflow composition** — Execute dependency-ordered stages with workspace-contained artifacts and explicit, sanitized handoffs.
+- **Session lifecycle commands** — Resume OpenCode and Copilot sessions and fork OpenCode sessions from the CLI.
 - **Stable automation contracts** — Consume versioned JSON results and stable exit categories from scripts and CI.
 - **Adapter extensibility** — Register new harness adapters without changing matching, routing, or registry logic.
 
@@ -182,6 +183,26 @@ npx switchyard run \
   --timeout-ms 120000 \
   "run the test suite and fix the first failure"
 ```
+
+Resume an existing provider session:
+
+```sh
+npx switchyard resume \
+  --harness=opencode \
+  --session=<session-id> \
+  "continue the implementation"
+```
+
+Fork an OpenCode session into a new session:
+
+```sh
+npx switchyard fork \
+  --harness=opencode \
+  --session=<session-id> \
+  "try an alternative implementation"
+```
+
+Copilot supports `resume`; its dedicated `fork` operation is unavailable.
 
 For a complete live exercise that routes an implementation prompt to OpenCode
 and a review prompt to GitHub Copilot in a disposable workspace, see the

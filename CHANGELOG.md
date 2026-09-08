@@ -4,6 +4,9 @@ All notable user-facing changes to Switchyard are documented here. The format fo
 
 ## [Unreleased]
 
+- Added a comprehensive [Switchyard User Guide](docs/user-guide.md) covering
+  CLI usage, configuration, verification, workflow composition,
+  troubleshooting, exit codes, and adapter development.
 - Added versioned workflow and stage composition schemas with dependency-cycle
   validation, workspace-contained artifact declarations, explicit stage input
   handoffs, sequential execution, and durable per-stage results.

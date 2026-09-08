@@ -4,6 +4,10 @@ Switchyard is a local, cross-platform TypeScript toolkit for discovering coding-
 
 The product direction is described in [`docs/PRD.md`](docs/PRD.md). The library exports discovery, capability, harness, and command contracts from [`src/index.ts`](src/index.ts), with built-in discovery support for OpenCode and GitHub Copilot CLI.
 
+For a practical walkthrough of installation, discovery, routing, configuration,
+verification, workflow composition, troubleshooting, and adapter development,
+see the [Switchyard User Guide](docs/user-guide.md).
+
 ## Current status
 
 The current completed slice covers discovery schemas, executable lookup, bounded version/help probing, built-in discovery adapters, atomic local registry persistence, refreshable registry profiles, the `discover`, `capabilities`, `verify`, `explain`, and `run` commands, normalized all-required capability matching with deterministic ranking and human-readable explanations, the full vendor-neutral `HarnessAdapter` contract with explicit registration, typed local configuration with environment/executable/registry/probe-policy precedence, the bounded process execution runtime connected to routed selection, and versioned workflow/stage schemas with declared artifact handoff validation. Built-in adapters currently support `discover` only and fail fast on other operations, so `verify` and `run` against them deterministically report unavailable results until a real operation implementation is registered.

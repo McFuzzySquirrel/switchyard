@@ -97,12 +97,9 @@ function launchCommand(
   executable: string,
   args: readonly string[],
 ): { executable: string; args: readonly string[] } {
-  // Windows does not execute .js/.mjs/.cjs files directly.  Treating these
-  // files as node-based test/adapter shims keeps the no-shell contract intact.
-  if (
-    process.platform === "win32" &&
-    /\.(?:cjs|js|mjs)$/i.test(executable)
-  ) {
+  // Treat Node-based .js/.mjs/.cjs shims consistently across platforms. This
+  // avoids relying on a shebang's PATH while keeping the no-shell contract.
+  if (/\.(?:cjs|js|mjs)$/i.test(executable)) {
     return { executable: process.execPath, args: [executable, ...args] };
   }
   return { executable, args };

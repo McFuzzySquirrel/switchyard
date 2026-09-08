@@ -75,13 +75,9 @@ function launchCommand(
   executable: string,
   args: readonly string[],
 ): { executable: string; args: readonly string[] } {
-  // Windows cannot launch Node scripts by their file association when shell
-  // execution is disabled. Prefix them with the current Node executable while
-  // preserving the explicit argv/no-shell process boundary.
-  if (
-    process.platform === "win32" &&
-    /\.(?:cjs|js|mjs)$/i.test(executable)
-  ) {
+  // Treat Node-based .js/.mjs/.cjs shims consistently across platforms. This
+  // avoids relying on a shebang's PATH while preserving the no-shell boundary.
+  if (/\.(?:cjs|js|mjs)$/i.test(executable)) {
     return { executable: process.execPath, args: [executable, ...args] };
   }
   return { executable, args };

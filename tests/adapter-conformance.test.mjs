@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { access, chmod, copyFile, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { access, chmod, copyFile, mkdtemp, rm, unlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -316,6 +316,8 @@ switch (process.argv[2]) {
 
     const execution = await adapter.execute({ task: "implement feature" });
     assert.equal(execution.succeeded, true);
+    assert.equal(await exists(sentinel), true);
+    await unlink(sentinel);
 
     for (const [operation, invoke] of [
       ["verify", () => adapter.verify(["headless"], {})],
@@ -334,8 +336,7 @@ switch (process.argv[2]) {
       );
     }
 
-    // The unsupported operations above must fail before any process launch:
-    // the sentinel file is only created by the fixture's catch-all branch.
+    // The unsupported operations above must fail before any process launch.
     assert.equal(await exists(sentinel), false);
   });
 

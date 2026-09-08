@@ -121,17 +121,24 @@ test("discovers OpenCode through an executable override with bounded version and
     directory,
     "custom-opencode",
     `
-case "$1" in
-  --version) echo "opencode 9.8.7"; exit 0 ;;
-  --help)
-    echo "Usage: opencode [command]"
-    printf '%s\n' "Commands:" "  run" "  mcp" "  fork"
-    printf '%s\n' "Options:" "  --model <model>" "  --continue"
-    printf '%s\n' "Providers:" "  Ollama" "  local-models"
-    printf '%0500d\n' 0
-    exit 0 ;;
-  *) echo "unexpected probe argument: $1"; exit 32 ;;
-esac`,
+if (process.argv[2] === "--version") console.log("opencode 9.8.7");
+else if (process.argv[2] === "--help") {
+console.log("Usage: opencode [command]");
+console.log("Commands:");
+console.log("  run");
+console.log("  mcp");
+console.log("  fork");
+console.log("Options:");
+console.log("  --model <model>");
+console.log("  --continue");
+console.log("Providers:");
+console.log("  Ollama");
+console.log("  local-models");
+console.log("0".repeat(500));
+} else {
+console.log("unexpected probe argument:", process.argv[2]);
+process.exitCode = 32;
+}`,
   );
   await makeScript(
     directory,
@@ -172,15 +179,19 @@ test("discovers GitHub Copilot through a configured executable and normalizes it
     directory,
    "copilot-fixture",
    `
-case "$1" in
-  --version) echo "github copilot cli v1.2.3"; exit 0 ;;
-  --help)
-    echo "Usage: copilot --prompt <task>"
-    printf '%s\n' "Options:" "  --model <model>" "  --resume"
-    printf '%s\n' "Commands:" "  mcp" "  issues" "  pull"
-    exit 0 ;;
-  *) exit 32 ;;
-esac`,
+if (process.argv[2] === "--version") console.log("github copilot cli v1.2.3");
+else if (process.argv[2] === "--help") {
+console.log("Usage: copilot --prompt <task>");
+console.log("Options:");
+console.log("  --model <model>");
+console.log("  --resume");
+console.log("Commands:");
+console.log("  mcp");
+console.log("  issues");
+console.log("  pull");
+} else {
+process.exitCode = 32;
+}`,
   );
 
   const profile = await createGitHubCopilotDiscoveryAdapter().discover({

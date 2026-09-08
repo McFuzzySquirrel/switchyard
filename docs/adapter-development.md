@@ -162,7 +162,7 @@ Every configurable field — executable location, probe timeout, maximum output 
 |---|---|---|---|---|
 | Executable | factory option / CLI flag | `SWITCHYARD_<HARNESS>_EXECUTABLE` | `harnesses.<id>.executable` | PATH lookup |
 | Probe timeout | factory option | `SWITCHYARD_<HARNESS>_PROBE_TIMEOUT_MS`, then `SWITCHYARD_PROBE_TIMEOUT_MS` | `harnesses.<id>.probePolicy.timeoutMs`, then `probePolicy.timeoutMs` | 5000 |
-| Max output length | factory option | `SWITCHYARD_<HARNESS>_PROBE_MAX_OUTPUT_LENGTH`, then `SWITCHYARD_PROBE_MAX_OUTPUT_LENGTH` | `harnesses.<id>.probePolicy.maxOutputLength`, then `probePolicy.maxOutputLength` | 8192 |
+| Max output length | factory option | `SWITCHYARD_<HARNESS>_PROBE_MAX_OUTPUT_LENGTH`, then `SWITCHYARD_PROBE_MAX_OUTPUT_LENGTH` | `harnesses.<id>.probePolicy.maxOutputLength`, then `probePolicy.maxOutputLength` | 32768 |
 | Allow mutating probes | factory option | `SWITCHYARD_<HARNESS>_ALLOW_MUTATING_PROBES`, then `SWITCHYARD_ALLOW_MUTATING_PROBES` | `harnesses.<id>.probePolicy.allowMutatingProbes`, then `probePolicy.allowMutatingProbes` | `false` |
 | Registry path | `resolveEffectiveRegistryPath` argument | `SWITCHYARD_REGISTRY_PATH` | `registryPath` | platform-appropriate user config directory |
 
@@ -178,7 +178,7 @@ against the typed schema in `src/config/schema.ts`:
 {
   "schemaVersion": 1,
   "registryPath": "/custom/path/registry.json",
-  "probePolicy": { "timeoutMs": 5000, "maxOutputLength": 8192, "allowMutatingProbes": false },
+  "probePolicy": { "timeoutMs": 5000, "maxOutputLength": 32768, "allowMutatingProbes": false },
   "harnesses": {
     "opencode": { "executable": "/opt/opencode/bin/opencode" },
     "copilot": { "probePolicy": { "timeoutMs": 8000 } }

@@ -196,7 +196,7 @@ test("resolves per-harness executable and probe policy with explicit > environme
   assert.equal(defaults.executable, undefined);
   assert.equal(defaults.configuredExecutable, undefined);
   assert.equal(defaults.timeoutMs, 5000);
-  assert.equal(defaults.maxOutputLength, 8192);
+  assert.equal(defaults.maxOutputLength, 32768);
   assert.equal(defaults.allowMutatingProbes, false);
 });
 

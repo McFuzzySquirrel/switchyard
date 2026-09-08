@@ -11,6 +11,7 @@ import {
   validateCapabilityObservation,
   validateHarnessProfile,
   validateLocalRegistry,
+  validateProviderCapability,
   validateTaskRequirements,
 } from "../src/index.ts";
 
@@ -55,6 +56,21 @@ function profile(id, status = "available") {
     },
     discoveredAt: observedAt,
     updatedAt: observedAt,
+  };
+}
+
+function providerCapability(id = "option:--model", kind = "option") {
+  return {
+    id,
+    label: id,
+    kind,
+    observedAt,
+    evidence: {
+      source: "help",
+      excerpt: "  --model <provider/model>",
+      capturedAt: observedAt,
+      reference: "--help",
+    },
   };
 }
 
@@ -156,6 +172,37 @@ test("validates profiles, availability, lifecycle, and duplicate capability ids"
     capabilities: [observation(), observation()],
   };
   assert.equal(validateHarnessProfile(duplicate).success, false);
+});
+
+test("validates provider-specific capability inventory without expanding routing vocabulary", () => {
+  const capability = providerCapability();
+  assert.equal(validateProviderCapability(capability).success, true);
+
+  const withInventory = {
+    ...profile("fixture"),
+    providerCapabilities: [
+      capability,
+      providerCapability("provider:ollama", "provider"),
+      providerCapability("topic:providers", "topic"),
+    ],
+  };
+  assert.equal(validateHarnessProfile(withInventory).success, true);
+
+  const duplicate = {
+    ...withInventory,
+    providerCapabilities: [capability, capability],
+  };
+  assert.equal(validateHarnessProfile(duplicate).success, false);
+
+  const invalidKind = providerCapability("command:run", "unknown");
+  assert.equal(validateProviderCapability(invalidKind).success, false);
+
+  const invalidId = providerCapability("Option:--model");
+  assert.equal(validateProviderCapability(invalidId).success, false);
+
+  const oversizedEvidence = providerCapability();
+  oversizedEvidence.evidence.excerpt = "x".repeat(32769);
+  assert.equal(validateProviderCapability(oversizedEvidence).success, false);
 });
 
 test("validates versioned local registries and preserves unavailable profiles", () => {

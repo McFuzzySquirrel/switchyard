@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 220" role="img" aria-labelledby="title desc">
+  <title id="title">Switchyard logo</title>
+  <desc id="desc">A blue train entering a switchyard with diverging orange rails.</desc>
+
+  <rect width="640" height="220" rx="28" fill="#0f172a"/>
+
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M42 176h556" stroke="#334155" stroke-width="10"/>
+    <path d="M58 202 300 128 582 52" stroke="#f59e0b" stroke-width="8"/>
+    <path d="M58 202 300 128 582 128" stroke="#fbbf24" stroke-width="8"/>
+    <path d="M58 202 300 128 582 194" stroke="#f59e0b" stroke-width="8"/>
+    <path d="M58 186 300 112 582 36" stroke="#64748b" stroke-width="5"/>
+    <path d="M58 186 300 112 582 112" stroke="#94a3b8" stroke-width="5"/>
+    <path d="M58 186 300 112 582 178" stroke="#64748b" stroke-width="5"/>
+  </g>
+
+  <g stroke="#1e293b" stroke-width="7">
+    <path d="m112 164 14 28"/>
+    <path d="m164 148 14 28"/>
+    <path d="m216 132 14 28"/>
+    <path d="m268 116 14 28"/>
+    <path d="m320 100 14 28"/>
+    <path d="m372 84 14 28"/>
+    <path d="m424 68 14 28"/>
+    <path d="m476 52 14 28"/>
+    <path d="m528 36 14 28"/>
+  </g>
+
+  <g transform="translate(94 48)">
+    <rect x="0" y="22" width="210" height="82" rx="14" fill="#2563eb" stroke="#dbeafe" stroke-width="6"/>
+    <path d="M28 22V4h86l34 18" fill="#1d4ed8" stroke="#dbeafe" stroke-width="6"/>
+    <rect x="48" y="38" width="48" height="28" rx="5" fill="#bfdbfe"/>
+    <rect x="110" y="38" width="48" height="28" rx="5" fill="#bfdbfe"/>
+    <path d="M0 76h210" stroke="#fbbf24" stroke-width="7"/>
+    <circle cx="45" cy="112" r="17" fill="#0f172a" stroke="#f8fafc" stroke-width="6"/>
+    <circle cx="166" cy="112" r="17" fill="#0f172a" stroke="#f8fafc" stroke-width="6"/>
+    <path d="M210 62h22l20 22v20h-42z" fill="#1d4ed8" stroke="#dbeafe" stroke-width="6"/>
+    <circle cx="236" cy="112" r="17" fill="#0f172a" stroke="#f8fafc" stroke-width="6"/>
+  </g>
+</svg>

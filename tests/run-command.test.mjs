@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { Readable } from "node:stream";
 import test from "node:test";
 
 import {
@@ -15,6 +16,8 @@ import {
   HarnessAdapterRegistry,
   CLI_EXIT_CODES,
   runCli,
+  aggregateSelectableCapabilities,
+  selectCapabilities,
 } from "../src/index.ts";
 
 const observedAt = "2026-09-07T19:00:00.000Z";
@@ -391,6 +394,62 @@ test("CLI run --json executes through the built-in wiring and maps stable exit c
   assert.equal(payload.policy.allowFallback, false);
   assert.deepEqual(payload.policy.attempts.map((attempt) => attempt.harnessId), ["fixture"]);
   assert.match(payload.execution.stdout, /fix the bug/);
+});
+
+test("CLI prompt is a task-focused alias for run", async (t) => {
+  const registryPath = await withRegistry(t);
+  const stub = createStubHarnessAdapter({ id: "fixture" });
+  const stdout = [];
+
+  const exitCode = await runCli(
+    ["prompt", "--requires=headless", "--registry", registryPath, "--json", "inspect", "the", "repo"],
+    { stdout: (text) => stdout.push(text), stderr: () => {} },
+    undefined,
+    [stub],
+  );
+
+  assert.equal(exitCode, CLI_EXIT_CODES.success);
+  const payload = JSON.parse(stdout.join(""));
+  assert.equal(payload.command, "run");
+  assert.equal(payload.status, "success");
+  assert.equal(payload.task, "inspect the repo");
+});
+
+test("prompt aggregates capabilities and lets an interactive user select them", async (t) => {
+  const registryPath = await withRegistry(t, ["headless", "repository-access"]);
+  const stub = createStubHarnessAdapter({ id: "fixture" });
+  const stdout = [];
+
+  const exitCode = await runCli(
+    ["prompt", "--registry", registryPath, "--stale-after-ms", "999999999", "inspect", "the", "repo"],
+    {
+      stdout: (text) => stdout.push(text),
+      stderr: () => {},
+      stdin: Readable.from(["1,2\n"]),
+      interactive: true,
+    },
+    undefined,
+    [stub],
+  );
+
+  assert.equal(exitCode, CLI_EXIT_CODES.success);
+  assert.match(stdout.join(""), /headless/);
+  assert.match(stdout.join(""), /repository-access/);
+  assert.match(stdout.join(""), /Status: success/);
+});
+
+test("prompt requires explicit requirements for non-interactive use", async (t) => {
+  const registryPath = await withRegistry(t);
+  const stdout = [];
+  const exitCode = await runCli(
+    ["prompt", "--registry", registryPath, "--json", "inspect", "the", "repo"],
+    { stdout: (text) => stdout.push(text), stderr: () => {} },
+  );
+
+  assert.equal(exitCode, CLI_EXIT_CODES.invalidInput);
+  const payload = JSON.parse(stdout.join(""));
+  assert.equal(payload.status, "invalid-input");
+  assert.match(payload.error.message, /provide --requires/);
 });
 
 test("CLI run --dry-run never launches the selected harness", async (t) => {

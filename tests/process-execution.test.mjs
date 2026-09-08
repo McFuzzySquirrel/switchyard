@@ -42,6 +42,20 @@ test("executeProcess captures bounded output and applies environment policy", as
   assert.equal(result.stdout.includes("TOKEN_123"), false);
 });
 
+test("executeProcess keeps PWD aligned with the requested working directory", async (t) => {
+  const directory = await mkdtemp(join(tmpdir(), "switchyard-execution-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const script = await makeScript(directory, "pwd.sh", 'printf "%s|%s" "$PWD" "$(pwd)"');
+
+  const result = await executeProcess(script, [], {
+    task: "working-directory",
+    cwd: directory,
+  });
+
+  assert.equal(result.succeeded, true);
+  assert.equal(result.stdout, `${directory}|${directory}`);
+});
+
 test("executeProcess treats zero as a valid output limit", async (t) => {
   const directory = await mkdtemp(join(tmpdir(), "switchyard-execution-"));
   t.after(() => rm(directory, { recursive: true, force: true }));

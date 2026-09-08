@@ -89,6 +89,17 @@ function presentationProfile(profile: HarnessProfile): HarnessProfile {
             }),
       },
     })),
+    ...(profile.providerCapabilities === undefined
+      ? {}
+      : {
+          providerCapabilities: profile.providerCapabilities.map((capability) => ({
+            ...capability,
+            evidence: {
+              ...capability.evidence,
+              excerpt: redactSecrets(capability.evidence.excerpt),
+            },
+          })),
+        }),
     ...(profile.diagnostics === undefined
       ? {}
       : {

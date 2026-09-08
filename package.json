@@ -19,6 +19,7 @@
     "./verification": "./src/verification/index.ts"
   },
   "scripts": {
+    "switchyard": "node --experimental-strip-types src/cli.ts",
     "test": "node --experimental-strip-types --test tests/*.test.mjs",
     "test:docs": "node --test tests/documentation-governance.test.mjs",
     "typecheck": "tsc --noEmit"

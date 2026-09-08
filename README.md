@@ -1,297 +1,411 @@
+<div align="center">
+
+<img src="./docs/images/logo.png" alt="Switchyard train entering a rail switchyard" width="150" />
+
 # Switchyard
 
-Switchyard is a local, cross-platform TypeScript toolkit for discovering coding-agent harnesses, normalizing their capabilities, and routing work to suitable harnesses. The project is designed around deterministic, explainable decisions and safe subprocess execution.
+**Capability-driven routing for local coding-agent harnesses**
 
-The product direction is described in [`docs/PRD.md`](docs/PRD.md). The library exports discovery, capability, harness, and command contracts from [`src/index.ts`](src/index.ts), with built-in discovery support for OpenCode and GitHub Copilot CLI.
+[![Node.js](https://img.shields.io/badge/Node.js-%3E%3D24-3c873a?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Tests](https://img.shields.io/badge/tests-143%20passing-2ea44f?style=flat-square)](tests/)
 
-For a practical walkthrough of installation, discovery, routing, configuration,
-verification, workflow composition, troubleshooting, and adapter development,
-see the [Switchyard User Guide](docs/user-guide.md).
+[Features](#features) · [Getting started](#getting-started) · [CLI workflow](#cli-workflow) · [Configuration](#configuration) · [Workflow composition](#workflow-composition) · [Development](#development)
+
+</div>
+
+Switchyard is a local, cross-platform TypeScript toolkit for discovering coding-agent harnesses, normalizing their capabilities, and routing work to a suitable harness. It treats **capabilities**, rather than vendor identity, as the orchestration contract.
+
+Routing is deterministic and explainable: requirements are matched explicitly, preferred-harness fallback is opt-in, verification is separate from discovery, and subprocess execution is bounded and cancellation-aware.
+
+> [!NOTE]
+> Switchyard is currently a private development package. The built-in OpenCode
+> and GitHub Copilot adapters support bounded prompt execution; verification,
+> resume, and fork remain unsupported.
 
 ## Current status
 
-The current completed slice covers discovery schemas, executable lookup, bounded version/help probing, built-in discovery adapters, atomic local registry persistence, refreshable registry profiles, the `discover`, `capabilities`, `verify`, `explain`, and `run` commands, normalized all-required capability matching with deterministic ranking and human-readable explanations, the full vendor-neutral `HarnessAdapter` contract with explicit registration, typed local configuration with environment/executable/registry/probe-policy precedence, the bounded process execution runtime connected to routed selection, and versioned workflow/stage schemas with declared artifact handoff validation. Built-in adapters currently support `discover` only and fail fast on other operations, so `verify` and `run` against them deterministically report unavailable results until a real operation implementation is registered.
+The current release slice includes discovery schemas, executable lookup,
+bounded version/help probing, local registry persistence, capability matching,
+deterministic routing, verification policy, safe process execution, typed
+configuration, workflow composition, stable JSON output, and explicit adapter
+registration. OpenCode and GitHub Copilot discovery are included; execution
+support for prompts is available through their non-interactive provider modes.
 
-## Development
+## Features
 
-Requirements:
+- **Harness discovery** — Locate configured OpenCode and GitHub Copilot executables, probe bounded version/help output, and persist a local registry.
+- **Normalized capabilities** — Compare harnesses using a shared capability vocabulary instead of vendor-specific flags.
+- **Provider feature inventory** — Preserve structured provider commands, options, providers, and help topics alongside normalized routing capabilities.
+- **Deterministic routing** — Require every requested capability, rank qualifying candidates consistently, and explain each decision.
+- **Explicit fallback policy** — A preferred harness must qualify; fallback to another candidate happens only when enabled.
+- **Verification-aware selection** — Run bounded, policy-controlled probes and keep verification evidence separate from discovery evidence.
+- **Safe execution runtime** — Use direct argument arrays, controlled working directories and environments, output bounds, timeouts, cancellation, and redacted diagnostics.
+- **Workflow composition** — Execute dependency-ordered stages with workspace-contained artifacts and explicit, sanitized handoffs.
+- **Stable automation contracts** — Consume versioned JSON results and stable exit categories from scripts and CI.
+- **Adapter extensibility** — Register new harness adapters without changing matching, routing, or registry logic.
 
-- Node.js 24 or newer
+## Getting started
+
+### Requirements
+
+- [Node.js](https://nodejs.org/) 24 or newer
 - npm
+- At least one supported harness executable when refreshing discovery
 
-Install dependencies and run the existing checks:
+Check your runtime before installing:
 
 ```sh
-npm install
-npm test
-npm run typecheck
-npm run test:docs
+node --version
+npm --version
 ```
 
-## Discovery commands
+### Install
 
-The CLI is available through the package entry point:
+Clone the repository, enter the project directory, and install dependencies:
 
 ```sh
-npx switchyard discover
-npx switchyard discover --refresh --json
+git clone https://github.com/McFuzzySquirrel/switchyard.git
+cd switchyard
+npm install
+```
+
+If you use `nvm`, select Node 24 or newer before running npm commands:
+
+```sh
+nvm install 24
+nvm use 24
+```
+
+### First discovery
+
+Run the CLI from this private repository checkout:
+
+```sh
+npm run switchyard -- discover
+```
+
+The examples below use the installed-package form `npx switchyard`. From this
+checkout, use `npm run switchyard --` as the command prefix instead.
+
+The first discovery creates a per-user registry snapshot. Refresh it after
+installing or changing a harness:
+
+```sh
+npm run switchyard -- discover --refresh --json
+```
+
+Use `--registry ./registry.json` for a project-local or CI-specific snapshot.
+
+## CLI workflow
+
+### Inspect capabilities
+
+`capabilities` reads the registry and never launches a harness:
+
+```sh
 npx switchyard capabilities
-npx switchyard capabilities --verified --json
-npx switchyard verify --harness=opencode --capability=headless --json
+npx switchyard capabilities --verified
+npx switchyard capabilities --json
+```
+
+### Explain a routing decision
+
+Requirements are all-required: a candidate must positively match every
+capability:
+
+```sh
 npx switchyard explain --requires=headless,repository-access
 npx switchyard explain --requires=headless --json
-npx switchyard capabilities --config ./switchyard.config.json
-npx switchyard run --requires=headless "fix the failing test"
-npx switchyard run --requires=headless --dry-run --json "fix the failing test"
 ```
 
-`discover` probes OpenCode and GitHub Copilot on the first run and stores a
-per-user registry. Subsequent runs use the cached snapshot unless `--refresh`
-is supplied. Use `--registry PATH`, `SWITCHYARD_REGISTRY_PATH`, or
-`registryPath` in the typed configuration file for an explicit local file,
-which is useful in CI and tests. `--config PATH` (or
-`SWITCHYARD_CONFIG_PATH`) selects a non-default configuration file for every
-registry-reading command. A missing or malformed harness is reported in its
-profile and does not discard successful profiles. `capabilities` only reads
-the registry; it never launches a harness. `explain` also only reads the
-registry and never launches a harness or mutates the registry. It reports
-every candidate's matched and missing capabilities,
-verification state, deterministic ranking inputs, and selection reason.
-Requirements are all-required. Use `--preferred-harness=<id>` to request a
-preferred qualifying harness; fallback remains disabled unless
-`--allow-fallback` is explicitly supplied. Invalid requirements exit `2`
-(`CLI_EXIT_CODES.invalidInput`), and valid requirements with no qualifying
-selection exit `4` (`CLI_EXIT_CODES.noMatch`).
+Prefer a particular harness without silently using another:
 
-`verify` runs bounded probes for capabilities already observed in the local
-registry and persists the resulting verification state. Use `--harness=<id>`
-to select one harness and repeat `--capability=<name>` to select capabilities.
-Probe risks are declared with repeatable `--risk=<read-only|mutating|external-access|paid|model-invoking>`
-options. Read-only probes are allowed by default; probes that may access an
-external service or incur provider/model charges require explicit policy
-approval (`--allow-external-access`, `--allow-paid-probes`, or typed
-configuration). JSON and human output include fixed, payload-free warnings
-for those risks and never include command arguments, prompts, environment
-values, or secrets.
-
-`run --requires=<capabilities> [--json] [--dry-run] [--cwd PATH]
-[--timeout-ms MS] "<task>"` connects that same routing decision to adapter
-execution: it calls `explain` internally for selection, then executes the
-selected harness's `execute` operation with a controlled working directory,
-environment, timeout, and cancellation boundary (`src/harness/process.ts`).
-It never launches a harness for `no-match` or `invalid-input` decisions, and
-`--dry-run` describes the selected request without resolving or invoking an
-adapter, making previews safe even when the harness is not installed. A
-normal run whose harness is not registered, or whose adapter has not declared `execute`
-support, is reported as `status: "unavailable"` and exits `5`
-(`CLI_EXIT_CODES.unavailable`) before any process starts. A completed
-execution that failed, timed out, or was cancelled is reported as
-`status: "execution-failure"` and exits `3` (`CLI_EXIT_CODES.failure`); the
-JSON result's nested `execution` field retains the finer-grained
-`ExecutionResult` status and failure category. `no-match` and
-`invalid-input` reuse the same `4` and `2` exit categories as `explain`.
-
-CLI exit categories are stable and centralized in `src/output/exit-codes.ts`:
-
-| Category | Code | Meaning |
-| --- | ---: | --- |
-| `success` | `0` | The command completed successfully, including `dry-run`. |
-| `partial` | `1` | The command completed with some refresh failures. |
-| `invalidInput` | `2` | Arguments or command input failed validation. |
-| `failure` | `3` | A command or selected harness execution failed. |
-| `noMatch` | `4` | No harness satisfied the requested capabilities. |
-| `unavailable` | `5` | The selected harness cannot execute the request. |
-
-The deprecated `usage` key aliases `invalidInput`. Timeout and cancellation
-are distinct nested execution failure categories, but intentionally map to
-the command-level `failure` code.
-
-## Workflow composition
-
-The exported composition contracts in `src/composition/index.ts` model
-multi-stage workflows with validated dependencies, capability requirements,
-workspace-contained artifact declarations, and explicit stage-to-stage inputs.
-Use `validateWorkflow` for structured validation or `assertWorkflow` when
-invalid definitions should raise `WorkflowValidationError`. The
-`executeWorkflow` helper runs validated stages sequentially and persists
-per-stage results in an atomic `switchyard-workflow-state.json` snapshot
-(`schemaVersion: 1`) without transferring undeclared conversation state or
-artifacts. Every path-bearing file or directory handoff is checked at the
-receiving stage: the path must still resolve inside the workflow workspace and
-must have the declared kind. A missing or escaped artifact fails only the receiving stage;
-successful earlier stages and their diagnostics remain in the state file.
-The `compose` result reports `status: "partial"` and a `stageSummary` count
-(`succeeded`, `failed`, and `skipped`) whenever any stage fails or is skipped;
-the per-stage results remain available for diagnostics and recovery, and the
-CLI exits with the stable partial code `1`.
-
-An input must name its source stage (which must also be a declared dependency)
-and may request one declared artifact plus the explicitly allowed stage
-context fields `status`, `selectedHarness`, `durationMs`, and `diagnostic`.
-Input names, context fields, stage dependencies, and output names are unique
-and validated before any adapter is selected or invoked. The receiving
-adapter gets a bounded task string containing a JSON handoff manifest; the
-manifest contains only the requested artifact metadata and context, never
-stdout, stderr, environment variables, or opaque conversation state. Each
-stage result also exposes the exact sanitized `handoff` manifest for audit and
-replay.
-
-For example, an implementation stage can publish a file and a review stage
-can explicitly consume it:
-
-```ts
-const workflow = {
-  id: "implementation-review",
-  workspace: "/tmp/switchyard-workspace",
-  stages: [
-    {
-      id: "implementation",
-      requirements: [],
-      task: "implement the requested change",
-      outputs: [{ name: "patch", kind: "file", path: "patch.diff" }],
-    },
-    {
-      id: "review",
-      dependsOn: ["implementation"],
-      requirements: [],
-      task: "review the implementation",
-      inputs: [
-        {
-          name: "patch-input",
-          fromStage: "implementation",
-          artifact: "patch",
-          context: ["status", "durationMs"],
-        },
-      ],
-    },
-  ],
-};
-
-const result = await executeWorkflow({ workflow, adapters });
+```sh
+npx switchyard explain \
+  --requires=headless \
+  --preferred-harness=opencode
 ```
 
-The complete OpenCode-to-Copilot implementation/review workflow is also
-available as [`examples/opencode-to-copilot.workflow.json`](examples/opencode-to-copilot.workflow.json).
-It routes the implementation stage to OpenCode, routes the review stage to
-Copilot, and passes only the declared patch plus status/harness context.
-`tests/composition-demo.test.mjs` runs this same workflow with execution-capable
-fixture adapters when the built-in adapters are discovery-only or unavailable.
+Opt into fallback explicitly:
 
-JSON output is versioned with `schemaVersion: 1`. All command JSON payloads use
-the shared `serializeCommandJson` contract exported from `src/output/index.ts`;
-the serializer preserves command-owned fields while enforcing the common
-`schemaVersion`, `command`, and `status` envelope. The explain payload is the
-versioned routing-decision contract (`DECISION_SCHEMA_VERSION`) and keeps
-success, no-match, and invalid-input as distinct status variants. Consumers
-can use `parseDecisionJson` to validate that discriminator before applying
-command-specific validation. Human output
-is plain text with the same statuses and decision data, and diagnostics are
-redacted before either output format is emitted. New fields are additive; a
-schema-version bump is reserved for incompatible changes.
+```sh
+npx switchyard explain \
+  --requires=headless \
+  --preferred-harness=opencode \
+  --allow-fallback
+```
 
-## Requirement schema
+The explanation includes matched and missing capabilities, discovery and
+verification state, ranking inputs, policy attempts, and the selection reason.
 
-Routing requests use the exported `TaskRequirements` contract:
+### Run an agent prompt
+
+`prompt` is the task-focused alias for `run`:
+
+```sh
+npx switchyard prompt \
+  "Inspect the failing tests and explain the first fix."
+```
+
+In an interactive terminal, omitting `--requires` presents one consolidated
+checkbox-style list of discovered normalized capabilities. Select the
+capabilities the prompt needs; provider names stay out of the selection step.
+For scripts, CI, JSON output, and non-TTY use, pass `--requires` explicitly.
+
+Preview selection before launching the provider:
+
+```sh
+npx switchyard prompt \
+  --requires=headless \
+  --dry-run \
+  --json \
+  "Inspect the failing tests and explain the first fix."
+```
+
+### Run a task
+
+```sh
+npx switchyard run \
+  --requires=headless \
+  "fix the failing test"
+```
+
+Control the working directory and execution timeout:
+
+```sh
+npx switchyard run \
+  --requires=headless \
+  --cwd ./my-repository \
+  --timeout-ms 120000 \
+  "run the test suite and fix the first failure"
+```
+
+For a complete live exercise that routes an implementation prompt to OpenCode
+and a review prompt to GitHub Copilot in a disposable workspace, see the
+[Live Routing Exercise](docs/examples/live-routing-exercise.md) and its
+[replayable script](examples/live-routing-exercise.sh).
+
+To see a capability-only routing decision select OpenCode, run the
+[Fork Capability Routing Exercise](docs/examples/fork-capability-routing.md).
+Both exercises also include terminal-style [GIF and MP4 recordings](docs/examples/media/).
+
+![Live routing exercise](docs/examples/media/live-routing-exercise.gif)
+
+![Fork capability routing exercise](docs/examples/media/fork-capability-routing.gif)
+
+Preview a request without resolving or invoking an adapter:
+
+```sh
+npx switchyard run \
+  --requires=headless \
+  --dry-run \
+  --json \
+  "fix the failing test"
+```
+
+### Verify capabilities
+
+Verification runs bounded probes for capabilities already observed in the
+registry and persists the result:
+
+```sh
+npx switchyard verify \
+  --harness=opencode \
+  --capability=headless \
+  --capability=repository-access \
+  --json
+```
+
+Read-only probes are allowed by default. Risky probes require both a declared
+risk and matching approval:
+
+```sh
+npx switchyard verify \
+  --harness=opencode \
+  --capability=external-access \
+  --risk=external-access \
+  --allow-external-access
+```
+
+Supported risk classes are `read-only`, `mutating`, `external-access`, `paid`,
+and `model-invoking`. Approval flags are `--allow-mutating-probes`,
+`--allow-external-access`, `--allow-paid-probes`, and
+`--allow-model-invocation`.
+
+### Commands at a glance
+
+| Command | Purpose | Launches a harness? | Updates local state? |
+| --- | --- | :---: | :---: |
+| `discover` | Probe configured harnesses and update the registry | Yes, for bounded probes | Yes |
+| `capabilities` | Read normalized capability profiles | No | No |
+| `explain` | Explain deterministic selection | No | No |
+| `run` | Route and execute a task | Yes, unless `--dry-run` | No registry update |
+| `verify` | Run selected capability probes | Yes, when supported | Yes |
+| `compose` | Execute a declared multi-stage workflow | Yes, when supported | Yes |
+
+Run `npm run switchyard -- --help` for the complete option list. Once
+Switchyard is published and installed as a package, the equivalent command is
+`npx switchyard --help`.
+
+## Configuration
+
+Switchyard accepts a typed JSON configuration file. Select it explicitly:
+
+```sh
+npx switchyard discover --config ./switchyard.config.json
+```
+
+Or set `SWITCHYARD_CONFIG_PATH`. A minimal configuration looks like this:
 
 ```json
 {
   "schemaVersion": 1,
-  "requires": ["headless", "repository-access"],
-  "preferredHarness": "opencode",
-  "allowFallback": true
+  "registryPath": "./switchyard-registry.json",
+  "harnesses": {
+    "opencode": {
+      "executable": "/opt/opencode/bin/opencode"
+    },
+    "copilot": {
+      "probePolicy": {
+        "timeoutMs": 8000
+      }
+    }
+  }
 }
 ```
 
-`requires` accepts only normalized capability names and cannot contain
-duplicates. `preferredHarness` must be a lowercase harness identifier, and
-`allowFallback` must be boolean. The runtime exports
-`validateTaskRequirements`, `isTaskRequirements`, and
-`assertTaskRequirements`; the schema version is optional for compatibility with
-the original PRD interface. `matchRequiredCapabilities` (also exported as `matchCapabilities`) reports
-matched and missing capabilities in requirement order and qualifies a profile
-only when every required capability was positively observed during discovery.
-`rankCapabilityMatches` and `selectBestCapabilityMatch` rank only qualifying
-profiles: fully verified matches come first, followed by discovered matches,
-with equal-tier ties resolved by ascending harness ID (never input order).
-Stale or discovery-only lifecycle profiles are never promoted to the verified
-tier. Verification state is not treated as discovery evidence. When
-`preferredHarness` is set, the preferred profile is checked first and is
-selected only if it satisfies every requirement. A different qualifying
-profile is selected only when `allowFallback: true`; fallback is disabled by
-default. Explain and run results include deterministic `policy.attempts`
-records for the preferred check and selected fallback/ranked candidate.
+Supported settings include:
 
-## Adapters and configuration
+- `registryPath`
+- `harnesses.<id>.executable`
+- `probePolicy.timeoutMs`
+- `probePolicy.maxOutputLength`
+- `probePolicy.allowMutatingProbes`
+- `probePolicy.allowExternalAccess`
+- `probePolicy.allowPaidProbes`
+- `probePolicy.allowModelInvocation`
 
-`HarnessAdapter` (`src/harness/adapter.ts`) is the vendor-neutral contract for
-discovery, verification, execution, resume, and fork. Built-in `opencode` and
-`copilot` adapters are registered explicitly through `HarnessAdapterRegistry`
-(`src/harness/adapter-registry.ts`); they currently support `discover` only,
-and every other operation rejects with `UnsupportedOperationError` before any
-process is launched. A reusable `createStubHarnessAdapter` fixture
-(`src/harness/stub.ts`) implements the full contract for conformance and
-integration testing without a real vendor binary. The exported
-`ExecutionRequest` and `ExecutionResult` types define controlled working
-directory/environment policy, safe stdin and cancellation inputs, bounded
-output metadata, lifecycle status, and stable failure categories for the
-execution runtime.
-`executeProcess` and `runProcess` provide the shared direct-argv runtime for
-adapter implementations. They never invoke a shell, apply environment
-inheritance allow/deny rules, cap each output stream independently, redact
-diagnostics, and distinguish ordinary failures from timeout and cancellation.
-Verification adapters return the versioned `VerificationResult` schema,
-validated with `validateVerificationResult` (or
-`assertVerificationResult`), including ordered UTC `startedAt` and
-`completedAt` timestamps. Verification probes default to a five-second
-timeout; set `ProbeContext.timeoutMs` for a different positive bound. The
-runner passes `ProbeContext.signal` for cooperative cancellation and returns
-explicit `timed-out` results if an adapter does not finish within its bound.
+Configuration precedence is consistent across executable, timeout, output
+limit, and probe-policy settings:
 
-Executable location, probe timeout, maximum probe output length, the
-mutating-probe policy flag, and the registry path all resolve through the same
-precedence: an explicit call-time value, then an environment variable, then a
-typed local configuration file, then a built-in default. Executable values are
-normalized once into a single resolved override before adapter construction,
-so discovery, future verification, and future execution share the same
-executable and source classification. See
-[`docs/adapter-development.md`](docs/adapter-development.md) for the full
-precedence table, the adapter lifecycle, registration, testing, error
-handling, and security expectations, and
-[`docs/adr/0002-adapter-contract-and-typed-configuration.md`](docs/adr/0002-adapter-contract-and-typed-configuration.md)
-for the design rationale. Configuration diagnostics always identify the
-adapter and field path and never echo the submitted value.
+1. Explicit command or API value
+2. Environment variable
+3. Configuration file
+4. Built-in default
 
-To validate a new adapter without installing its vendor binary, register it
-through the existing registry and run the reusable conformance suite:
+Useful environment variables include `SWITCHYARD_REGISTRY_PATH`,
+`SWITCHYARD_OPENCODE_EXECUTABLE`, `SWITCHYARD_COPILOT_EXECUTABLE`,
+`SWITCHYARD_PROBE_TIMEOUT_MS`, and
+`SWITCHYARD_PROBE_MAX_OUTPUT_LENGTH`. Harness-specific variables use the
+`SWITCHYARD_<HARNESS>_...` form.
+
+## Workflow composition
+
+`compose` executes a declared JSON workflow in dependency order:
 
 ```sh
-node --experimental-strip-types --test tests/adapter-conformance.test.mjs
+npx switchyard compose \
+  ./examples/opencode-to-copilot.workflow.json \
+  --json
 ```
 
-The suite covers registration, normalized operation support, configuration
-precedence, executable-override consistency, and unsupported-operation
-fail-fast behavior. See the [adapter development guide](docs/adapter-development.md)
-for the registration workflow and fixture pattern.
+Each workflow can declare:
 
-The `discover`, `capabilities`, and `explain` commands load the per-user JSON
-configuration automatically. Use `--config PATH`, `SWITCHYARD_CONFIG_PATH`, or
-the corresponding `{ configPath }` library option to select another file.
-Per-harness environment variables such as `SWITCHYARD_OPENCODE_EXECUTABLE`
-and `SWITCHYARD_OPENCODE_PROBE_TIMEOUT_MS` override matching file entries
-without changing adapter code.
+- A workspace root and stable workflow ID.
+- Stage dependencies and capability requirements.
+- Workspace-contained file or directory outputs.
+- Explicit stage inputs that consume one declared artifact and approved context.
 
-## Repository layout
+Only declared handoff metadata is forwarded to the next stage. Undeclared
+conversation state, stdout, stderr, environment variables, and arbitrary
+artifacts are not transferred. Path containment and artifact kind are checked
+again when a receiving stage consumes an output.
 
-| Path | Purpose |
-| --- | --- |
-| `src/` | TypeScript library and harness contracts |
-| `tests/` | Node test-runner tests and discovery fixtures |
-| `docs/PRD.md` | Product requirements and roadmap |
-| `docs/adapter-development.md` | Adapter lifecycle, registration, testing, errors, and security |
-| `docs/` | Product, execution, and workflow documentation |
-| `docs/adr/` | Architecture decision records |
-| `docs/templates/` | Starting structures for maintained documents |
+The included example models an implementation stage followed by a review stage:
 
-## Documentation conventions
+```text
+implementation (OpenCode)
+        │ patch.diff + status context
+        ▼
+review (GitHub Copilot)
+```
 
-Agent and contributor documentation responsibilities are defined in [`AGENTS.md`](AGENTS.md). User-facing behavior belongs in this README, release-relevant changes belong in [`CHANGELOG.md`](CHANGELOG.md), and significant architectural decisions belong in numbered ADRs under [`docs/adr/`](docs/adr/).
+Workflow state is persisted atomically in
+`switchyard-workflow-state.json`. If a later stage fails, earlier successful
+results remain available and the command reports a `partial` result.
+
+## Output and exit codes
+
+Use `--json` for scripts and CI. JSON output uses a versioned
+`schemaVersion: 1` envelope with stable `command` and `status` fields. Human
+output is intended for interactive use. Diagnostics and captured output are
+bounded and redacted before they are emitted.
+
+| Code | Category | Meaning |
+| ---: | --- | --- |
+| `0` | `success` | The command completed successfully, including a dry run |
+| `1` | `partial` | Some refresh operations or workflow stages failed |
+| `2` | `invalidInput` | Arguments or input failed validation |
+| `3` | `failure` | A command or selected execution failed |
+| `4` | `noMatch` | No harness satisfied all requirements |
+| `5` | `unavailable` | The selected harness cannot execute the request |
+
+## Library and adapter development
+
+The package exports TypeScript contracts from the root and subpaths:
+
+```ts
+import {
+  matchRequiredCapabilities,
+  selectBestCapabilityMatch,
+  validateTaskRequirements,
+} from "switchyard";
+```
+
+Public subpaths include `switchyard/capabilities`, `switchyard/commands`,
+`switchyard/composition`, `switchyard/config`, `switchyard/discovery`,
+`switchyard/harness`, `switchyard/output`, and `switchyard/verification`.
+
+Implement a new integration behind the vendor-neutral `HarnessAdapter` or the
+narrower `HarnessDiscoveryAdapter` contract. Register the constructed adapter
+explicitly with the existing registry; do not add vendor branches to routing or
+matching. Unsupported operations must fail before a subprocess is launched.
+
+See the [Adapter Development Guide](docs/adapter-development.md) for the
+operation contract, registration pattern, configuration resolution, testing
+requirements, and security expectations.
+
+## Development
+
+Run the existing project checks:
+
+```sh
+npm install
+npm run typecheck
+npm test
+npm run test:docs
+```
+
+The test suite uses Node's built-in test runner and TypeScript's
+`--experimental-strip-types` support. The repository currently contains unit,
+integration, process-execution, adapter-conformance, workflow-composition, and
+documentation-governance coverage.
+
+## Documentation
+
+- [User Guide](docs/user-guide.md) — complete CLI, configuration,
+  verification, workflow, troubleshooting, and library usage reference.
+- [Adapter Development Guide](docs/adapter-development.md) — build and test
+  harness integrations.
+- [OpenCode-to-Copilot workflow example](examples/opencode-to-copilot.workflow.json)
+  — a complete multi-stage workflow definition.
+- [Live routing exercise](docs/examples/live-routing-exercise.md) — a recorded
+  two-provider prompt execution scenario.
+- [Fork capability routing exercise](docs/examples/fork-capability-routing.md)
+  — a recorded capability-specific routing scenario.
+- [Terminal demo recorder](examples/record-terminal-demos.sh) — regenerate
+  live GIF and MP4 recordings from both exercises.
+- [Product requirements](docs/PRD.md) — product goals and scope.
+- [Architecture decision records](docs/adr/) — rationale for public contracts
+  and execution boundaries.

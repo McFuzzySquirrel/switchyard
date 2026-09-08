@@ -10,7 +10,9 @@ import {
   createGitHubCopilotDiscoveryAdapter,
   createOpenCodeDiscoveryAdapter,
   parseGitHubCopilotCapabilities,
+  parseGitHubCopilotProviderCapabilities,
   parseOpenCodeCapabilities,
+  parseOpenCodeProviderCapabilities,
   validateHarnessProfile,
 } from "../src/index.ts";
 
@@ -87,6 +89,29 @@ test("parses supported CLI-help fixtures into the normalized capability vocabula
     parseGitHubCopilotCapabilities("GitHub Copilot CLI\nOptions: --silent"),
     [],
   );
+
+  assert.deepEqual(
+    parseOpenCodeProviderCapabilities(
+      "Commands:\n  run <prompt>\n  mcp\nOptions:\n  --model <model>\nProviders:\n  Ollama",
+    ),
+    [
+      { id: "command:run", label: "run", kind: "command" },
+      { id: "command:mcp", label: "mcp", kind: "command" },
+      { id: "option:-model", label: "--model", kind: "option" },
+      { id: "provider:ollama", label: "Ollama", kind: "provider" },
+    ],
+  );
+  assert.deepEqual(
+    parseGitHubCopilotProviderCapabilities(
+      "Options:\n  --prompt <task>\n  --model <model>\nCommands:\n  mcp\nHelp Topics:\n  providers",
+    ),
+    [
+      { id: "option:-prompt", label: "--prompt", kind: "option" },
+      { id: "option:-model", label: "--model", kind: "option" },
+      { id: "command:mcp", label: "mcp", kind: "command" },
+      { id: "topic:providers", label: "providers", kind: "topic" },
+    ],
+  );
 });
 
 test("discovers OpenCode through an executable override with bounded version and help probes", async (t) => {
@@ -96,17 +121,17 @@ test("discovers OpenCode through an executable override with bounded version and
     directory,
     "custom-opencode",
     `
-if (process.argv[2] === "--version") console.log("opencode 9.8.7");
-else if (process.argv[2] === "--help") {
- console.log("Usage: opencode [command]");
- console.log("Commands: run mcp fork");
- console.log("Options: --model <model> --continue");
- console.log("Providers: Ollama local models");
- console.log("0".repeat(500));
-} else {
- console.log("unexpected probe argument:", process.argv[2]);
- process.exitCode = 32;
-}`,
+case "$1" in
+  --version) echo "opencode 9.8.7"; exit 0 ;;
+  --help)
+    echo "Usage: opencode [command]"
+    printf '%s\n' "Commands:" "  run" "  mcp" "  fork"
+    printf '%s\n' "Options:" "  --model <model>" "  --continue"
+    printf '%s\n' "Providers:" "  Ollama" "  local-models"
+    printf '%0500d\n' 0
+    exit 0 ;;
+  *) echo "unexpected probe argument: $1"; exit 32 ;;
+esac`,
   );
   await makeScript(
     directory,
@@ -133,6 +158,10 @@ else if (process.argv[2] === "--help") {
   assert.equal(profile.discoveredAt, observedAt);
   assert.equal(profile.capabilities[0].discovery.evidence.reference, "--help");
   assert.ok(profile.capabilities[0].discovery.evidence.excerpt.includes("[truncated]"));
+  assert.deepEqual(
+    profile.providerCapabilities?.map((capability) => capability.id),
+    ["command:run", "command:mcp", "command:fork", "option:-model", "option:-continue", "provider:ollama", "provider:local-models"],
+  );
   assert.equal(validateHarnessProfile(profile).success, true);
 });
 
@@ -143,12 +172,15 @@ test("discovers GitHub Copilot through a configured executable and normalizes it
     directory,
    "copilot-fixture",
    `
-if (process.argv[2] === "--version") console.log("github copilot cli v1.2.3");
-else if (process.argv[2] === "--help") {
- console.log("Usage: copilot --prompt <task>");
- console.log("Options: --model <model> --resume");
- console.log("Commands: mcp issues pull requests");
-} else process.exitCode = 32;`,
+case "$1" in
+  --version) echo "github copilot cli v1.2.3"; exit 0 ;;
+  --help)
+    echo "Usage: copilot --prompt <task>"
+    printf '%s\n' "Options:" "  --model <model>" "  --resume"
+    printf '%s\n' "Commands:" "  mcp" "  issues" "  pull"
+    exit 0 ;;
+  *) exit 32 ;;
+esac`,
   );
 
   const profile = await createGitHubCopilotDiscoveryAdapter().discover({
@@ -163,6 +195,17 @@ else if (process.argv[2] === "--help") {
   assert.deepEqual(
     profile.capabilities.map((observation) => observation.capability),
     ["headless", "model-selection", "continue", "mcp", "github-context"],
+  );
+  assert.deepEqual(
+    profile.providerCapabilities?.map((capability) => capability.id),
+    [
+      "option:-prompt",
+      "option:-model",
+      "option:-resume",
+      "command:mcp",
+      "command:issues",
+      "command:pull",
+    ],
   );
   assert.equal(validateHarnessProfile(profile).success, true);
 });

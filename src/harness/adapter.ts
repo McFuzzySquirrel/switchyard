@@ -321,6 +321,15 @@ export const DISCOVERY_ONLY_OPERATIONS: SupportedOperations = Object.freeze({
   fork: false,
 });
 
+/** Built-in provider adapters support bounded, direct prompt execution. */
+export const DISCOVERY_AND_EXECUTION_OPERATIONS: SupportedOperations = Object.freeze({
+  discover: true,
+  verify: false,
+  execute: true,
+  resume: false,
+  fork: false,
+});
+
 /**
  * Raised when an operation is invoked on an adapter that has not declared
  * support for it. The message never includes request/response payloads, so

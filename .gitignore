@@ -1,2 +1,16 @@
 node_modules/
 docs/engine-run.log
+
+# Local-only workflow-engine and authoring state. These files can contain
+# prompts, repository paths, provider diagnostics, and generated task output.
+docs/artifacts/
+docs/AUTHORING-EVENTS.jsonl
+docs/EXECUTION-AUDIT.jsonl
+docs/EXECUTION-MANIFEST.json
+docs/WORKFLOW-STATE.json
+docs/authoring-state.json
+docs/engine-config.json
+docs/engine-run.log
+docs/PROGRESS.md
+docs/SKILL-CANDIDATES.json
+docs/agent-responsibility-matrix.md

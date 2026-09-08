@@ -252,7 +252,7 @@ test("a checked-in executable fixture exercises discovery success and malformed 
   assert.equal(failingProfile.diagnostics?.[0].code, "probe-unavailable");
 });
 
-test("the executable fixture proves unsupported operations fail before launch", async (t) => {
+test("the executable fixture executes a prompt through the provider adapter", async (t) => {
   const directory = await mkdtemp(join(tmpdir(), "switchyard-adapter-launch-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
   const sentinel = join(directory, "launched.txt");
@@ -266,23 +266,16 @@ test("the executable fixture proves unsupported operations fail before launch", 
     now: fixedClock,
   });
 
-  await assert.rejects(
-    () => adapter.execute({ task: "must not launch" }),
-    (error) => {
-      assert.ok(error instanceof UnsupportedOperationError);
-      assert.equal(error.adapterId, "opencode");
-      assert.equal(error.operation, "execute");
-      return true;
-    },
-  );
-  assert.equal(await exists(sentinel), false);
+  const result = await adapter.execute({ task: "launch the prompt" });
+  assert.equal(result.succeeded, true);
+  assert.equal(await exists(sentinel), true);
 });
 
 for (const [label, createAdapter, command] of [
   ["OpenCode", createOpenCodeAdapter, "opencode"],
   ["GitHub Copilot", createGitHubCopilotAdapter, "copilot"],
 ]) {
-  test(`${label} built-in adapter declares discovery-only support and fails every other operation before launch`, async (t) => {
+  test(`${label} built-in adapter supports discovery and prompt execution`, async (t) => {
     const directory = await mkdtemp(join(tmpdir(), "switchyard-adapter-conformance-"));
     t.after(() => rm(directory, { recursive: true, force: true }));
     const sentinel = join(directory, "launched.txt");
@@ -308,10 +301,10 @@ switch (process.argv[2]) {
 
     const adapter = createAdapter({ executable, env: { PATH: "" }, now: fixedClock });
 
-    assert.deepEqual(adapter.supportedOperations, {
+      assert.deepEqual(adapter.supportedOperations, {
       discover: true,
       verify: false,
-      execute: false,
+        execute: true,
       resume: false,
       fork: false,
     });
@@ -321,9 +314,11 @@ switch (process.argv[2]) {
     assert.equal(profile.executable, executable);
     assert.equal(profile.executableSource, "override");
 
+    const execution = await adapter.execute({ task: "implement feature" });
+    assert.equal(execution.succeeded, true);
+
     for (const [operation, invoke] of [
       ["verify", () => adapter.verify(["headless"], {})],
-      ["execute", () => adapter.execute({ task: "implement feature" })],
       ["resume", () => adapter.resume({ sessionId: "s1" })],
       ["fork", () => adapter.fork({ sessionId: "s1" })],
     ]) {

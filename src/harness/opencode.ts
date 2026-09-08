@@ -8,7 +8,7 @@ import {
   type HarnessDiscoveryOptions,
 } from "./discovery-adapter.ts";
 import {
-  DISCOVERY_ONLY_OPERATIONS,
+  DISCOVERY_AND_EXECUTION_OPERATIONS,
   throwUnsupportedOperation,
   type ExecutionRequest,
   type ExecutionResult,
@@ -19,6 +19,11 @@ import {
   type ResumeRequest,
   type VerificationResult,
 } from "./adapter.ts";
+import { executeProcess } from "./process.ts";
+import {
+  parseProviderHelpSurface,
+  type ProviderCapabilityDescriptor,
+} from "./discovery-adapter.ts";
 
 /**
  * Converts only documented OpenCode help labels to shared vocabulary terms.
@@ -42,6 +47,12 @@ export function parseOpenCodeCapabilities(
   ))];
 }
 
+export function parseOpenCodeProviderCapabilities(
+  helpText: string,
+): readonly ProviderCapabilityDescriptor[] {
+  return parseProviderHelpSurface(helpText);
+}
+
 export function createOpenCodeDiscoveryAdapter(): HarnessDiscoveryAdapter {
   return createHarnessDiscoveryAdapter({
     id: "opencode",
@@ -52,6 +63,7 @@ export function createOpenCodeDiscoveryAdapter(): HarnessDiscoveryAdapter {
     versionCandidateArgs: [["--version"]],
     helpCandidateArgs: [["--help"]],
     parseCapabilities: parseOpenCodeCapabilities,
+    parseProviderCapabilities: parseOpenCodeProviderCapabilities,
   });
 }
 
@@ -68,10 +80,8 @@ export const openCodeDiscoveryAdapter = createOpenCodeDiscoveryAdapter();
 export interface OpenCodeAdapterOptions extends HarnessDiscoveryOptions {}
 
 /**
- * Creates the full OpenCode adapter. Execution, verification, resume, and
- * fork are not implemented yet, so every non-discovery operation fails
- * before any process launch via `throwUnsupportedOperation`, and
- * `supportedOperations` reports the same restriction declaratively.
+ * Creates the OpenCode adapter. Prompt execution uses `opencode run` with a
+ * direct argument array; verification, resume, and fork remain unsupported.
  */
 export function createOpenCodeAdapter(
   options: OpenCodeAdapterOptions = {},
@@ -83,7 +93,7 @@ export function createOpenCodeAdapter(
 
   return Object.freeze({
     id: "opencode",
-    supportedOperations: DISCOVERY_ONLY_OPERATIONS,
+    supportedOperations: DISCOVERY_AND_EXECUTION_OPERATIONS,
     async discover() {
       return discoveryAdapter.discover(resolvedDiscoveryOptions);
     },
@@ -93,8 +103,18 @@ export function createOpenCodeAdapter(
     ): Promise<readonly VerificationResult[]> {
       return throwUnsupportedOperation("opencode", "verify");
     },
-    async execute(_request: ExecutionRequest): Promise<ExecutionResult> {
-      return throwUnsupportedOperation("opencode", "execute");
+    async execute(request: ExecutionRequest): Promise<ExecutionResult> {
+      const executable = resolvedDiscoveryOptions.executable ??
+        resolvedDiscoveryOptions.configuredExecutable ??
+        "opencode";
+      return executeProcess(executable, ["run", request.task], {
+        ...request,
+        cwd: request.cwd ?? resolvedDiscoveryOptions.cwd,
+        env: { ...resolvedDiscoveryOptions.env, ...request.env },
+        timeoutMs: request.timeoutMs ?? resolvedDiscoveryOptions.timeoutMs,
+        maxOutputLength: request.maxOutputLength ?? resolvedDiscoveryOptions.maxOutputLength,
+        nonInteractive: request.nonInteractive ?? true,
+      });
     },
     async resume(_request: ResumeRequest): Promise<ExecutionResult> {
       return throwUnsupportedOperation("opencode", "resume");

@@ -87,18 +87,12 @@ function fixtureReviewAdapter(id) {
 }
 
 /**
- * Resolves the execution-capable adapter for one participant: the real
- * built-in adapter when the vendor executable is installed on PATH *and*
- * that adapter already implements `execute`, and a fixture stand-in
- * registered under the same ID otherwise. This is what keeps the
- * demonstration reproducible in any environment while remaining accurate
- * about what actually ran a process.
+ * Uses fixture adapters so the demonstration remains reproducible and does
+ * not depend on provider credentials, network access, or local permissions.
  */
 async function resolveParticipant(command, realAdapter, fixtureAdapter) {
-  const found = await findExecutable(command);
-  if (found !== undefined && realAdapter.supportedOperations.execute) {
-    return { adapter: realAdapter, real: true };
-  }
+  void command;
+  void realAdapter;
   return { adapter: fixtureAdapter, real: false };
 }
 

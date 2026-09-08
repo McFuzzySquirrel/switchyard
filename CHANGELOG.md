@@ -4,6 +4,29 @@ All notable user-facing changes to Switchyard are documented here. The format fo
 
 ## [Unreleased]
 
+- Added a replayable [live routing exercise](docs/examples/live-routing-exercise.md)
+  showing discovery, OpenCode implementation, and GitHub Copilot review in a
+  disposable workspace.
+- Added a [fork capability routing exercise](docs/examples/fork-capability-routing.md)
+  showing a normalized capability requirement selecting OpenCode for execution.
+- Added terminal-style GIF and MP4 recordings for both live exercises, plus a
+  local recorder script that replays the exercises in a pseudo-terminal.
+- Kept the child process `PWD` aligned with `--cwd` so provider tools resolve
+  the requested execution workspace instead of an inherited caller directory.
+- Added interactive capability selection to `prompt`: human users can choose
+  from one consolidated normalized list after entering a prompt, while
+  non-interactive and JSON usage continues to require explicit `--requires`.
+- Added the `prompt` CLI alias for routed agent tasks and wired bounded
+  non-interactive prompt execution for the built-in OpenCode and GitHub
+  Copilot adapters. Verification, resume, and fork remain explicitly
+  unsupported.
+- Expanded built-in provider discovery to preserve normalized capabilities and
+  bounded raw provider feature inventories for commands, options, providers,
+  and help topics. Increased the default probe output bound to `32768` so
+  longer provider help surfaces are not silently truncated before parsing.
+- Added the `npm run switchyard -- ...` development entry point so the private
+  repository can run its CLI without accidentally resolving an unrelated
+  package through `npx`.
 - Added a comprehensive [Switchyard User Guide](docs/user-guide.md) covering
   CLI usage, configuration, verification, workflow composition,
   troubleshooting, exit codes, and adapter development.

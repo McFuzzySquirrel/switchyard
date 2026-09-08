@@ -75,7 +75,7 @@ export interface ResolvedHarnessRuntimeConfig {
 }
 
 export const DEFAULT_PROBE_TIMEOUT_MS = 5000;
-export const DEFAULT_PROBE_MAX_OUTPUT_LENGTH = 8192;
+export const DEFAULT_PROBE_MAX_OUTPUT_LENGTH = 32768;
 export const DEFAULT_ALLOW_MUTATING_PROBES = false;
 export const DEFAULT_ALLOW_EXTERNAL_ACCESS = false;
 export const DEFAULT_ALLOW_PAID_PROBES = false;

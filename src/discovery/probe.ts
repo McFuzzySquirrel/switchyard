@@ -8,7 +8,7 @@ export interface ProbeOptions {
   readonly args?: readonly string[];
   /** Maximum execution time in milliseconds before terminating the process. Default: 5000ms. */
   readonly timeoutMs?: number;
-  /** Maximum output buffer size in characters before truncating. Default: 8192. */
+  /** Maximum output buffer size in characters before truncating. Default: 32768. */
   readonly maxOutputLength?: number;
   /** Working directory for the probe subprocess. Default: process.cwd(). */
   readonly cwd?: string;
@@ -69,7 +69,7 @@ export interface HarnessMetadataProbeResult {
 }
 
 const DEFAULT_TIMEOUT_MS = 5000;
-const DEFAULT_MAX_OUTPUT_LENGTH = 8192;
+const DEFAULT_MAX_OUTPUT_LENGTH = 32768;
 
 function launchCommand(
   executable: string,

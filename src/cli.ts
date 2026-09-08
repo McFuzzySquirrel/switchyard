@@ -30,6 +30,11 @@ import {
   type RunCommandOptions,
 } from "./commands/run.ts";
 import {
+  prompt,
+  PromptSelectionError,
+  type PromptSelectionIo,
+} from "./commands/prompt.ts";
+import {
   verify,
   formatVerifyJson,
   formatVerifyHuman,
@@ -57,10 +62,12 @@ export { CLI_EXIT_CODES, exitCodeForStatus } from "./output/exit-codes.ts";
 export interface CliIo {
   readonly stdout?: (text: string) => void;
   readonly stderr?: (text: string) => void;
+  readonly stdin?: NodeJS.ReadableStream;
+  readonly interactive?: boolean;
 }
 
 interface ParsedArguments {
-  readonly command: "discover" | "capabilities" | "explain" | "run" | "verify" | "compose" | "help";
+  readonly command: "discover" | "capabilities" | "explain" | "run" | "prompt" | "verify" | "compose" | "help";
   readonly json: boolean;
   readonly refresh: boolean;
   readonly verified: boolean;
@@ -86,7 +93,7 @@ interface ParsedArguments {
 }
 
 function usageError(message: string): Error {
-  return new Error(`${message}\nUsage: switchyard <discover|capabilities|explain|run|verify|compose> [options]`);
+  return new Error(`${message}\nUsage: switchyard <discover|capabilities|explain|run|prompt|verify|compose> [options]`);
 }
 
 function valueAfter(args: readonly string[], index: number, option: string): string {
@@ -98,8 +105,8 @@ function valueAfter(args: readonly string[], index: number, option: string): str
 }
 
 function parseArguments(args: readonly string[]): ParsedArguments {
-  const command = args[0] ?? "help";
-  if (command === "--help" || command === "-h" || command === "help") {
+  const requestedCommand = args[0] ?? "help";
+  if (requestedCommand === "--help" || requestedCommand === "-h" || requestedCommand === "help") {
     return {
       command: "help",
       json: false,
@@ -113,11 +120,13 @@ function parseArguments(args: readonly string[]): ParsedArguments {
       allowModelInvocation: false,
     };
   }
+  const command = requestedCommand;
   if (
     command !== "discover" &&
     command !== "capabilities" &&
     command !== "explain" &&
     command !== "run" &&
+    command !== "prompt" &&
     command !== "verify" &&
     command !== "compose"
   ) {
@@ -160,7 +169,7 @@ function parseArguments(args: readonly string[]): ParsedArguments {
         verified = true;
         break;
       case "--requires":
-        if (command !== "explain" && command !== "run") {
+        if (command !== "explain" && command !== "run" && command !== "prompt") {
           throw usageError(`${argument} is only supported by the explain and run commands`);
         }
         requires = valueAfter(args, index, "--requires");
@@ -174,20 +183,20 @@ function parseArguments(args: readonly string[]): ParsedArguments {
         index += 1;
         break;
       case "--preferred-harness":
-        if (command !== "explain" && command !== "run") {
+        if (command !== "explain" && command !== "run" && command !== "prompt") {
           throw usageError(`${argument} is only supported by the explain and run commands`);
         }
         preferredHarness = valueAfter(args, index, "--preferred-harness");
         index += 1;
         break;
       case "--allow-fallback":
-        if (command !== "explain" && command !== "run") {
+        if (command !== "explain" && command !== "run" && command !== "prompt") {
           throw usageError(`${argument} is only supported by the explain and run commands`);
         }
         allowFallback = true;
         break;
       case "--dry-run":
-        if (command !== "run") {
+        if (command !== "run" && command !== "prompt") {
           throw usageError(`${argument} is only supported by the run command`);
         }
         dryRun = true;
@@ -228,14 +237,14 @@ function parseArguments(args: readonly string[]): ParsedArguments {
         allowModelInvocation = true;
         break;
       case "--cwd":
-        if (command !== "run") {
+        if (command !== "run" && command !== "prompt") {
           throw usageError(`${argument} is only supported by the run command`);
         }
         cwd = valueAfter(args, index, "--cwd");
         index += 1;
         break;
       case "--timeout-ms": {
-        if (command !== "run") {
+        if (command !== "run" && command !== "prompt") {
           throw usageError(`${argument} is only supported by the run command`);
         }
         const value = valueAfter(args, index, "--timeout-ms");
@@ -273,7 +282,7 @@ function parseArguments(args: readonly string[]): ParsedArguments {
         break;
       default:
         if (argument.startsWith("--requires=")) {
-          if (command !== "explain" && command !== "run") {
+          if (command !== "explain" && command !== "run" && command !== "prompt") {
             throw usageError(
               `${argument.split("=")[0]} is only supported by the explain and run commands`,
             );
@@ -299,7 +308,7 @@ function parseArguments(args: readonly string[]): ParsedArguments {
           }
           risks.push(value);
         } else if (argument.startsWith("--preferred-harness=")) {
-          if (command !== "explain" && command !== "run") {
+          if (command !== "explain" && command !== "run" && command !== "prompt") {
             throw usageError(
               `${argument.split("=")[0]} is only supported by the explain and run commands`,
             );
@@ -307,7 +316,7 @@ function parseArguments(args: readonly string[]): ParsedArguments {
           preferredHarness = argument.slice("--preferred-harness=".length);
         } else if (argument.startsWith("--")) {
           throw usageError(`Unknown option '${argument}'`);
-        } else if (command === "run") {
+        } else if (command === "run" || command === "prompt") {
           taskParts.push(argument);
         } else if (command === "compose") {
           if (workflowPath !== undefined) {
@@ -349,25 +358,26 @@ function parseArguments(args: readonly string[]): ParsedArguments {
 
 function printHelp(): string {
   return [
-    "Usage: switchyard <discover|capabilities|explain|run|verify|compose> [options]",
+    "Usage: switchyard <discover|capabilities|explain|run|prompt|verify|compose> [options]",
     "",
     "Commands:",
     "  discover       inspect configured harnesses and update the local registry",
     "  capabilities   read normalized capabilities without launching a harness",
     "  explain        explain deterministic selection without launching a harness",
     "  run            route a task and execute it through the selected harness",
+    "  prompt         route and execute a prompt (alias for run)",
     "  verify         run bounded capability probes and record verification state",
     "  compose        run a declared multi-stage workflow across selected adapters",
     "",
     "Options:",
     "  --refresh                 probe adapters instead of using a cached registry",
     "  --verified                show only verified capabilities (capabilities)",
-    "  --requires <capabilities> required comma-separated capabilities (explain, run)",
-    "  --preferred-harness <id>  prefer a qualifying harness (explain, run)",
+    "  --requires <capabilities> required comma-separated capabilities (explain, run, prompt)",
+    "  --preferred-harness <id>  prefer a qualifying harness (explain, run, prompt)",
     "  --allow-fallback          allow fallback when the preferred harness misses requirements",
-    "  --dry-run                 describe the selection without launching the task (run)",
-    "  --cwd <path>              controlled working directory for execution (run)",
-    "  --timeout-ms <ms>         execution timeout in milliseconds (run)",
+    "  --dry-run                 describe the selection without launching the task (run, prompt)",
+    "  --cwd <path>              controlled working directory for execution (run, prompt)",
+    "  --timeout-ms <ms>         execution timeout in milliseconds (run, prompt)",
     "  --registry <path>         override the local registry path",
     "  --config <path>           read local configuration from this file",
     "  --harness-id <id>         refresh one adapter (discover)",
@@ -384,6 +394,8 @@ function printHelp(): string {
     "",
     "run also accepts a positional task string, for example:",
     '  switchyard run --requires=headless "fix the failing test"',
+    "prompt is a task-focused alias, for example:",
+    '  switchyard prompt --requires=headless "fix the failing test"',
     "",
     "compose accepts a positional workflow file path, for example:",
     "  switchyard compose ./workflow.json --json",
@@ -412,8 +424,10 @@ function commandOptions(
       ...(parsed.staleAfterMs === undefined ? {} : { staleAfterMs: parsed.staleAfterMs }),
     };
   }
-  const requires = (parsed.requires ?? "").split(",").map((item) => item.trim());
-  if (parsed.command === "run") {
+  const requires = parsed.requires === undefined
+    ? []
+    : parsed.requires.split(",").map((item) => item.trim());
+  if (parsed.command === "run" || parsed.command === "prompt") {
     const options: RunCommandOptions = {
       ...(parsed.registryPath === undefined ? {} : { registryPath: parsed.registryPath }),
       ...(parsed.configPath === undefined ? {} : { configPath: parsed.configPath }),
@@ -482,10 +496,10 @@ function commandOptions(
 
 function jsonInvalidInputCommand(
   args: readonly string[],
-): "explain" | "run" | "verify" | "compose" | undefined {
+): "explain" | "run" | "prompt" | "verify" | "compose" | undefined {
   const command = args[0];
   if (
-    (command === "explain" || command === "run" || command === "verify" || command === "compose") &&
+    (command === "explain" || command === "run" || command === "prompt" || command === "verify" || command === "compose") &&
     args.includes("--json")
   ) {
     return command;
@@ -536,22 +550,43 @@ export async function runCli(
   }
 
   try {
-    const options = commandOptions(parsed);
+    const promptCommand = parsed.command === "prompt";
+    const command = promptCommand ? { ...parsed, command: "run" as const } : parsed;
+    const options = commandOptions(command);
+    const interactive = io.interactive ?? (
+      process.stdin.isTTY === true && process.stdout.isTTY === true
+    );
+    if (promptCommand && parsed.requires === undefined && (!interactive || parsed.json)) {
+      throw new PromptSelectionError(
+        "Interactive capability selection requires a terminal; provide --requires for scripted or JSON use.",
+      );
+    }
     // The optional adapter argument is intentionally test-only; production
     // commands use the explicit built-in registry in discover().
-    const result = parsed.command === "discover"
+    const result = command.command === "discover"
       ? await discover({
           ...(options as DiscoverCommandOptions),
           ...(_adapters === undefined ? {} : { adapters: _adapters }),
         })
-      : parsed.command === "capabilities"
+      : command.command === "capabilities"
         ? await capabilities(options as CapabilitiesCommandOptions)
-        : parsed.command === "run"
-          ? await run({
-              ...(options as RunCommandOptions),
-              ...(_executionAdapters === undefined ? {} : { adapters: _executionAdapters }),
-            })
-          : parsed.command === "verify"
+        : command.command === "run"
+          ? promptCommand
+            ? await prompt({
+                ...(options as RunCommandOptions),
+                discoveryAdapters: _adapters,
+                ...(_executionAdapters === undefined ? {} : { adapters: _executionAdapters }),
+              }, parsed.requires === undefined
+                ? ({
+                    input: io.stdin ?? process.stdin,
+                    write: writeStdout,
+                  } satisfies PromptSelectionIo)
+                : undefined)
+            : await run({
+                ...(options as RunCommandOptions),
+                ...(_executionAdapters === undefined ? {} : { adapters: _executionAdapters }),
+              })
+          : command.command === "verify"
             ? await verify({
                 ...(options as VerifyCommandOptions),
                 ...(_executionAdapters === undefined ? {} : { adapters: _executionAdapters }),
@@ -563,23 +598,23 @@ export async function runCli(
                 })
               : await explain(options as ExplainCommandOptions);
     if (parsed.json) {
-      writeStdout(parsed.command === "discover"
+      writeStdout(command.command === "discover"
         ? formatDiscoverJson(result as Awaited<ReturnType<typeof discover>>)
-        : parsed.command === "capabilities"
+        : command.command === "capabilities"
           ? formatCapabilitiesJson(result as Awaited<ReturnType<typeof capabilities>>)
-          : parsed.command === "run"
+          : command.command === "run"
             ? formatRunJson(result as Awaited<ReturnType<typeof run>>)
-            : parsed.command === "verify"
+            : command.command === "verify"
               ? formatVerifyJson(result as Awaited<ReturnType<typeof verify>>)
               : parsed.command === "compose"
                 ? formatComposeJson(result as Awaited<ReturnType<typeof compose>>)
                 : formatExplainJson(result as Awaited<ReturnType<typeof explain>>));
     } else {
-      writeStdout(parsed.command === "discover"
+      writeStdout(command.command === "discover"
         ? formatDiscoverHuman(result as Awaited<ReturnType<typeof discover>>)
-        : parsed.command === "capabilities"
+        : command.command === "capabilities"
           ? formatCapabilitiesHuman(result as Awaited<ReturnType<typeof capabilities>>)
-          : parsed.command === "run"
+          : command.command === "run"
             ? formatRunHuman(result as Awaited<ReturnType<typeof run>>)
               : parsed.command === "verify"
                 ? formatVerifyHuman(result as Awaited<ReturnType<typeof verify>>)
@@ -614,6 +649,23 @@ export async function runCli(
         writeStdout(formatExplainJson(invalid));
       } else {
         writeStderr(formatExplainHuman(invalid));
+      }
+      return CLI_EXIT_CODES.invalidInput;
+    }
+    if (error instanceof PromptSelectionError) {
+      if (parsed.json) {
+        writeStdout(serializeCommandJson({
+          schemaVersion: COMMAND_SCHEMA_VERSION,
+          command: "run",
+          status: "invalid-input",
+          error: {
+            code: "invalid-input",
+            message: redactSecrets(error.message),
+            issues: [],
+          },
+        }));
+      } else {
+        writeStderr(`prompt failed: ${redactSecrets(error.message)}`);
       }
       return CLI_EXIT_CODES.invalidInput;
     }

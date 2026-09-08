@@ -8,7 +8,7 @@ import {
   type HarnessDiscoveryOptions,
 } from "./discovery-adapter.ts";
 import {
-  DISCOVERY_ONLY_OPERATIONS,
+  DISCOVERY_AND_EXECUTION_OPERATIONS,
   throwUnsupportedOperation,
   type ExecutionRequest,
   type ExecutionResult,
@@ -19,6 +19,11 @@ import {
   type ResumeRequest,
   type VerificationResult,
 } from "./adapter.ts";
+import { executeProcess } from "./process.ts";
+import {
+  parseProviderHelpSurface,
+  type ProviderCapabilityDescriptor,
+} from "./discovery-adapter.ts";
 
 /**
  * Converts only GitHub Copilot CLI's advertised labels to the shared
@@ -42,6 +47,23 @@ export function parseGitHubCopilotCapabilities(
   ))];
 }
 
+export function parseGitHubCopilotProviderCapabilities(
+  helpText: string,
+): readonly ProviderCapabilityDescriptor[] {
+  const descriptors = [...parseProviderHelpSurface(helpText)];
+  if (
+    /--prompt\b/i.test(helpText) &&
+    !descriptors.some((descriptor) => descriptor.id === "option:-prompt")
+  ) {
+    descriptors.unshift({
+      id: "option:-prompt",
+      label: "--prompt",
+      kind: "option",
+    });
+  }
+  return descriptors;
+}
+
 export function createGitHubCopilotDiscoveryAdapter(): HarnessDiscoveryAdapter {
   return createHarnessDiscoveryAdapter({
     id: "copilot",
@@ -50,6 +72,7 @@ export function createGitHubCopilotDiscoveryAdapter(): HarnessDiscoveryAdapter {
     versionCandidateArgs: [["--version"]],
     helpCandidateArgs: [["--help"]],
     parseCapabilities: parseGitHubCopilotCapabilities,
+    parseProviderCapabilities: parseGitHubCopilotProviderCapabilities,
   });
 }
 
@@ -65,10 +88,9 @@ export const githubCopilotDiscoveryAdapter = createGitHubCopilotDiscoveryAdapter
 export interface GitHubCopilotAdapterOptions extends HarnessDiscoveryOptions {}
 
 /**
- * Creates the full GitHub Copilot adapter. Execution, verification, resume,
- * and fork are not implemented yet, so every non-discovery operation fails
- * before any process launch via `throwUnsupportedOperation`, and
- * `supportedOperations` reports the same restriction declaratively.
+ * Creates the GitHub Copilot adapter. Prompt execution uses Copilot's
+ * non-interactive `--prompt` mode with a direct argument array; verification,
+ * resume, and fork remain unsupported.
  */
 export function createGitHubCopilotAdapter(
   options: GitHubCopilotAdapterOptions = {},
@@ -78,7 +100,7 @@ export function createGitHubCopilotAdapter(
 
   return Object.freeze({
     id: "copilot",
-    supportedOperations: DISCOVERY_ONLY_OPERATIONS,
+    supportedOperations: DISCOVERY_AND_EXECUTION_OPERATIONS,
     async discover() {
       return discoveryAdapter.discover(resolvedDiscoveryOptions);
     },
@@ -88,8 +110,18 @@ export function createGitHubCopilotAdapter(
     ): Promise<readonly VerificationResult[]> {
       return throwUnsupportedOperation("copilot", "verify");
     },
-    async execute(_request: ExecutionRequest): Promise<ExecutionResult> {
-      return throwUnsupportedOperation("copilot", "execute");
+    async execute(request: ExecutionRequest): Promise<ExecutionResult> {
+      const executable = resolvedDiscoveryOptions.executable ??
+        resolvedDiscoveryOptions.configuredExecutable ??
+        "copilot";
+      return executeProcess(executable, ["--prompt", request.task], {
+        ...request,
+        cwd: request.cwd ?? resolvedDiscoveryOptions.cwd,
+        env: { ...resolvedDiscoveryOptions.env, ...request.env },
+        timeoutMs: request.timeoutMs ?? resolvedDiscoveryOptions.timeoutMs,
+        maxOutputLength: request.maxOutputLength ?? resolvedDiscoveryOptions.maxOutputLength,
+        nonInteractive: request.nonInteractive ?? true,
+      });
     },
     async resume(_request: ResumeRequest): Promise<ExecutionResult> {
       return throwUnsupportedOperation("copilot", "resume");

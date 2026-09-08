@@ -13,12 +13,37 @@ Before completing any change, determine whether it affects users, supported beha
 
 When more than one row applies, update every applicable document. Do not mark documentation work complete by merely describing a future update in a commit message.
 
+## Documentation workflow
+
+Use the repository `create-project-documentation` skill for documentation
+audits, new documentation, documentation refreshes, release preparation, and
+cross-document consistency work:
+
+```text
+.github/skills/create-project-documentation/SKILL.md
+```
+
+Follow that skill's inventory, evidence, scope/version, navigation, and
+validation process. Load its reference template for each artifact being
+created or substantially refreshed. Document implemented behavior separately
+from roadmap or aspirational behavior, and do not claim live integrations or
+production support without repository evidence.
+
+## Local workflow-engine state
+
+Workflow-engine and authoring outputs under `docs/` are local-only. They may
+contain prompts, repository paths, provider diagnostics, execution traces, or
+generated task artifacts, so do not add them to commits or paste their contents
+into public documentation. The repository `.gitignore` lists the generated
+categories; retain canonical requirements, feature, ADR, README, guide, and
+prompt-playbook documents.
+
 ## Canonical locations and formats
 
 - `README.md` is the public project overview and usage guide.
 - `CHANGELOG.md` follows the Keep a Changelog-style `Unreleased` and version sections.
 - ADRs use `docs/adr/NNNN-short-title.md`, with four digits and a kebab-case title.
-- Copy the relevant starting structure from `docs/templates/` rather than inventing a competing format.
+- Use the applicable templates from `.github/skills/create-project-documentation/references/`.
 - Keep links relative and examples accurate for the current implementation. If a document describes planned behavior, label it as planned and link to the source PRD.
 
 ## ADR workflow
@@ -32,6 +57,10 @@ Run the focused documentation check after documentation changes:
 ```sh
 npm run test:docs
 ```
+
+Also run the documentation skill's validation checklist and `git diff --check`,
+including local Markdown-link, command, configuration-name, version, and
+secret-leakage checks where applicable.
 
 Run the normal project checks for code changes as well:
 

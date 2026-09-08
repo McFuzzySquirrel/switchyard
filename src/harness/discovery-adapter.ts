@@ -17,6 +17,8 @@ import {
   type CapabilityObservation,
   type HarnessDiagnostic,
   type HarnessProfile,
+  type ProviderCapability,
+  type ProviderCapabilityKind,
 } from "../discovery/schema.ts";
 import {
   DISCOVERY_ONLY_OPERATIONS,
@@ -74,10 +76,78 @@ export interface HarnessDiscoveryAdapterDefinition {
    */
   readonly parseCapabilities: (helpText: string) => readonly CapabilityName[];
   /**
+   * Preserves provider-specific commands, options, and provider labels for
+   * inventory without adding them to vendor-neutral routing.
+   */
+  readonly parseProviderCapabilities?: (
+    helpText: string,
+  ) => readonly ProviderCapabilityDescriptor[];
+  /**
    * Discovery-only adapters must explicitly reject the operations that their
    * execution counterpart has not implemented yet.
    */
   readonly supportedOperations?: AdapterOperationSupport;
+}
+
+export interface ProviderCapabilityDescriptor {
+  readonly id: string;
+  readonly label: string;
+  readonly kind: ProviderCapabilityKind;
+}
+
+function providerCapabilityId(kind: ProviderCapabilityKind, label: string): string {
+  return `${kind}:${label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+}
+
+/**
+ * Extracts the structured command, option, provider, and topic sections that
+ * common CLI help output exposes. Adapters can add vendor-specific labels.
+ */
+export function parseProviderHelpSurface(
+  helpText: string,
+): readonly ProviderCapabilityDescriptor[] {
+  const descriptors: ProviderCapabilityDescriptor[] = [];
+  let section: ProviderCapabilityKind | undefined;
+  const add = (kind: ProviderCapabilityKind, label: string) => {
+    const normalized = label.trim();
+    if (normalized.length === 0) return;
+    descriptors.push({
+      id: providerCapabilityId(kind, normalized),
+      label: normalized,
+      kind,
+    });
+  };
+
+  for (const line of helpText.split(/\r?\n/)) {
+    const heading = line.match(/^(Commands|Options|Providers|Help Topics):\s*$/);
+    if (heading) {
+      const sectionByHeading: Record<string, ProviderCapabilityKind> = {
+        Commands: "command",
+        Options: "option",
+        Providers: "provider",
+        "Help Topics": "topic",
+      };
+      section = sectionByHeading[heading[1]];
+      continue;
+    }
+    if (/^\S[^:]*:\s*$/.test(line)) {
+      section = undefined;
+      continue;
+    }
+    if (section === "option") {
+      for (const match of line.matchAll(/(?:^|\s)(--?[a-z][a-z0-9-]*)\b/gi)) {
+        add("option", match[1]);
+      }
+    } else if (section === "command" || section === "topic") {
+      const match = line.match(/^\s{2,}([a-z][a-z0-9-]*)\b/i);
+      if (match) add(section, match[1]);
+    } else if (section === "provider") {
+      const match = line.match(/^\s{2,}([A-Za-z][A-Za-z0-9._-]*)\b/);
+      if (match) add("provider", match[1]);
+    }
+  }
+
+  return [...new Map(descriptors.map((descriptor) => [descriptor.id, descriptor])).values()];
 }
 
 function observedCapabilities(
@@ -106,6 +176,28 @@ function observedCapabilities(
         },
       },
       verification: { status: "not-requested" as const },
+    }));
+}
+
+function observedProviderCapabilities(
+  descriptors: readonly ProviderCapabilityDescriptor[],
+  helpText: string,
+  observedAt: string,
+  maxOutputLength: number | undefined,
+): readonly ProviderCapability[] {
+  const evidenceExcerpt = boundExcerpt(helpText, maxOutputLength);
+  return [...new Map(descriptors.map((descriptor) => [descriptor.id, descriptor])).values()]
+    .map((descriptor) => ({
+      id: descriptor.id,
+      label: descriptor.label,
+      kind: descriptor.kind,
+      observedAt,
+      evidence: {
+        source: "help" as const,
+        excerpt: evidenceExcerpt,
+        capturedAt: observedAt,
+        reference: "--help",
+      },
     }));
 }
 
@@ -296,6 +388,16 @@ export function createHarnessDiscoveryAdapter(
           checkedAt,
           options.maxOutputLength,
         ),
+        ...(definition.parseProviderCapabilities === undefined
+          ? {}
+          : {
+              providerCapabilities: observedProviderCapabilities(
+                definition.parseProviderCapabilities(metadata.helpText ?? ""),
+                metadata.helpText ?? "",
+                checkedAt,
+                options.maxOutputLength,
+              ),
+            }),
         status: "available",
         lifecycle: "registered",
         availability: { status: "available", checkedAt },

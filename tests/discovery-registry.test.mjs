@@ -168,7 +168,9 @@ test("reports thrown adapter failures while preserving the prior snapshot", asyn
 
   const result = await refreshRegistry(path, [
     { id: "fixture", discover: async () => { throw new Error("temporary failure"); } },
-  ]);
+  ], {
+    now: () => new Date("2026-09-07T20:00:00.000Z"),
+  });
 
   assert.deepEqual(result.refreshed, []);
   assert.deepEqual(result.failures, [{ harnessId: "fixture", message: "temporary failure" }]);

@@ -59,6 +59,7 @@ function buildEnvironment(
   policy: ExecutionEnvironmentPolicy | undefined,
   explicit: Readonly<Record<string, string | undefined>> | undefined,
   nonInteractive: boolean,
+  cwd: string | undefined,
 ): NodeJS.ProcessEnv {
   const inherited = policy?.inherit === false ? {} : process.env;
   const allow = policy?.allow === undefined ? undefined : new Set(policy.allow);
@@ -81,6 +82,9 @@ function buildEnvironment(
     environment.CI = "1";
     environment.NONINTERACTIVE = "1";
     environment.TERM ??= "dumb";
+  }
+  if (cwd !== undefined) {
+    environment.PWD = cwd;
   }
   return environment;
 }
@@ -267,6 +271,7 @@ export async function executeProcess(
           request.environmentPolicy,
           request.env,
           request.nonInteractive === true,
+          request.cwd,
         ),
         stdio: ["pipe", "pipe", "pipe"],
         detached: process.platform !== "win32",

@@ -61,6 +61,20 @@ export interface CapabilityObservation {
   readonly verification: VerificationObservation;
 }
 
+export type ProviderCapabilityKind = "command" | "option" | "provider" | "topic";
+
+/**
+ * Provider-specific feature evidence is preserved for inventory and diagnostics
+ * without making every vendor label part of the routing vocabulary.
+ */
+export interface ProviderCapability {
+  readonly id: string;
+  readonly label: string;
+  readonly kind: ProviderCapabilityKind;
+  readonly observedAt: string;
+  readonly evidence: CapabilityEvidence;
+}
+
 export type HarnessAvailability =
   | "available"
   | "unavailable"
@@ -102,6 +116,7 @@ export interface HarnessProfile {
   readonly executableSource: ExecutableSource;
   readonly version?: string;
   readonly capabilities: readonly CapabilityObservation[];
+  readonly providerCapabilities?: readonly ProviderCapability[];
   readonly status: HarnessAvailability;
   readonly lifecycle: HarnessLifecycleState;
   readonly availability: HarnessAvailabilityProfile;
@@ -160,10 +175,11 @@ export class SchemaValidationError extends Error {
 }
 
 const MAX_ID_LENGTH = 128;
-const MAX_TEXT_LENGTH = 8192;
+const MAX_TEXT_LENGTH = 32768;
 const MAX_REASON_LENGTH = 1024;
 const ISO_TIMESTAMP = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?Z$/;
 const IDENTIFIER = /^[a-z0-9][a-z0-9._-]*$/;
+const PROVIDER_CAPABILITY_ID = /^[a-z0-9][a-z0-9._:-]*$/;
 const EVIDENCE_SOURCES: readonly EvidenceSource[] = [
   "version",
   "help",
@@ -208,6 +224,12 @@ const EXECUTABLE_SOURCES: readonly ExecutableSource[] = [
   "override",
   "path",
   "configured",
+];
+const PROVIDER_CAPABILITY_KINDS: readonly ProviderCapabilityKind[] = [
+  "command",
+  "option",
+  "provider",
+  "topic",
 ];
 
 type UnknownRecord = Record<string, unknown>;
@@ -535,6 +557,61 @@ export function assertCapabilityObservation(
   return result.value;
 }
 
+function validateProviderCapabilityAtPath(
+  input: unknown,
+  path: string,
+): ValidationResult<ProviderCapability> {
+  const issues: SchemaIssue[] = [];
+  if (!isRecord(input)) {
+    return invalidResult([{ path, message: "must be an object" }]);
+  }
+  hasOnlyKeys(input, ["id", "label", "kind", "observedAt", "evidence"], path, issues);
+  const id = requiredString(input.id, `${path}.id`, issues, MAX_ID_LENGTH);
+  if (id && !PROVIDER_CAPABILITY_ID.test(id)) {
+    issues.push({ path: `${path}.id`, message: "must use provider capability identifier characters" });
+  }
+  const label = requiredString(input.label, `${path}.label`, issues, 256);
+  const kind = enumValue(
+    input.kind,
+    PROVIDER_CAPABILITY_KINDS,
+    `${path}.kind`,
+    issues,
+  );
+  const observedAt = timestamp(input.observedAt, `${path}.observedAt`, issues);
+  const evidenceResult = validateEvidence(input.evidence, `${path}.evidence`);
+  if (!evidenceResult.success) {
+    issues.push(...evidenceResult.issues);
+  }
+  if (issues.length > 0 || !id || !label || !kind || !observedAt || !evidenceResult.success) {
+    return invalidResult(issues);
+  }
+  return validResult({
+    id,
+    label,
+    kind,
+    observedAt,
+    evidence: evidenceResult.value,
+  });
+}
+
+export function validateProviderCapability(
+  input: unknown,
+): ValidationResult<ProviderCapability> {
+  return validateProviderCapabilityAtPath(input, "$");
+}
+
+export function isProviderCapability(input: unknown): input is ProviderCapability {
+  return validateProviderCapabilityAtPath(input, "$").success;
+}
+
+export function assertProviderCapability(input: unknown): ProviderCapability {
+  const result = validateProviderCapabilityAtPath(input, "$");
+  if (!result.success) {
+    throw new SchemaValidationError("ProviderCapability", result.issues);
+  }
+  return result.value;
+}
+
 function validateDiagnostic(
   input: unknown,
   path: string,
@@ -573,6 +650,7 @@ export function validateHarnessProfile(
       "executableSource",
       "version",
       "capabilities",
+      "providerCapabilities",
       "status",
       "lifecycle",
       "availability",
@@ -643,6 +721,30 @@ export function validateHarnessProfile(
         checkedAt,
         ...(reason === undefined ? {} : { reason }),
       };
+    }
+  }
+
+  let providerCapabilities: ProviderCapability[] | undefined;
+  if (input.providerCapabilities !== undefined) {
+    if (!Array.isArray(input.providerCapabilities)) {
+      issues.push({ path: "$.providerCapabilities", message: "must be an array" });
+    } else {
+      providerCapabilities = [];
+      const seenProviderCapabilities = new Set<string>();
+      input.providerCapabilities.forEach((item, index) => {
+        const result = validateProviderCapabilityAtPath(item, `$.providerCapabilities[${index}]`);
+        if (!result.success) {
+          issues.push(...result.issues);
+        } else if (seenProviderCapabilities.has(result.value.id)) {
+          issues.push({
+            path: `$.providerCapabilities[${index}].id`,
+            message: "must not duplicate another provider capability",
+          });
+        } else {
+          seenProviderCapabilities.add(result.value.id);
+          providerCapabilities?.push(result.value);
+        }
+      });
     }
   }
 
@@ -727,6 +829,7 @@ export function validateHarnessProfile(
     executableSource,
     ...(profileVersion === undefined ? {} : { version: profileVersion }),
     capabilities,
+    ...(providerCapabilities === undefined ? {} : { providerCapabilities }),
     status: profileStatus,
     lifecycle,
     availability,

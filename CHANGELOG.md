@@ -11,6 +11,8 @@ All notable user-facing changes to Switchyard are documented here. The format fo
   showing a normalized capability requirement selecting OpenCode for execution.
 - Added terminal-style GIF and MP4 recordings for both live exercises, plus a
   local recorder script that replays the exercises in a pseudo-terminal.
+- Slowed the terminal demo GIF and MP4 recordings to six frames per second so
+  the routing steps are easier to follow.
 - Kept the child process `PWD` aligned with `--cwd` so provider tools resolve
   the requested execution workspace instead of an inherited caller directory.
 - Added interactive capability selection to `prompt`: human users can choose

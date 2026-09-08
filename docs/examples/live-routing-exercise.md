@@ -36,7 +36,8 @@ result.
 
 ## Terminal recording
 
-The live run has been captured as terminal-style media:
+The live run has been captured as slowed terminal-style media so the routing
+steps are easier to follow:
 
 ![Live routing exercise terminal recording](media/live-routing-exercise.gif)
 

@@ -35,6 +35,9 @@ workspace is unchanged.
 
 ![Fork capability routing terminal recording](media/fork-capability-routing.gif)
 
+The recording is intentionally slowed so the routing decision and execution
+result are easier to follow.
+
 - [Download the MP4 recording](media/fork-capability-routing.mp4)
 - [Replay the exercise](../../examples/fork-capability-routing.sh)
 

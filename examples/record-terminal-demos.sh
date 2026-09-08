@@ -5,6 +5,7 @@ set -euo pipefail
 ROOT_DIR="$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 OUTPUT_DIR="$ROOT_DIR/docs/examples/media"
 WORK_DIR="$(mktemp -d "${TMPDIR:-/tmp}/switchyard-terminal-recording.XXXXXX")"
+FRAME_RATE=6
 
 cleanup() {
   rm -rf -- "$WORK_DIR"
@@ -98,12 +99,12 @@ make_media() {
   render_frames "$capture" "$frames" "$title"
 
   ffmpeg -hide_banner -loglevel error -y \
-    -framerate 12 \
+    -framerate "$FRAME_RATE" \
     -i "$frames/frame-%04d.png" \
-    -filter_complex "[0:v]fps=12,split[s0][s1];[s0]palettegen=max_colors=256[p];[s1][p]paletteuse" \
+    -filter_complex "[0:v]fps=$FRAME_RATE,split[s0][s1];[s0]palettegen=max_colors=256[p];[s1][p]paletteuse" \
     "$OUTPUT_DIR/$name.gif"
   ffmpeg -hide_banner -loglevel error -y \
-    -framerate 12 \
+    -framerate "$FRAME_RATE" \
     -i "$frames/frame-%04d.png" \
     -c:v libx264 \
     -pix_fmt yuv420p \
